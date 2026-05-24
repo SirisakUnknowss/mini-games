@@ -1,0 +1,42 @@
+# =====================================================================
+# Top-level monorepo .gitignore
+# Per-project .gitignore extends this (e.g., sudoku/.gitignore)
+# =====================================================================
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Editor
+.vscode/
+.idea/
+*~
+
+# Logs
+*.log
+
+# Node (in any subdir)
+**/node_modules/
+**/.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files (per-project)
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Build outputs
+**/dist/
+**/build/
+**/coverage/
+**/.nyc_output/
+
+# Cache
+**/.cache/
+**/.parcel-cache/
+
+# Claude
+.claude/

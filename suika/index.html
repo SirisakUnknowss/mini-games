@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Ball Merge</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- LOGIN -->
+  <section id="view-login" class="view hidden">
+    <h1>🏀 Ball Merge 🌎</h1>
+    <p class="subtitle">เข้าสู่ระบบเพื่อบันทึกสถิติ</p>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" data-tab="login">เข้าสู่ระบบ</button>
+        <button class="tab" data-tab="signup">สมัครใหม่</button>
+      </div>
+      <form id="login-form" class="auth-form">
+        <input type="text" id="login-username" placeholder="ชื่อผู้ใช้" required autocomplete="off"/>
+        <input type="password" id="login-password" placeholder="รหัสผ่าน" required/>
+        <button type="submit">เข้าสู่ระบบ</button>
+        <p class="err" id="login-err"></p>
+      </form>
+      <form id="signup-form" class="auth-form hidden">
+        <input type="text" id="signup-username" placeholder="ชื่อผู้ใช้ (3-20 ตัวอักษร)" required autocomplete="off"/>
+        <input type="password" id="signup-password" placeholder="รหัสผ่าน (อย่างน้อย 4 ตัว)" required/>
+        <button type="submit">สมัคร & เริ่มเล่น</button>
+        <p class="err" id="signup-err"></p>
+      </form>
+    </div>
+    <div id="existing-users" class="existing-users"></div>
+  </section>
+
+  <!-- MENU -->
+  <section id="view-menu" class="view hidden">
+    <div class="header">
+      <div class="user-badge"><span class="avatar">👤</span><span id="user-name"></span></div>
+      <div class="header-actions">
+        <button class="icon-btn" id="open-profile" title="โปรไฟล์">📊</button>
+        <button class="icon-btn" id="open-settings" title="ตั้งค่า">⚙️</button>
+        <button class="icon-btn" id="logout-btn" title="ออกจากระบบ">🚪</button>
+      </div>
+    </div>
+    <h1>🏀 Ball Merge 🌎</h1>
+    <p class="subtitle">รวมร่างลูกบอลให้ใหญ่ที่สุด</p>
+
+    <div class="totals">
+      <div class="totals-card">
+        <div class="totals-label">คะแนนสูงสุด</div>
+        <div class="totals-value" id="user-highscore">0</div>
+      </div>
+      <div class="totals-card">
+        <div class="totals-label">ลูกใหญ่สุด</div>
+        <div class="totals-value" id="user-highest-ball">🏓</div>
+      </div>
+    </div>
+
+    <button class="play-btn" id="play-btn">▶ เริ่มเล่น</button>
+
+    <div class="evolution">🏓 → 🎱 → 🥎 → ⚾ → 🎾 → 🏐 → ⚽ → 🏀 → 🌕 → 🪩 → 🌎</div>
+
+    <div class="card lb-card">
+      <h3 class="section-title">🏆 Global Leaderboard</h3>
+      <table class="lb-table">
+        <thead><tr><th class="rank">#</th><th>ผู้เล่น</th><th class="num">คะแนน</th></tr></thead>
+        <tbody id="global-lb"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="view-game" class="view hidden">
+    <div class="top-bar">
+      <button class="back-btn" id="back-to-menu-from-game">← กลับ</button>
+      <div class="game-info">
+        <span class="stat">คะแนน: <span id="score">0</span></span>
+        <span class="stat">ถัดไป: <span id="next">🏓</span></span>
+      </div>
+      <div></div>
+    </div>
+    <canvas id="game" width="400" height="600"></canvas>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="view-profile" class="view hidden">
+    <div class="top-bar">
+      <button class="back-btn" data-back="menu">← กลับ</button>
+      <h2>📊 โปรไฟล์</h2><div></div>
+    </div>
+    <div class="card profile-card">
+      <div class="profile-head">
+        <div class="big-avatar">👤</div>
+        <div>
+          <div class="profile-name" id="profile-name"></div>
+          <div class="profile-since" id="profile-since"></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">คะแนนสูงสุด</div><div class="stat-value" id="p-highscore">0</div></div>
+        <div class="stat-box"><div class="stat-label">ลูกใหญ่สุด</div><div class="stat-value" id="p-highest-ball">🏓</div></div>
+        <div class="stat-box"><div class="stat-label">เล่นทั้งหมด</div><div class="stat-value" id="p-plays">0</div></div>
+        <div class="stat-box"><div class="stat-label">merge รวม</div><div class="stat-value" id="p-merges">0</div></div>
+        <div class="stat-box"><div class="stat-label">คะแนนรวม</div><div class="stat-value" id="p-total-score">0</div></div>
+        <div class="stat-box"><div class="stat-label">เวลาเล่นรวม</div><div class="stat-value" id="p-playtime">0m</div></div>
+      </div>
+      <h3 class="section-title">เกมล่าสุด</h3>
+      <table class="lb-table">
+        <thead><tr><th>วันที่</th><th class="num">คะแนน</th><th class="num">ลูกสุด</th><th class="num">merge</th></tr></thead>
+        <tbody id="p-recent"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="view-settings" class="view hidden">
+    <div class="top-bar">
+      <button class="back-btn" data-back="menu">← กลับ</button>
+      <h2>⚙️ ตั้งค่า</h2><div></div>
+    </div>
+    <div class="card settings-card">
+      <h3 class="section-title">การเล่น</h3>
+      <label class="toggle">
+        <span>แสดงเส้นเล็ง</span>
+        <input type="checkbox" id="opt-aim"/>
+      </label>
+      <label class="toggle">
+        <span>แสดงตัวอย่างลูกถัดไปบนกระดาน</span>
+        <input type="checkbox" id="opt-preview"/>
+      </label>
+
+      <h3 class="section-title">บัญชี</h3>
+      <button class="btn-line" id="change-pw-btn">เปลี่ยนรหัสผ่าน</button>
+      <button class="btn-line danger" id="reset-progress-btn">ล้างสถิติทั้งหมด</button>
+      <button class="btn-line danger" id="delete-account-btn">ลบบัญชี</button>
+    </div>
+  </section>
+
+  <!-- WIN/GAME OVER MODAL -->
+  <div class="modal-bg" id="win-modal">
+    <div class="modal">
+      <h2>💥 จบเกม!</h2>
+      <div class="big-time" id="win-score">0</div>
+      <p class="small">คะแนน</p>
+      <div class="win-grid">
+        <div><div class="ws-label">ลูกใหญ่สุด</div><div class="ws-val" id="win-highest">🏓</div></div>
+        <div><div class="ws-label">Merge</div><div class="ws-val" id="win-merges">0</div></div>
+      </div>
+      <p id="win-best" class="best-time"></p>
+      <div class="modal-buttons">
+        <button id="win-again">เล่นอีกครั้ง</button>
+        <button class="secondary" id="win-back">กลับเมนู</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="prompt-modal">
+    <div class="modal">
+      <h2 id="prompt-title">ยืนยัน</h2>
+      <p id="prompt-msg"></p>
+      <input type="password" id="prompt-input" class="prompt-input hidden" placeholder="รหัสผ่าน"/>
+      <p class="err" id="prompt-err"></p>
+      <div class="modal-buttons">
+        <button id="prompt-ok">ตกลง</button>
+        <button class="secondary" id="prompt-cancel">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
