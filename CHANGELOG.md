@@ -9,8 +9,16 @@ Release notes ละเอียดของแต่ละ version อยู่
 
 ## [Unreleased]
 
-### Phase 1 — MVP (in progress, ~15h เหลือ)
-ดู [PROGRESS.md](./PROGRESS.md) สำหรับ task breakdown
+### Phase 1 — MVP (in progress)
+ดู [PROGRESS.md](./PROGRESS.md) + [TASK.md](./TASK.md) สำหรับ task breakdown
+
+#### Added
+- Task 1A — Daily puzzle backend live บน Supabase Cloud (7 migrations, 2 edge functions, pg_cron, 30 puzzles pre-generated)
+- Task 1B — Auth UI (sign in / sign up / anonymous → email upgrade) พร้อม validation + analytics events
+- `TASK.md` — subtask breakdown ย่อย ๆ ทุก phase พร้อม priority + status + ประมาณเวลา
+
+#### Changed
+- `README.md` — ปรับเป็น hub ของทั้ง 3 เกม, ชู Sudoku Daily เป็นเกมหลัก, เพิ่ม roadmap table + คำสั่งรัน web/Android/iOS
 
 ---
 

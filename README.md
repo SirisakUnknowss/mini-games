@@ -1,215 +1,155 @@
-# 🎮 Browser Games Collection
+# 🎮 Mini Games Collection
 
-โปรเจกต์รวมเกมเล่นใน browser แบบไม่ต้อง build/server — เปิดไฟล์ HTML ได้เลย
-ทุกเกมเขียนด้วย **HTML + CSS + Vanilla JS** เก็บข้อมูลทั้งหมดใน **localStorage**
+โปรเจกต์รวมเกมเล่นใน browser — มีตั้งแต่เกม Vanilla JS เล่นได้เลย ไปจนถึง Sudoku Daily ที่เป็น PWA + mobile app เต็มรูปแบบพร้อม Supabase backend
 
-**ทั้ง 3 เกมมี:**
-- 🔐 ระบบ Login / Signup (multi-user ใน localStorage)
-- 📊 หน้า Profile + สถิติส่วนตัว
-- ⚙️ Settings ต่อ user (เปลี่ยนรหัสผ่าน, ล้างสถิติ, ลบบัญชี)
-- 🏆 Global Leaderboard (รวม high score ของผู้ใช้ทุกคนในเครื่อง)
+> **Current release:** [v0.0.0](https://github.com/SirisakUnknowss/mini-games/releases/tag/v0.0.0) — Sudoku Daily MVP
+> **Status:** Phase 0 ✅ · Phase 1 🟡 ~30% — ดู [PROGRESS.md](./PROGRESS.md) · [TASK.md](./TASK.md) · [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 
-## 📂 โครงสร้างโปรเจกต์
+## 📂 เกมในโปรเจกต์
 
-```
-MatchThree/
-├── README.md
-├── match-three/            ← เกม 1: Match Three
-│   ├── index.html
-│   ├── style.css
-│   ├── db.js               ← user/data layer (key: mt_db_v1)
-│   └── app.js              ← UI + game logic
-├── suika/                  ← เกม 2: Ball Merge (Suika-like)
-│   ├── index.html
-│   ├── style.css
-│   ├── db.js               ← key: suika_db_v1
-│   ├── game.js             ← physics + canvas rendering
-│   └── app.js              ← UI + user system
-└── sudoku/                 ← เกม 3: Sudoku
-    ├── index.html
-    ├── style.css
-    ├── sudoku.js           ← puzzle generator (seeded)
-    ├── db.js               ← key: sudoku_db_v1
-    ├── app.js              ← UI controllers
-    └── ARCHITECTURE.md     ← เอกสารเชิงลึก
-```
+| เกม | สถานะ | Stack | รายละเอียด |
+|---|---|---|---|
+| 🧩 **Sudoku Daily** ([`sudoku/`](./sudoku)) | 🟡 Active dev (v0.0.0) | TypeScript + Vite + PWA + Capacitor + Supabase | Daily puzzle, leaderboard, streak, auth, Android/iOS apps |
+| 🎯 **Match Three** ([`match-three/`](./match-three)) | ✅ Playable | Vanilla JS + localStorage | จับคู่ 3 แบบคลาสสิก, 8×8, combo chain |
+| 🏀 **Suika / Ball Merge** ([`suika/`](./suika)) | ✅ Playable | Vanilla JS + custom physics | ปล่อยลูกชนรวมร่าง 11 ระดับ |
 
 ---
 
-## 🎯 เกม 1: Match Three (`match-three/`)
+## 🧩 Sudoku Daily — เกมหลัก (active development)
 
-**แนวเกม:** จับคู่ 3 แบบคลาสสิก (Bejeweled / Candy Crush-style)
+แอป Sudoku แนว daily puzzle เต็มรูปแบบ — ปริศนาใหม่ทุกวัน + leaderboard + auth + streak + achievements
 
-### กลไก
-- กระดาน **8×8** มีสัญลักษณ์ 6 ชนิด (🍎🍇🍋🍒🍊💎)
-- คลิกเลือกช่องแล้วคลิกข้างเคียงเพื่อสลับ
-- จับคู่ ≥3 แนวตั้ง/แนวนอน → ระเบิด + ของใหม่ตกลงมา
-- **Combo chain**: chain ติดกัน x1, x2, x3 ... ทวีคูณคะแนน
+### ✨ Highlights
+- 🌐 **PWA** — ติดตั้งเป็นแอปจาก browser, ใช้ offline ได้
+- 📱 **Mobile apps** — Android APK + iOS (.app) ผ่าน Capacitor 8
+- 🔐 **Auth** — Anonymous → Email/Password upgrade (Supabase Auth)
+- 🧠 **Engine** — Sudoku generator + solver พร้อม uniqueness check (เขียนเองตั้งแต่ 0)
+- ☁️ **Backend** — Supabase Postgres + 7 migrations + 2 edge functions + pg_cron
+- 🛡️ **Anti-cheat** — edge function `submit-daily-score` ตรวจสอบ server-side
+- 📊 **Analytics + Sentry** — integration พร้อม (no-op safe ถ้าไม่ตั้ง env)
+- 🎨 **Custom branding** — animated splash, adaptive icons + monochrome (Android 13+)
+- ✅ **Quality** — 37/37 unit tests, TypeScript strict, ESLint + Prettier, build ~65 KB gzip
 
-### ระบบ
-| ระบบ | รายละเอียด |
-|---|---|
-| Score | `match_count × 10 × combo` |
-| Timer | 3 / 5 / 10 นาที (ตั้งใน settings) |
-| Stats | high score, total score, total plays, total matches, max combo, play time |
-| Leaderboard | คะแนนสูงสุด (per user) ของผู้เล่นทุกคนในเครื่อง |
-
-### Database (`mt_db_v1`)
-```ts
-{
-  currentUser: string | null,
-  users: {
-    [username]: {
-      password, createdAt,
-      settings: { animations, durationMin },
-      stats: { totalPlays, totalScore, totalMatches, totalPlayTime, highScore, maxCombo },
-      recent: [{ score, matches, maxCombo, duration, playedAt }]  // 20 ล่าสุด
-    }
-  }
-}
+### 📦 Architecture
+```
+sudoku/
+├── src/
+│   ├── engine/        ← pure logic (generator, solver, validator, scoring, quests, rng)
+│   ├── lib/           ← supabase, auth, api, analytics, migrate-v1, local-db, format
+│   ├── ui/            ← views (game, home, splash, leaderboard, auth-modal), board, numpad
+│   └── main.ts        ← routing + boot flow
+├── supabase/
+│   ├── migrations/    ← 7 SQL migrations (init, RLS, triggers, views, RPC, security, cron)
+│   └── functions/     ← submit-daily-score, generate-daily-puzzle
+├── android/ · ios/    ← Capacitor native projects
+├── tests/             ← vitest (37 tests)
+└── docs/              ← 40 markdown files ใน 7 sections
 ```
 
----
+### 🚀 รัน Sudoku Daily
 
-## 🏀 เกม 2: Ball Merge / Suika (`suika/`)
-
-**แนวเกม:** ปล่อยลูกบอลลงมา ชนชนิดเดียวกันรวมร่างเป็นลูกถัดไป
-
-### กลไก
-- เลื่อนเมาส์เล็ง, คลิกปล่อย
-- ลูกชนิดเดียวกันชน → รวมร่าง + ได้คะแนน
-- ลูกค้างเหนือเส้น danger นานเกินไป → จบเกม
-
-### ลำดับวิวัฒนาการ (11 ระดับ)
-🏓 → 🎱 → 🥎 → ⚾ → 🎾 → 🏐 → ⚽ → 🏀 → 🌕 → 🪩 → 🌎
-
-### Physics (custom, ไม่ใช้ engine)
-- Gravity `0.4`, friction `0.99`, bounce `0.3`
-- Collision pairwise O(n²), แก้ overlap + impulse
-- **Pattern:** mark `merged=true` ในรอบ collision แล้วค่อย filter หลัง loop จบ (ป้องกัน null pointer ระหว่าง iterate)
-
-### ระบบ
-| ระบบ | รายละเอียด |
-|---|---|
-| Score | สะสมตามคะแนนของลูกที่ merge (1, 3, 6, 10, ..., 66) |
-| Stats | high score, highest ball reached, total plays, total merges, total score, play time |
-| Settings | แสดงเส้นเล็ง / preview ลูกถัดไปบนกระดาน |
-
-### Database (`suika_db_v1`)
-```ts
-{
-  currentUser, users: {
-    [username]: {
-      password, createdAt,
-      settings: { showAim, showPreview },
-      stats: { totalPlays, totalScore, totalMerges, totalPlayTime, highScore, highestBall },
-      recent: [{ score, merges, highestBall, duration, playedAt }]
-    }
-  }
-}
-```
-
-### โครงสร้างไฟล์ภายใน
-- `game.js` — encapsulate physics เป็น `window.SuikaGame` มี `start({ settings, onScoreChange, onNextChange, onGameOver })` และ `stop()`
-- `app.js` — สั่ง start/stop เมื่อเข้า/ออกหน้าเกม, จัดการ user system
-
----
-
-## 🧩 เกม 3: Sudoku (`sudoku/`)
-
-**แนวเกม:** Sudoku 9×9 มี 4 ระดับความยาก × 100 ด่าน
-
-📄 **ดู [`sudoku/ARCHITECTURE.md`](sudoku/ARCHITECTURE.md) สำหรับรายละเอียดเชิงลึก**
-
-### ฟีเจอร์หลัก
-- 4 ระดับ (Easy / Medium / Hard / Expert) × 100 ด่าน = **400 ด่าน**
-- ปริศนา reproducible — seeded RNG ตาม (level, stage)
-- ระบบตัวช่วย 3 ครั้ง/ด่าน
-- จับเวลา + นับจำนวนผิด
-- ปุ่มเลขซ่อนเมื่อกรอกครบ 9 ตัว
-- ระบบคะแนน → จัดอันดับ
-- หน้าโปรไฟล์ + สถิติแยกตามระดับ
-
-### สูตรคะแนน
-```
-score = max(100, base - timeSec*2 - mistakes*50 - hintsUsed*150)
-base: easy 1000 / medium 2000 / hard 3500 / expert 5000
-```
-
----
-
-## 🗄️ การเก็บข้อมูล (localStorage keys)
-
-| Key | เกม |
-|---|---|
-| `mt_db_v1` | Match Three |
-| `suika_db_v1` | Ball Merge |
-| `sudoku_db_v1` | Sudoku |
-
-> ทั้ง 3 keys **แยกกันคนละเกม** — ลบ key หนึ่งไม่กระทบอีกเกม
-> ผู้ใช้ที่สร้างในเกม A ใช้ login เกม B ไม่ได้ (account แยกตามเกม)
-
----
-
-## 🔐 Auth Pattern (เหมือนกันทั้ง 3 เกม)
-
-แต่ละเกมมี `db.js` ของตัวเอง ใช้ pattern เดียวกัน:
-
-```js
-DB.signup(username, password)     // → { ok, err? }
-DB.login(username, password)      // → { ok, err? }
-DB.logout()
-DB.getCurrentUser()               // → { username, password, settings, stats, recent, ... } | null
-DB.updateSettings(partial)
-DB.changePassword(oldPw, newPw)   // → { ok, err? }
-DB.resetProgress()                // ล้างสถิติ ไม่ลบบัญชี
-DB.deleteAccount()
-DB.recordGame({...})              // → { isNewBest }
-DB.getGlobalLeaderboard(limit)    // → [{ name, score, ... }]
-DB.listUsers()                    // → [username, ...]
-```
-
-### ⚠️ ไม่ใช่ security จริง
-- รหัสผ่าน hash ด้วย `btoa('<game>-salt-v1::' + pw)` — แค่ obfuscate
-- ถ้าจะไป production ต้องย้ายไป server + bcrypt/argon2 + session/JWT
-
----
-
-## 🚀 ถ้าจะเอาไป Production
-
-### ทั่วไป
-1. **Backend จริง** — ทุก DB ตอนนี้อยู่ใน localStorage; ต้องมี API + database จริง (PostgreSQL / Supabase / Firebase)
-2. **Auth จริง** — bcrypt + session/JWT, email verification, reset password
-3. **Global Leaderboard ข้ามอุปกรณ์** — ตอนนี้ "global" คือแค่ในเครื่องเดียวกัน
-4. **Build system** — Vite / esbuild เพื่อ minify
-5. **Framework** — React/Vue ถ้าจะขยาย UI ซับซ้อนขึ้น
-6. **PWA** — manifest + service worker เพื่อเล่น offline + ติดตั้งบนมือถือ
-7. **Asset polish** — เปลี่ยน emoji → SVG เพื่อความสม่ำเสมอข้าม OS
-8. **Testing** — unit test (logic) + Playwright (E2E)
-9. **Anti-cheat** — user แก้ localStorage โดยตรงเพื่อปลอมคะแนนได้ ต้อง server-side validate
-
-### เฉพาะเกม
-- **Match Three**: เพิ่ม deadlock detection (no possible move → shuffle), booster, level system
-- **Suika**: ใช้ physics engine จริง (Matter.js), เพิ่ม particle / sound
-- **Sudoku**: เพิ่ม uniqueness check ใน generator, notes/pencil marks, daily challenge
-
----
-
-## 🔧 รัน
-
-เปิดไฟล์ `index.html` ของแต่ละเกมใน browser ได้ตรงๆ:
-- `match-three/index.html`
-- `suika/index.html`
-- `sudoku/index.html`
-
-หรือยิง local server:
 ```bash
-python3 -m http.server 8000
-# http://localhost:8000/match-three/
-# http://localhost:8000/suika/
-# http://localhost:8000/sudoku/
+cd sudoku
+npm install
+cp .env.example .env.local   # เติม Supabase URL + anon key (ดู docs)
+npm run dev                  # http://localhost:5173
 ```
 
-ไม่ต้อง npm install อะไรทั้งสิ้น ✨
+Build + verify:
+```bash
+npm run build
+npm test                     # 37 tests
+npm run phase0:verify        # self-check ทั้งโปรเจกต์
+```
+
+### 📲 Mobile builds
+
+```bash
+# Android
+npm run build && npx cap sync android && npx cap open android
+
+# iOS (macOS only)
+npm run build && npx cap sync ios && npx cap open ios
+```
+
+📄 **เอกสารเชิงลึก:** [`sudoku/docs/README.md`](./sudoku/docs/README.md)
+
+---
+
+## 🎯 Match Three (`match-three/`)
+
+เกมจับคู่ 3 แบบคลาสสิก (Bejeweled / Candy Crush-style) — Vanilla JS เล่นในไฟล์ได้เลย
+
+- กระดาน **8×8** มี 6 สัญลักษณ์ (🍎🍇🍋🍒🍊💎)
+- จับคู่ ≥3 แนวตั้ง/แนวนอน → ระเบิด + ของใหม่ตกลงมา
+- **Combo chain:** chain ต่อเนื่อง × ทวีคูณคะแนน
+- Timer 3 / 5 / 10 นาที, ระบบ user + leaderboard ใน localStorage (`mt_db_v1`)
+
+**รัน:** เปิด `match-three/index.html` ใน browser ได้เลย
+
+---
+
+## 🏀 Suika / Ball Merge (`suika/`)
+
+ปล่อยลูกบอลลงมา ชนชนิดเดียวกัน → รวมร่างเป็นลูกถัดไป — Vanilla JS + custom physics (ไม่ใช้ engine)
+
+- 11 ระดับ: 🏓 → 🎱 → 🥎 → ⚾ → 🎾 → 🏐 → ⚽ → 🏀 → 🌕 → 🪩 → 🌎
+- Gravity `0.4`, friction `0.99`, bounce `0.3`, collision O(n²)
+- ลูกค้างเหนือเส้น danger นานเกินไป → จบเกม
+- ระบบ user + stats ใน localStorage (`suika_db_v1`)
+
+**รัน:** เปิด `suika/index.html` ใน browser ได้เลย
+
+---
+
+## 🗂 โครงสร้างโปรเจกต์
+
+```
+mini-games/
+├── README.md            ← (ไฟล์นี้)
+├── PROGRESS.md          ← ความคืบหน้าแต่ละ phase
+├── TASK.md              ← subtask ย่อยพร้อม priority
+├── CHANGELOG.md         ← release history
+├── releases/            ← release notes per version
+├── sudoku/              ← 🧩 Sudoku Daily (TS + Vite + PWA + mobile)
+├── match-three/         ← 🎯 Match Three (Vanilla JS)
+└── suika/               ← 🏀 Ball Merge (Vanilla JS)
+```
+
+---
+
+## 🛣️ Roadmap (Sudoku Daily)
+
+| Phase | สถานะ | สรุป |
+|---|---|---|
+| **Phase 0** Foundation | ✅ 100% | Engine + infra + mobile wrap (released v0.0.0) |
+| **Phase 1** MVP | 🟡 ~30% | Daily puzzle + Leaderboard + Auth + Streak — soft launch |
+| **Phase 2** Customization | ⏳ 0% | Coin economy, shop, themes, avatar |
+| **Phase 3** Progression | ⏳ 0% | XP/level, 50+ achievements, stats dashboard |
+| **Phase 4** Polish & Launch | 🟡 30% | Play Store + App Store submission |
+| **Phase 5** Monetization | ⏳ 0% | Subscription, ads, IAP |
+
+ดูรายละเอียดและ subtask ที่ [TASK.md](./TASK.md)
+
+---
+
+## 🔗 Quick Links
+
+| Resource | URL |
+|---|---|
+| GitHub Repo | https://github.com/SirisakUnknowss/mini-games |
+| Latest Release | https://github.com/SirisakUnknowss/mini-games/releases/tag/v0.0.0 |
+| Sudoku docs | [sudoku/docs/README.md](./sudoku/docs/README.md) |
+| Vision | [sudoku/docs/00-overview/vision.md](./sudoku/docs/00-overview/vision.md) |
+| Roadmap | [sudoku/docs/00-overview/roadmap.md](./sudoku/docs/00-overview/roadmap.md) |
+| Dev onboarding | [sudoku/docs/06-implementation/developer-onboarding.md](./sudoku/docs/06-implementation/developer-onboarding.md) |
+
+---
+
+## 📝 Notes
+
+- เกม Match Three และ Suika ยังเก็บข้อมูลใน localStorage (ไม่ใช่ production-grade auth) — แยก account คนละเกม
+- Sudoku Daily ย้ายไป Supabase Auth + Postgres เต็มรูปแบบแล้ว
+- เกมเก่า (vanilla JS) ยังไม่มีแผนพัฒนาต่อ — focus หลักอยู่ที่ Sudoku Daily
