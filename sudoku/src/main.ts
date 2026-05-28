@@ -14,6 +14,8 @@ import { mountHomeView } from './ui/views/home';
 import { mountGameView, type GameResult } from './ui/views/game';
 import { showWinModal, buildShareText } from './ui/views/win-modal';
 import { mountSplash } from './ui/views/splash';
+import { showAuthModal } from './ui/views/auth-modal';
+import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
 
 const root = document.getElementById('app')!;
@@ -57,9 +59,55 @@ function showHome() {
     onPlayPractice: (level) => playPractice(level as Difficulty),
     onOpenLeaderboard: () => toast('Leaderboard coming soon'),
     onOpenShop: () => toast('Shop coming soon'),
-    onOpenProfile: () => toast('Profile coming soon'),
+    onOpenProfile: openProfileMenu,
+    onAuthAction: openAuthAction,
   });
   currentUnmount = view.unmount;
+}
+
+function openAuthAction() {
+  const user = useStore.getState().user;
+  if (user?.is_anonymous) {
+    showAuthModal({
+      isUpgrade: true,
+      onSuccess: async () => {
+        await loadUserData();
+        showHome();
+        toast('Progress saved! Sign in from any device to continue.');
+      },
+      onCancel: () => {},
+    });
+  } else if (user) {
+    // Already signed in → show profile menu
+    openProfileMenu();
+  } else {
+    showAuthModal({
+      onSuccess: async () => {
+        await loadUserData();
+        showHome();
+      },
+      onCancel: () => {},
+    });
+  }
+}
+
+function openProfileMenu() {
+  const user = useStore.getState().user;
+  if (user?.is_anonymous) {
+    // Anonymous → suggest upgrade
+    if (confirm('💾 Save your progress?\n\nYou are playing as a guest. Sign up with an email so you can play on any device.')) {
+      openAuthAction();
+    }
+    return;
+  }
+  // Signed-in user → offer sign out
+  if (confirm('Sign out?')) {
+    void signOut().then(() => {
+      useStore.setState({ user: null, profile: null, coins: 0, xp: 0, level: 1, currentStreak: 0 });
+      // Re-create an anonymous session so app keeps working
+      void boot();
+    });
+  }
 }
 
 async function playDaily() {

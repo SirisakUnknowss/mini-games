@@ -36,6 +36,34 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }
 
+/**
+ * Upgrade an anonymous account to an email+password account.
+ * Keeps the same user_id so all progress, coins, streak persist.
+ */
+export async function upgradeAnonymousToEmail(email: string, password: string): Promise<AuthResult> {
+  const { data: { user: current } } = await supabase.auth.getUser();
+  if (!current) return { ok: false, error: 'Not signed in' };
+  if (!current.is_anonymous) return { ok: false, error: 'Already has an email account' };
+
+  // First link the email
+  const { data: emailUpdate, error: emailErr } = await supabase.auth.updateUser({ email });
+  if (emailErr) return { ok: false, error: emailErr.message };
+  // Then set the password
+  const { data: pwUpdate, error: pwErr } = await supabase.auth.updateUser({ password });
+  if (pwErr) return { ok: false, error: pwErr.message };
+
+  // Mark profile as no longer anonymous
+  await supabase.from('profiles').update({ is_anonymous: false }).eq('id', current.id);
+
+  return { ok: true, user: pwUpdate.user ?? emailUpdate.user ?? current };
+}
+
+/** True if the current user is anonymous (no email linked yet) */
+export async function isAnonymous(): Promise<boolean> {
+  const u = await getCurrentUser();
+  return !!u?.is_anonymous;
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   const { data } = await supabase.auth.getUser();
   return data.user;

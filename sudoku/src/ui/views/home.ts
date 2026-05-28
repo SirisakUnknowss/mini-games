@@ -11,6 +11,7 @@ export interface HomeViewProps {
   onOpenLeaderboard: () => void;
   onOpenShop: () => void;
   onOpenProfile: () => void;
+  onAuthAction: () => void;
 }
 
 export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmount: () => void } {
@@ -19,13 +20,18 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
   const dow = new Date(today + 'T00:00:00Z').getUTCDay();
   const todayDifficulty = difficultyForDayOfWeek(dow);
 
+  const isAnonymous = !!state.user?.is_anonymous;
+  const displayName = state.profile?.display_name || state.profile?.username || (isAnonymous ? 'Guest' : 'Player');
+  const userIcon = isAnonymous ? '👻' : '👤';
+
   root.innerHTML = `
     <section class="view">
       <div class="header">
-        <div class="user-badge">
-          <span>👤</span>
-          <span>${state.profile?.display_name || state.profile?.username || 'Guest'}</span>
-        </div>
+        <button class="user-badge" id="user-badge" type="button">
+          <span>${userIcon}</span>
+          <span>${displayName}</span>
+          ${isAnonymous ? '<span class="badge-tag">guest</span>' : ''}
+        </button>
         <div style="display:flex;gap:8px;">
           <span class="stat-pill">🔥 ${state.currentStreak}</span>
           <span class="stat-pill">💰 ${formatNumber(state.coins)}</span>
@@ -33,6 +39,13 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
       </div>
 
       <h1>🧩 Sudoku Daily</h1>
+
+      ${isAnonymous ? `
+        <div class="save-banner" id="save-banner">
+          <span>💾 Playing as guest — your progress could be lost if you clear data.</span>
+          <button class="btn btn--small" id="save-progress">Save progress</button>
+        </div>
+      ` : ''}
 
       <div class="card daily-card">
         <h3>📅 Daily Puzzle</h3>
@@ -74,6 +87,8 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
   root.querySelector('#nav-leaderboard')?.addEventListener('click', props.onOpenLeaderboard);
   root.querySelector('#nav-shop')?.addEventListener('click', props.onOpenShop);
   root.querySelector('#nav-profile')?.addEventListener('click', props.onOpenProfile);
+  root.querySelector('#user-badge')?.addEventListener('click', props.onAuthAction);
+  root.querySelector('#save-progress')?.addEventListener('click', props.onAuthAction);
 
   return { unmount() { /* no listeners to clean */ } };
 }
