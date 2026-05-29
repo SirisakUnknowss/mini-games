@@ -15,6 +15,9 @@ import { mountGameView, type GameResult } from './ui/views/game';
 import { showWinModal, buildShareText } from './ui/views/win-modal';
 import { mountSplash } from './ui/views/splash';
 import { showAuthModal } from './ui/views/auth-modal';
+import { mountLeaderboardView } from './ui/views/leaderboard';
+import { hasCompletedOnboarding, showOnboarding } from './ui/views/onboarding';
+import { renderDailyQuests } from './ui/views/quests';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
 
@@ -57,11 +60,23 @@ function showHome() {
   const view = mountHomeView(root, {
     onPlayDaily: playDaily,
     onPlayPractice: (level) => playPractice(level as Difficulty),
-    onOpenLeaderboard: () => toast('Leaderboard coming soon'),
+    onOpenLeaderboard: showLeaderboard,
     onOpenShop: () => toast('Shop coming soon'),
     onOpenProfile: openProfileMenu,
     onAuthAction: openAuthAction,
   });
+  currentUnmount = view.unmount;
+
+  // Render today's quests into the home card (best-effort, background)
+  const questList = document.getElementById('quest-list');
+  if (questList) {
+    void renderDailyQuests(questList, { onToast: toast });
+  }
+}
+
+function showLeaderboard() {
+  clearView();
+  const view = mountLeaderboardView(root, { onBack: showHome });
   currentUnmount = view.unmount;
 }
 
@@ -214,6 +229,8 @@ async function handleWin(result: GameResult, date?: string) {
         rank = data.rank;
         totalPlayers = data.total_players;
       }
+      // Refresh progression to pick up new streak from server
+      await refreshStreakAndToast();
     } catch (err) {
       console.warn('Submit failed (offline?):', err);
       // TODO: queue for sync
@@ -241,6 +258,34 @@ async function handleWin(result: GameResult, date?: string) {
     onContinue: showHome,
     onShare: date ? () => shareResult(result, date, rank, totalPlayers) : undefined,
   });
+}
+
+const STREAK_MILESTONES = new Set([3, 7, 14, 30, 60, 100, 365]);
+
+async function refreshStreakAndToast() {
+  try {
+    const prevStreak = useStore.getState().currentStreak;
+    const prog = await api.getProgression();
+    if (!prog) return;
+    const newStreak = prog.current_streak ?? 0;
+    useStore.setState({
+      xp: Number(prog.xp ?? useStore.getState().xp),
+      level: prog.level ?? useStore.getState().level,
+      currentStreak: newStreak,
+    });
+    if (newStreak > prevStreak) {
+      if (STREAK_MILESTONES.has(newStreak)) {
+        track(Events.STREAK_MILESTONE, { streak: newStreak });
+        toast(`🔥 ${newStreak}-day streak! Keep it up!`, 4000);
+      } else {
+        toast(`🔥 Streak saved — ${newStreak} day${newStreak === 1 ? '' : 's'}!`);
+      }
+    } else if (newStreak < prevStreak && prevStreak > 0) {
+      track(Events.STREAK_LOST, { previous: prevStreak });
+    }
+  } catch (err) {
+    console.warn('Streak refresh failed:', err);
+  }
 }
 
 async function shareResult(result: GameResult, date: string, rank?: number, total?: number) {
@@ -337,6 +382,11 @@ async function boot() {
   await splash.unmount();
 
   showHome();
+
+  // Show onboarding once per device (after home is mounted so it has a backdrop)
+  if (!hasCompletedOnboarding()) {
+    showOnboarding({ onFinish: () => { /* user is on home; quest list will pick up name on next render */ showHome(); } });
+  }
 }
 
 boot().catch((err) => {

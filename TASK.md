@@ -1,6 +1,6 @@
 # ✅ TASK.md — Sudoku Daily
 
-> **Last updated:** 2026-05-28
+> **Last updated:** 2026-05-30
 > **Rule:** แต่ละ task ≤ 2 ชั่วโมง · ถ้าใหญ่กว่า → แตกเป็น sub-task
 > **Legend:** ✅ Done · 🟡 In progress · ⏳ Todo · ⏭️ Blocked
 > **Priority:** 🔴 P0 (must) · 🟡 P1 (should) · 🟢 P2 (nice) · ⚪ P3 (later)
@@ -12,7 +12,7 @@
 | Phase | Progress | Remaining tasks |
 |---|---|---|
 | Phase 0 — Foundation | ✅ 100% | 0 |
-| Phase 1 — MVP | 🟡 ~30% | 22 |
+| Phase 1 — MVP | 🟡 ~75% | 6 |
 | Phase 2 — Customization | ⏳ 0% | 14 |
 | Phase 3 — Progression | ⏳ 0% | 12 |
 | Phase 4 — Polish & Launch | 🟡 30% | 11 |
@@ -46,35 +46,37 @@
 - [x] 🔴 P0 — `openAuthAction()` + `openProfileMenu()` flow
 - [x] 🔴 P0 — Analytics: SIGN_IN, SIGN_UP, ANONYMOUS_UPGRADED
 
-### 1C. Leaderboard UI ⏳ (~3 ชม. → แตกเป็น 4 ย่อย)
-- [ ] 🔴 P0 — `src/lib/api.ts`: เพิ่ม `fetchLeaderboard(date)` + types (~30 น.)
-- [ ] 🔴 P0 — `src/ui/views/leaderboard.ts`: list view + rank/name/time/score (~1 ชม.)
-- [ ] 🔴 P0 — Highlight current user row + scroll-to-me button (~30 น.)
-- [ ] 🔴 P0 — Supabase Realtime subscribe → update on new submission (~1 ชม.)
-- [ ] 🟡 P1 — Empty state + loading skeleton + error retry (~30 น.)
-- [ ] 🟡 P1 — Tab: Today / Yesterday / All-time (~45 น.)
+### 1C. Leaderboard UI ✅ DONE (2026-05-30)
+- [x] 🔴 P0 — `src/lib/api.ts`: `getLeaderboard(date, limit)` ใช้ `leaderboard_view`
+- [x] 🔴 P0 — `src/ui/views/leaderboard.ts`: list view + rank/medals/name/time/score
+- [x] 🔴 P0 — Highlight current user row + "Scroll to my rank" button + flash animation
+- [x] 🔴 P0 — Supabase Realtime channel `lb:<date>` → refetch on insert/update
+- [x] 🟡 P1 — Empty state + shimmer loading skeleton + error retry
+- [x] 🟡 P1 — Tabs: Today / Yesterday (All-time ทำเสริมหลัง Phase 1)
 
-### 1D. Daily Quest UI ⏳ (~2 ชม.)
-- [ ] 🟡 P1 — Quest card component (title, progress bar, claim button) (~45 น.)
-- [ ] 🟡 P1 — `fetchTodayQuest()` + `claimQuest()` API wrappers (~30 น.)
-- [ ] 🟡 P1 — Toast + coin animation on claim (~30 น.)
-- [ ] 🟢 P2 — Quest history view (last 7 days) (~30 น.)
+### 1D. Daily Quest UI ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — `src/ui/views/quests.ts`: progress-bar row + claim button per quest
+- [x] 🟡 P1 — Wire `getDailyQuests()` + `claimQuestReward()` API ใน home card
+- [x] 🟡 P1 — Toast on claim + optimistic refresh
+- [ ] 🟢 P2 — Quest history view (last 7 days) — เลื่อนไป Phase 2
 
-### 1E. Streak Counter ⏳ (~1 ชม.)
-- [ ] 🟡 P1 — `fetchStreak()` API + cache in Zustand (~20 น.)
-- [ ] 🟡 P1 — Streak badge in home header (🔥 icon + number) (~20 น.)
-- [ ] 🟡 P1 — "Streak saved!" toast หลังชนะรายวัน (~20 น.)
+### 1E. Streak Counter ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — `refreshStreakAndToast()` ดึง `user_progression` หลัง submit
+- [x] 🟡 P1 — Streak badge in home header (🔥 + number) — มีมาตั้งแต่ Phase 0
+- [x] 🟡 P1 — "Streak saved!" toast + milestone toast (3, 7, 14, 30, 60, 100, 365)
 
-### 1F. Onboarding Wizard ⏳ (~2 ชม.)
-- [ ] 🟢 P2 — Step 1: welcome + nickname input (~30 น.)
-- [ ] 🟢 P2 — Step 2: how-to-play (3-row carousel) (~30 น.)
-- [ ] 🟢 P2 — Step 3: enable notifications prompt (~30 น.)
-- [ ] 🟢 P2 — Step 4: first daily puzzle CTA + persist `onboarded=true` (~30 น.)
+### 1F. Onboarding Wizard ✅ DONE (2026-05-30)
+- [x] 🟢 P2 — Step 1: welcome + nickname input (saved to `profiles.display_name`)
+- [x] 🟢 P2 — Step 2: how-to-play (3-bullet list)
+- [x] 🟢 P2 — Step 3: daily-reminder prompt (accept/skip choice tracked)
+- [x] 🟢 P2 — Step 4: "Let's play!" CTA + persist `sudoku_onboarded_v1` in localStorage
+- [x] 🟢 P2 — Skip button + dot indicators + analytics events
 
-### 1G. Push Notifications ⏳ (~2 ชม.)
+### 1G. Push Notifications ⏭️ DEFERRED to post-Phase-1
 - [ ] 🟢 P2 — Capacitor Push plugin install + Android FCM config (~45 น.)
 - [ ] 🟢 P2 — iOS APNs cert setup + capability (~45 น.)
 - [ ] 🟢 P2 — Server-side: edge function ส่ง notification 9:00 local (~30 น.)
+- _หมายเหตุ: ต้องการ FCM/APNs credentials จริง + native build → ขยับไปทำคู่ Play Store/App Store ใน Phase 4_
 
 ### 1Z. Phase 1 Exit Criteria
 - [ ] 🔴 P0 — Real users signed up ≥ 500
@@ -187,12 +189,14 @@
 
 ---
 
-## 🎯 Recommended Next 5 Tasks
+## 🎯 Recommended Next Steps
 
-1. 🔴 **1C-1** `fetchLeaderboard(date)` ใน `src/lib/api.ts` (~30 น.)
-2. 🔴 **1C-2** Leaderboard list view (~1 ชม.)
-3. 🔴 **1C-4** Realtime subscribe (~1 ชม.)
-4. 🟡 **1E-1+2+3** Streak counter ครบเซ็ต (~1 ชม.)
-5. 🟡 **1D-1+2** Daily Quest card + API (~1.25 ชม.)
+Phase 1 ฟีเจอร์โค้ดเสร็จแล้ว (1A–1F) — ที่เหลือคือ launch tasks:
 
-→ จบ 5 อันนี้ ≈ 5 ชม. แล้ว Phase 1 จะ ~70% (พอ soft launch ได้)
+1. 🔴 **1Z** Soft launch + แชร์ link → เก็บ metrics (D1/D7 retention, completion rate)
+2. 🟡 **1G** Push notifications (FCM + APNs setup) → ทำคู่ Play Store ใน 4C
+3. 🔴 **4C** Sign + submit Android release → Play Internal Testing
+4. 🟡 **4D** TestFlight submission
+5. 🔴 **4E** Privacy Policy + ToS (ต้องมีก่อน submit store)
+
+→ Phase 1 จะปิดเมื่อถึง exit criteria (500 users, D7 > 15%, completion > 50%)

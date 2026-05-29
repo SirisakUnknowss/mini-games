@@ -15,10 +15,27 @@ Release notes ละเอียดของแต่ละ version อยู่
 #### Added
 - Task 1A — Daily puzzle backend live บน Supabase Cloud (7 migrations, 2 edge functions, pg_cron, 30 puzzles pre-generated)
 - Task 1B — Auth UI (sign in / sign up / anonymous → email upgrade) พร้อม validation + analytics events
+- **Task 1C** — Leaderboard view เต็มฟีเจอร์: Today/Yesterday tabs, current-user highlight,
+  "Scroll to my rank" + flash animation, shimmer skeleton, empty/error states with retry,
+  Supabase Realtime channel for live updates (`src/ui/views/leaderboard.ts`)
+- **Task 1D** — Daily Quest UI: progress bars, claim button per quest, wired to
+  `getDailyQuests()` + `claimQuestReward()` with optimistic refresh (`src/ui/views/quests.ts`)
+- **Task 1E** — Streak integration: `refreshStreakAndToast()` after daily submit,
+  "Streak saved" toast + milestone toasts on 3/7/14/30/60/100/365, fires
+  `STREAK_MILESTONE` / `STREAK_LOST` analytics events
+- **Task 1F** — 4-step Onboarding wizard (welcome+nickname → how-to-play →
+  daily-reminder prompt → "Let's play" CTA) with dot indicators, skip support,
+  persisted via `localStorage.sudoku_onboarded_v1` (`src/ui/views/onboarding.ts`)
 - `TASK.md` — subtask breakdown ย่อย ๆ ทุก phase พร้อม priority + status + ประมาณเวลา
 
 #### Changed
 - `README.md` — ปรับเป็น hub ของทั้ง 3 เกม, ชู Sudoku Daily เป็นเกมหลัก, เพิ่ม roadmap table + คำสั่งรัน web/Android/iOS
+- `src/main.ts` — wire Leaderboard route, render Daily Quests on home, trigger
+  onboarding on first boot, refresh streak post-submit
+- `src/ui/styles/main.css` — เพิ่ม CSS สำหรับ leaderboard / quest / onboarding components
+
+#### Deferred
+- **Task 1G** Push notifications — เลื่อนไปทำคู่ Play Store / App Store submission ใน Phase 4 (ต้อง FCM + APNs credentials จริง)
 
 ---
 
