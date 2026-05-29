@@ -37,6 +37,64 @@ Release notes ละเอียดของแต่ละ version อยู่
 #### Deferred
 - **Task 1G** Push notifications — เลื่อนไปทำคู่ Play Store / App Store submission ใน Phase 4 (ต้อง FCM + APNs credentials จริง)
 
+### Phase 2 — Customization (2026-05-30)
+
+#### Added
+- **2B Shop** (`src/ui/views/shop.ts`) — full grid view with category tabs
+  (All / Themes / Backgrounds / Avatars), rarity-colored borders, Buy + Equip
+  flows wired to `purchaseItem()` / `equipItem()` RPCs with optimistic coin
+  deduction and local fallback when the equip endpoint is unavailable
+- **2C Theme system** (`src/lib/themes.ts`) — 11 themes (Classic, Paper, Dark,
+  Pastel, Ocean, Forest, Sunset, Neon, Sakura, Thai, Mono Pro) applied via
+  CSS custom property overrides; theme persists across reloads via
+  localStorage cache and applied before first paint to avoid flicker
+- **2D Avatar picker** — 21 emoji avatars in Profile view, equip persists to
+  `user_equipped.avatar` (JSONB); equipped avatar shows in home header
+
+### Phase 3 — Progression (2026-05-30)
+
+#### Added
+- **3A XP & Levels** (`src/lib/level.ts`) — quadratic curve
+  `(L-1) * L * 50`; in-home XP bar with progress + "X to next level" label;
+  level-up modal (`src/ui/views/level-up.ts`) shown 600ms after win
+- **3B Achievements** (`src/ui/views/achievements.ts`) — grid view with tier
+  color rings, lock/unlock states, category tabs, hidden achievement support;
+  migration `20260530000000_phase3_more_achievements.sql` adds 33 entries
+  (total now 53: play volume, daily/streak, skill, speedrun, leaderboard,
+  progression levels, special/fun)
+- **3C Stats dashboard** (`src/ui/views/stats.ts`) — games, best/avg time,
+  current+longest streaks, mistakes/game; difficulty breakdown bars from
+  `user_game_history`
+- **`tests/engine/level.test.ts`** — 8 new unit tests for the XP curve
+  (monotonicity, boundaries, progress fractions). Total now 45/45 passing.
+
+### Phase 4 — Polish (2026-05-30)
+
+#### Added
+- **4E Web presence**
+  - `legal/PRIVACY.md` — Privacy Policy (sections: data collection, use,
+    sharing, choices, retention, security, contact)
+  - `legal/TERMS.md` — Terms of Service (eligibility, account, acceptable use,
+    virtual currency, IP, disclaimers, governing law)
+  - `landing/index.html` — single-page marketing site with hero, 8 feature
+    cards, and store CTAs
+
+### Phase 5 — Monetization (2026-05-30)
+
+#### Added
+- **5A Paywall UI stub** (`src/ui/views/paywall.ts`) — premium features
+  list, monthly/yearly plan selector, recommended badge. **Stub only** —
+  real IAP/subscription wiring requires RevenueCat or App/Play Store Connect
+  accounts and is left for post-launch.
+
+#### Profile view (Phase 2/3 cross-cutting)
+- `src/ui/views/profile.ts` — new dedicated Profile route with avatar picker,
+  editable display name, stat tiles, and links into Stats / Achievements / Sign-out
+- `src/main.ts` — Shop/Profile/Achievements/Stats routes wired; theme
+  applied on boot from cached localStorage; level-up detected after submit
+- `src/state/store.ts` — added `equipped`, `inventory`, `longestStreak`,
+  `setEquipped()`, `setInventory()`, `addToInventory()`
+
 ---
 
 ## [v0.0.0] — 2026-05-24

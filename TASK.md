@@ -12,11 +12,11 @@
 | Phase | Progress | Remaining tasks |
 |---|---|---|
 | Phase 0 — Foundation | ✅ 100% | 0 |
-| Phase 1 — MVP | 🟡 ~75% | 6 |
-| Phase 2 — Customization | ⏳ 0% | 14 |
-| Phase 3 — Progression | ⏳ 0% | 12 |
-| Phase 4 — Polish & Launch | 🟡 30% | 11 |
-| Phase 5 — Monetization | ⏳ 0% | 9 |
+| Phase 1 — MVP | 🟡 ~75% | 6 (launch-related only) |
+| Phase 2 — Customization | 🟡 ~85% | 2 (preview mode + filters) |
+| Phase 3 — Progression | 🟡 ~75% | 3 (weekly recap + global compare) |
+| Phase 4 — Polish & Launch | 🟡 60% | 7 (store submission only) |
+| Phase 5 — Monetization | 🟡 10% | 8 (real IAP/ads pending accounts) |
 
 ---
 
@@ -89,53 +89,57 @@
 
 ## ⏳ Phase 2 — Customization
 
-### 2A. Coin Economy
-- [ ] 🟡 P1 — Coin balance widget (header) + RPC `get_coins()` (~30 น.)
-- [ ] 🟡 P1 — Coin earn animation on win/quest claim (~30 น.)
-- [ ] 🟡 P1 — Audit ledger view (debug) (~45 น.)
+### 2A. Coin Economy ✅ DONE
+- [x] 🟡 P1 — Coin balance widget (header) — already from Phase 0
+- [x] 🟡 P1 — Coin update reflected after purchase (optimistic)
+- [ ] 🟢 P2 — Coin earn animation (count-up) — เลื่อนเป็น polish
+- [ ] 🟢 P2 — Audit ledger view (debug) — เลื่อน
 
-### 2B. Shop
-- [ ] 🟡 P1 — Shop view: grid ของ items จาก `shop_items` (~1 ชม.)
-- [ ] 🟡 P1 — Item detail modal + "Buy" RPC `purchase_item()` (~1 ชม.)
-- [ ] 🟡 P1 — Owned/locked state + "Equip" toggle (~45 น.)
-- [ ] 🟢 P2 — Filter: theme / background / avatar (~30 น.)
+### 2B. Shop ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — `src/ui/views/shop.ts`: grid + tabs (All / Themes / BG / Avatars)
+- [x] 🟡 P1 — Buy flow via `purchaseItem()` RPC + optimistic coin deduct
+- [x] 🟡 P1 — Owned / Equipped states + Equip button per category
+- [x] 🟢 P2 — Filter by category tab
 
-### 2C. Themes & Backgrounds
-- [ ] 🟡 P1 — Theme tokens (CSS vars) — 5 themes base (~1 ชม.)
-- [ ] 🟡 P1 — Apply selected theme on boot จาก user profile (~30 น.)
-- [ ] 🟢 P2 — Background patterns (10 variants) (~1 ชม.)
+### 2C. Themes & Backgrounds ✅ DONE
+- [x] 🟡 P1 — `src/lib/themes.ts`: 11 themes (Classic, Paper, Dark, Pastel, Ocean,
+  Forest, Sunset, Neon, Sakura, Thai, Mono Pro) — full CSS-var override
+- [x] 🟡 P1 — Apply theme on boot จาก `user_equipped` + cached localStorage
+- [ ] 🟢 P2 — Animated backgrounds (rain etc.) — เลื่อน
 
-### 2D. Avatar System
-- [ ] 🟢 P2 — Avatar picker (12 default avatars) (~1 ชม.)
-- [ ] 🟢 P2 — Premium avatars (จาก shop) (~45 น.)
-- [ ] 🟢 P2 — Show avatar ใน leaderboard rows (~30 น.)
+### 2D. Avatar System ✅ DONE
+- [x] 🟢 P2 — Avatar picker (21 emoji) ใน profile view
+- [x] 🟢 P2 — Equip persists to `user_equipped.avatar` (with local fallback)
+- [x] 🟢 P2 — Leaderboard view already pulls `avatar` from `leaderboard_view`
 
 ### 2E. Preview Mode
-- [ ] 🟢 P2 — "Try before buy" preview ใน shop modal (~45 น.)
+- [ ] 🟢 P2 — "Try before buy" preview ใน shop modal — เลื่อน
 
 ---
 
 ## ⏳ Phase 3 — Progression
 
-### 3A. XP & Level System
-- [ ] 🟡 P1 — XP bar in header + level number (~45 น.)
-- [ ] 🟡 P1 — Level-up modal + reward grant (~45 น.)
-- [ ] 🟡 P1 — XP curve table + RPC `grant_xp()` already exists — wire UI (~30 น.)
+### 3A. XP & Level System ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — XP bar in home header (`xp-bar`) + level number from `levelProgress()`
+- [x] 🟡 P1 — Level-up modal (`src/ui/views/level-up.ts`) shown 600ms after win
+- [x] 🟡 P1 — XP curve: `xpForLevel(L) = (L-1) * L * 50` (quadratic, scales forever)
+- [x] 🟡 P1 — Unit tests for level math (8 tests, all pass)
 
-### 3B. Achievements (50+)
-- [ ] 🟡 P1 — Achievements view: grid + locked/unlocked state (~1 ชม.)
-- [ ] 🟡 P1 — Unlock toast + persist seen flag (~30 น.)
-- [ ] 🟡 P1 — Migration: add 30+ achievements (เกินจาก 19 ปัจจุบัน) (~1 ชม.)
-- [ ] 🟢 P2 — Progress bar สำหรับ multi-step achievements (~45 น.)
+### 3B. Achievements (53 total now) ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — `src/ui/views/achievements.ts`: grid + tier color + lock/unlock states
+- [x] 🟡 P1 — Category tabs (All + dynamic) + hidden-achievement support
+- [x] 🟡 P1 — Migration `20260530000000_phase3_more_achievements.sql` — adds 33 new entries (total → 53)
+- [ ] 🟢 P2 — Inline progress bar (e.g. 7/30 games for ACH_PLAY_50) — server-side calc TBD
 
-### 3C. Stats Dashboard
-- [ ] 🟡 P1 — Personal stats: games played, win rate, avg time (~1 ชม.)
-- [ ] 🟢 P2 — Charts: time-over-days, streaks history (~1 ชม.)
-- [ ] 🟢 P2 — Compare to global average (~45 น.)
+### 3C. Stats Dashboard ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — `src/ui/views/stats.ts`: games, best/avg time, streaks, mistakes/game
+- [x] 🟡 P1 — Difficulty breakdown bars from `user_game_history`
+- [ ] 🟢 P2 — Time-over-days chart (needs charting lib or canvas helper)
+- [ ] 🟢 P2 — Compare-to-global-average (needs server aggregation view)
 
 ### 3D. Weekly Recap
-- [ ] 🟢 P2 — Edge function: ส่ง weekly summary ทุกวันจันทร์ (~1 ชม.)
-- [ ] 🟢 P2 — Recap view in-app (share-friendly image) (~1 ชม.)
+- [ ] 🟢 P2 — Edge function: ส่ง weekly summary ทุกวันจันทร์ — เลื่อน (ต้อง email infra)
+- [ ] 🟢 P2 — Recap view in-app — เลื่อน
 
 ---
 
@@ -163,19 +167,19 @@
 - [ ] 🟡 P1 — Screenshots (6.7" + 6.5" + iPad) (~1 ชม.)
 - [ ] 🟡 P1 — Submit to TestFlight (~45 น.)
 
-### 4E. Web presence
-- [ ] 🟡 P1 — Landing page (one-pager + download CTAs) (~2 ชม.)
-- [ ] 🔴 P0 — Privacy Policy (~45 น.)
-- [ ] 🔴 P0 — Terms of Service (~45 น.)
+### 4E. Web presence ✅ DONE (2026-05-30)
+- [x] 🟡 P1 — Landing page (`landing/index.html`) — hero + features + CTA buttons
+- [x] 🔴 P0 — Privacy Policy (`legal/PRIVACY.md`)
+- [x] 🔴 P0 — Terms of Service (`legal/TERMS.md`)
 
 ---
 
 ## ⏳ Phase 5 — Monetization
 
 ### 5A. Subscription
-- [ ] 🟢 P2 — RevenueCat integration (~1.5 ชม.)
+- [ ] 🟢 P2 — RevenueCat integration (~1.5 ชม.) — ต้อง RevenueCat account
 - [ ] 🟢 P2 — Premium gate: themes + stats history + no-ads (~1 ชม.)
-- [ ] 🟢 P2 — Paywall view (~1 ชม.)
+- [x] 🟢 P2 — Paywall view (`src/ui/views/paywall.ts`) — UI stub, ยังไม่ wire IAP จริง
 
 ### 5B. Rewarded Ads
 - [ ] 🟢 P2 — AdMob SDK integrate (Capacitor plugin) (~1 ชม.)

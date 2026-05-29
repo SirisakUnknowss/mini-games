@@ -4,6 +4,7 @@
 import { useStore } from '@state/store';
 import { todayUtc, formatNumber } from '@lib/format';
 import { difficultyForDayOfWeek } from '@engine/generator';
+import { levelProgress } from '@lib/level';
 
 export interface HomeViewProps {
   onPlayDaily: () => void;
@@ -22,7 +23,9 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
 
   const isAnonymous = !!state.user?.is_anonymous;
   const displayName = state.profile?.display_name || state.profile?.username || (isAnonymous ? 'Guest' : 'Player');
-  const userIcon = isAnonymous ? '👻' : '👤';
+  const equippedEmoji = (state.equipped.avatar?.emoji as string) ?? null;
+  const userIcon = equippedEmoji || (isAnonymous ? '👻' : '👤');
+  const lvl = levelProgress(state.xp);
 
   root.innerHTML = `
     <section class="view">
@@ -39,6 +42,16 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
       </div>
 
       <h1>🧩 Sudoku Daily</h1>
+
+      <div class="xp-bar" title="${lvl.xpForNext} XP to level ${lvl.level + 1}">
+        <div class="xp-bar-label">
+          <span>⭐ Lv ${lvl.level}</span>
+          <span>${lvl.xpIntoLevel} / ${lvl.xpIntoLevel + lvl.xpForNext} XP</span>
+        </div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill" style="width:${Math.round(lvl.fraction * 100)}%"></div>
+        </div>
+      </div>
 
       ${isAnonymous ? `
         <div class="save-banner" id="save-banner">

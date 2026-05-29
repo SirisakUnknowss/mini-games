@@ -18,6 +18,13 @@ import { showAuthModal } from './ui/views/auth-modal';
 import { mountLeaderboardView } from './ui/views/leaderboard';
 import { hasCompletedOnboarding, showOnboarding } from './ui/views/onboarding';
 import { renderDailyQuests } from './ui/views/quests';
+import { mountShopView } from './ui/views/shop';
+import { mountProfileView } from './ui/views/profile';
+import { mountAchievementsView } from './ui/views/achievements';
+import { mountStatsView } from './ui/views/stats';
+import { showLevelUpModal } from './ui/views/level-up';
+import { applyTheme, loadCachedThemeId } from './lib/themes';
+import { levelFromXp } from './lib/level';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
 
@@ -34,10 +41,12 @@ function clearView() {
 
 async function loadUserData(): Promise<void> {
   try {
-    const [wallet, progression, profile] = await Promise.all([
+    const [wallet, progression, profile, equipped, inventory] = await Promise.all([
       api.getWallet(),
       api.getProgression(),
       useStore.getState().user ? api.getProfile(useStore.getState().user!.id) : Promise.resolve(null),
+      api.getEquipped().catch(() => null),
+      api.getInventory().catch(() => []),
     ]);
     const set = useStore.setState;
     if (wallet) set({ coins: wallet.coins });
@@ -45,8 +54,20 @@ async function loadUserData(): Promise<void> {
       xp: Number(progression.xp),
       level: progression.level,
       currentStreak: progression.current_streak,
+      longestStreak: progression.longest_streak ?? 0,
     });
     if (profile) set({ profile });
+    if (equipped) {
+      useStore.getState().setEquipped({
+        theme_id: equipped.theme_id ?? null,
+        background_id: equipped.background_id ?? null,
+        avatar: equipped.avatar ?? { emoji: '👤' },
+      });
+      if (equipped.theme_id) applyTheme(equipped.theme_id);
+    }
+    if (inventory) {
+      useStore.getState().setInventory((inventory as any[]).map((r) => r.item_id));
+    }
   } catch (err) {
     console.warn('Failed to load user data:', err);
   }
@@ -61,8 +82,8 @@ function showHome() {
     onPlayDaily: playDaily,
     onPlayPractice: (level) => playPractice(level as Difficulty),
     onOpenLeaderboard: showLeaderboard,
-    onOpenShop: () => toast('Shop coming soon'),
-    onOpenProfile: openProfileMenu,
+    onOpenShop: showShop,
+    onOpenProfile: showProfile,
     onAuthAction: openAuthAction,
   });
   currentUnmount = view.unmount;
@@ -80,6 +101,44 @@ function showLeaderboard() {
   currentUnmount = view.unmount;
 }
 
+function showShop() {
+  clearView();
+  const view = mountShopView(root, { onBack: showHome, onToast: toast });
+  currentUnmount = view.unmount;
+}
+
+function showProfile() {
+  clearView();
+  const view = mountProfileView(root, {
+    onBack: showHome,
+    onOpenStats: showStats,
+    onOpenAchievements: showAchievements,
+    onSignOut: () => {
+      if (confirm('Sign out?')) {
+        void signOut().then(() => {
+          useStore.setState({ user: null, profile: null, coins: 0, xp: 0, level: 1, currentStreak: 0 });
+          void boot();
+        });
+      }
+    },
+    onUpgradeAccount: openAuthAction,
+    onToast: toast,
+  });
+  currentUnmount = view.unmount;
+}
+
+function showAchievements() {
+  clearView();
+  const view = mountAchievementsView(root, { onBack: showProfile });
+  currentUnmount = view.unmount;
+}
+
+function showStats() {
+  clearView();
+  const view = mountStatsView(root, { onBack: showProfile });
+  currentUnmount = view.unmount;
+}
+
 function openAuthAction() {
   const user = useStore.getState().user;
   if (user?.is_anonymous) {
@@ -93,8 +152,8 @@ function openAuthAction() {
       onCancel: () => {},
     });
   } else if (user) {
-    // Already signed in → show profile menu
-    openProfileMenu();
+    // Already signed in → go to profile
+    showProfile();
   } else {
     showAuthModal({
       onSuccess: async () => {
@@ -106,24 +165,7 @@ function openAuthAction() {
   }
 }
 
-function openProfileMenu() {
-  const user = useStore.getState().user;
-  if (user?.is_anonymous) {
-    // Anonymous → suggest upgrade
-    if (confirm('💾 Save your progress?\n\nYou are playing as a guest. Sign up with an email so you can play on any device.')) {
-      openAuthAction();
-    }
-    return;
-  }
-  // Signed-in user → offer sign out
-  if (confirm('Sign out?')) {
-    void signOut().then(() => {
-      useStore.setState({ user: null, profile: null, coins: 0, xp: 0, level: 1, currentStreak: 0 });
-      // Re-create an anonymous session so app keeps working
-      void boot();
-    });
-  }
-}
+// (profile menu now lives in mountProfileView)
 
 async function playDaily() {
   const date = todayUtc();
@@ -205,10 +247,19 @@ async function handleWin(result: GameResult, date?: string) {
   const xp = computeXpReward(scoreInput, result.mode);
 
   // Optimistic update
+  const prevLevel = useStore.getState().level;
+  const newXp = useStore.getState().xp + xp;
+  const newLevel = levelFromXp(newXp);
   useStore.setState({
     coins: useStore.getState().coins + coins,
-    xp: useStore.getState().xp + xp,
+    xp: newXp,
+    level: newLevel,
   });
+  if (newLevel > prevLevel) {
+    // Show level-up modal after the win modal closes
+    setTimeout(() => showLevelUpModal({ newLevel, rewardCoins: 50 * (newLevel - prevLevel) }), 600);
+    track('level_up', { from: prevLevel, to: newLevel });
+  }
 
   let rank: number | undefined;
   let totalPlayers: number | undefined;
@@ -331,6 +382,10 @@ function stringToBoard(s: string): number[][] {
 // Boot
 // =====================================================================
 async function boot() {
+  // Apply cached theme before first paint to avoid flicker
+  const cachedTheme = loadCachedThemeId();
+  if (cachedTheme) applyTheme(cachedTheme);
+
   // Init analytics first — safe even with empty keys
   initAnalytics();
   track(Events.APP_OPEN);
