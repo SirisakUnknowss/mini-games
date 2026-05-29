@@ -40,3 +40,8 @@ yarn-error.log*
 
 # Claude
 .claude/
+
+# Mobile build artifacts (uploaded to GitHub Releases, not tracked in repo)
+*.apk
+*.aab
+*.ipa
