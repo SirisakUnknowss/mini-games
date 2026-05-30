@@ -80,15 +80,21 @@ async function loadUserData(): Promise<void> {
 // =====================================================================
 // Routing
 // =====================================================================
+// Shared callbacks for the bottom nav — same in every view
+const navCb = {
+  onHome:        () => showHome(),
+  onLeaderboard: () => showLeaderboard(),
+  onShop:        () => showShop(),
+  onProfile:     () => showProfile(),
+};
+
 function showHome() {
   clearView();
   const view = mountHomeView(root, {
     onPlayDaily: playDaily,
     onPlayPractice: (level) => playPractice(level as Difficulty),
-    onOpenLeaderboard: showLeaderboard,
-    onOpenShop: showShop,
-    onOpenProfile: showProfile,
     onAuthAction: openAuthAction,
+    nav: navCb,
   });
   currentUnmount = view.unmount;
 
@@ -101,13 +107,13 @@ function showHome() {
 
 function showLeaderboard() {
   clearView();
-  const view = mountLeaderboardView(root, { onBack: showHome });
+  const view = mountLeaderboardView(root, { onBack: showHome, nav: navCb });
   currentUnmount = view.unmount;
 }
 
 function showShop() {
   clearView();
-  const view = mountShopView(root, { onBack: showHome, onToast: toast });
+  const view = mountShopView(root, { onBack: showHome, onToast: toast, nav: navCb });
   currentUnmount = view.unmount;
 }
 
@@ -129,31 +135,32 @@ function showProfile() {
     },
     onUpgradeAccount: openAuthAction,
     onToast: toast,
+    nav: navCb,
   });
   currentUnmount = view.unmount;
 }
 
 function showAchievements() {
   clearView();
-  const view = mountAchievementsView(root, { onBack: showProfile });
+  const view = mountAchievementsView(root, { onBack: showProfile, nav: navCb });
   currentUnmount = view.unmount;
 }
 
 function showStats() {
   clearView();
-  const view = mountStatsView(root, { onBack: showProfile });
+  const view = mountStatsView(root, { onBack: showProfile, nav: navCb });
   currentUnmount = view.unmount;
 }
 
 function showRecap() {
   clearView();
-  const view = mountRecapView(root, { onBack: showProfile, onToast: toast });
+  const view = mountRecapView(root, { onBack: showProfile, onToast: toast, nav: navCb });
   currentUnmount = view.unmount;
 }
 
 function showLedger() {
   clearView();
-  const view = mountLedgerView(root, { onBack: showProfile });
+  const view = mountLedgerView(root, { onBack: showProfile, nav: navCb });
   currentUnmount = view.unmount;
 }
 

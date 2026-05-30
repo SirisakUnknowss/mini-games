@@ -5,9 +5,11 @@ import { useStore } from '@state/store';
 import { supabase } from '@lib/supabase';
 import * as api from '@lib/api';
 import { formatTime, todayUtc, escapeHtml } from '@lib/format';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 export interface LeaderboardProps {
   onBack: () => void;
+  nav: BottomNavCallbacks;
 }
 
 type Tab = 'today' | 'yesterday';
@@ -62,13 +64,9 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
         Scroll to my rank
       </button>
     </section>
-    <nav class="bottom-nav">
-      <button id="lb-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button class="active"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="lb-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button id="lb-nav-profile"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('leaderboard')}
   `;
+  wireBottomNav(root, props.nav, 'leaderboard');
 
   const listEl = root.querySelector<HTMLElement>('#lb-list')!;
   const metaEl = root.querySelector<HTMLElement>('#lb-meta')!;
@@ -200,9 +198,8 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
     });
   });
 
-  // Back & nav
+  // Back
   root.querySelector('#lb-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#lb-nav-home')?.addEventListener('click', props.onBack);
 
   // Scroll to me
   scrollBtn.addEventListener('click', () => {

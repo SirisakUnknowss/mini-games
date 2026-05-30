@@ -5,10 +5,12 @@ import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { formatTime, escapeHtml } from '@lib/format';
 import { track } from '@lib/analytics';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 export interface RecapProps {
   onBack: () => void;
   onToast: (msg: string) => void;
+  nav: BottomNavCallbacks;
 }
 
 interface Recap {
@@ -74,13 +76,9 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
       </div>
       <div id="recap-body" class="stats-body"><div class="shop-loading">Loading recap…</div></div>
     </section>
-    <nav class="bottom-nav">
-      <button id="recap-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="recap-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="recap-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button class="active"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('profile')}
   `;
+  wireBottomNav(root, props.nav, 'profile');
   const body = root.querySelector<HTMLElement>('#recap-body')!;
 
   async function load() {
@@ -142,7 +140,6 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
   }
 
   root.querySelector('#recap-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#recap-nav-home')?.addEventListener('click', props.onBack);
 
   void load();
   return { unmount() { /* no-op */ } };

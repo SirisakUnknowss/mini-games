@@ -4,6 +4,7 @@
 import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { escapeHtml, formatNumber } from '@lib/format';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 interface Tx {
   id: number;
@@ -16,6 +17,7 @@ interface Tx {
 
 export interface LedgerProps {
   onBack: () => void;
+  nav: BottomNavCallbacks;
 }
 
 function formatTimestamp(iso: string): string {
@@ -37,13 +39,9 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
         <div class="shop-loading">Loading…</div>
       </div>
     </section>
-    <nav class="bottom-nav">
-      <button id="ledger-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="ledger-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="ledger-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button class="active"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('profile')}
   `;
+  wireBottomNav(root, props.nav, 'profile');
 
   const body = root.querySelector<HTMLElement>('#ledger-body')!;
 
@@ -105,7 +103,6 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
   }
 
   root.querySelector('#ledger-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#ledger-nav-home')?.addEventListener('click', props.onBack);
 
   void load();
   return { unmount() { /* no-op */ } };

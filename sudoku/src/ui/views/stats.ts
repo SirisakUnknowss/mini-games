@@ -6,6 +6,7 @@ import { useStore } from '@state/store';
 import * as api from '@lib/api';
 import { formatTime, formatNumber, escapeHtml } from '@lib/format';
 import { drawLineChart, type LinePoint } from '@lib/chart';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 interface StatRow {
   total_games: number;
@@ -21,6 +22,7 @@ interface StatRow {
 
 export interface StatsProps {
   onBack: () => void;
+  nav: BottomNavCallbacks;
 }
 
 async function loadStats(): Promise<StatRow> {
@@ -71,13 +73,9 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
       </div>
       <div id="stats-body" class="stats-body"><div class="shop-loading">Loading stats…</div></div>
     </section>
-    <nav class="bottom-nav">
-      <button id="stats-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="stats-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="stats-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button class="active"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('profile')}
   `;
+  wireBottomNav(root, props.nav, 'profile');
 
   const body = root.querySelector<HTMLElement>('#stats-body')!;
 
@@ -180,7 +178,6 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
   }
 
   root.querySelector('#stats-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#stats-nav-home')?.addEventListener('click', props.onBack);
 
   void load();
 

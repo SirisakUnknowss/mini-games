@@ -5,14 +5,13 @@ import { useStore } from '@state/store';
 import { todayUtc, formatNumber } from '@lib/format';
 import { difficultyForDayOfWeek } from '@engine/generator';
 import { levelProgress } from '@lib/level';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 export interface HomeViewProps {
   onPlayDaily: () => void;
   onPlayPractice: (level: string) => void;
-  onOpenLeaderboard: () => void;
-  onOpenShop: () => void;
-  onOpenProfile: () => void;
   onAuthAction: () => void;
+  nav: BottomNavCallbacks;
 }
 
 export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmount: () => void } {
@@ -22,26 +21,25 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
   const todayDifficulty = difficultyForDayOfWeek(dow);
 
   const isAnonymous = !!state.user?.is_anonymous;
-  const displayName = state.profile?.display_name || state.profile?.username || (isAnonymous ? 'Guest' : 'Player');
+  const isGuest = !state.user || isAnonymous;
+  const displayName = state.profile?.display_name || state.profile?.username || (isGuest ? 'Guest' : 'Player');
   const equippedEmoji = (state.equipped.avatar?.emoji as string) ?? null;
-  const userIcon = equippedEmoji || (isAnonymous ? '👻' : '👤');
+  const userIcon = equippedEmoji || (isGuest ? '👻' : '👤');
   const lvl = levelProgress(state.xp);
 
   root.innerHTML = `
-    <section class="view">
+    <section class="view view--home">
       <div class="header">
         <button class="user-badge" id="user-badge" type="button">
           <span>${userIcon}</span>
           <span>${displayName}</span>
           ${isAnonymous ? '<span class="badge-tag">guest</span>' : ''}
         </button>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:6px;">
           <span class="stat-pill">🔥 ${state.currentStreak}</span>
           <span class="stat-pill">💰 ${formatNumber(state.coins)}</span>
         </div>
       </div>
-
-      <h1>🧩 Sudoku Daily</h1>
 
       <div class="xp-bar" title="${lvl.xpForNext} XP to level ${lvl.level + 1}">
         <div class="xp-bar-label">
@@ -53,42 +51,38 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
         </div>
       </div>
 
-      ${isAnonymous ? `
-        <div class="save-banner" id="save-banner">
-          <span>💾 Playing as guest — your progress could be lost if you clear data.</span>
-          <button class="btn btn--small" id="save-progress">Save progress</button>
+      ${isGuest ? `
+        <div class="save-banner save-banner--compact" id="save-banner">
+          <span>💾 Guest mode</span>
+          <button class="btn btn--small" id="save-progress">Save</button>
         </div>
       ` : ''}
 
       <div class="card daily-card">
-        <h3>📅 Daily Puzzle</h3>
-        <div class="daily-date">${today}</div>
-        <div class="daily-difficulty">${todayDifficulty}</div>
-        <div class="daily-status" id="daily-status">Ready to play!</div>
-        <button class="btn btn--full" id="play-daily">Play Daily Puzzle</button>
+        <div class="daily-head">
+          <h3>📅 Daily Puzzle</h3>
+          <span class="daily-difficulty">${todayDifficulty}</span>
+        </div>
+        <div class="daily-date" id="daily-status">${today} · Ready to play!</div>
+        <button class="btn btn--full" id="play-daily">▶ Play Daily</button>
       </div>
 
-      <div class="card">
-        <h3>🎮 Practice Mode</h3>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px;">
-          <button class="btn btn--secondary" data-practice="easy">🌱 Easy</button>
-          <button class="btn btn--secondary" data-practice="medium">⭐ Medium</button>
-          <button class="btn btn--secondary" data-practice="hard">🔥 Hard</button>
-          <button class="btn btn--secondary" data-practice="expert">💀 Expert</button>
+      <div class="card practice-card">
+        <h3>🎮 Practice</h3>
+        <div class="practice-grid">
+          <button class="btn btn--secondary practice-btn" data-practice="easy">🌱<span>Easy</span></button>
+          <button class="btn btn--secondary practice-btn" data-practice="medium">⭐<span>Medium</span></button>
+          <button class="btn btn--secondary practice-btn" data-practice="hard">🔥<span>Hard</span></button>
+          <button class="btn btn--secondary practice-btn" data-practice="expert">💀<span>Expert</span></button>
         </div>
       </div>
 
-      <div class="card">
-        <h3>🎯 Daily Quests</h3>
-        <div id="quest-list" style="opacity:0.7;">Loading...</div>
+      <div class="card quests-card">
+        <h3>🎯 Quests</h3>
+        <div id="quest-list" style="opacity:0.7;font-size:13px;">Loading…</div>
       </div>
     </section>
-    <nav class="bottom-nav">
-      <button class="active"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="nav-leaderboard"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button id="nav-profile"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('home')}
   `;
 
   root.querySelector('#play-daily')?.addEventListener('click', props.onPlayDaily);
@@ -97,9 +91,7 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
       props.onPlayPractice((btn as HTMLElement).dataset.practice!);
     });
   });
-  root.querySelector('#nav-leaderboard')?.addEventListener('click', props.onOpenLeaderboard);
-  root.querySelector('#nav-shop')?.addEventListener('click', props.onOpenShop);
-  root.querySelector('#nav-profile')?.addEventListener('click', props.onOpenProfile);
+  wireBottomNav(root, props.nav, 'home');
   root.querySelector('#user-badge')?.addEventListener('click', props.onAuthAction);
   root.querySelector('#save-progress')?.addEventListener('click', props.onAuthAction);
 

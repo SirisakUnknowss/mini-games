@@ -10,10 +10,21 @@ body {
   font-family: var(--font-base);
   background: var(--brand-gradient);
   color: white;
+  /* dvh = dynamic viewport (excludes iOS URL bar) so no phantom scroll.
+     Fallbacks for older browsers. */
   min-height: 100vh;
-  padding: var(--space-4);
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+  padding:
+    calc(var(--space-4) + env(safe-area-inset-top))
+    calc(var(--space-4) + env(safe-area-inset-right))
+    var(--space-4)
+    calc(var(--space-4) + env(safe-area-inset-left));
   -webkit-font-smoothing: antialiased;
+  /* Block iOS rubber-band scroll when content fits */
+  overscroll-behavior-y: contain;
 }
+html { height: -webkit-fill-available; }
 
 button { font-family: inherit; cursor: pointer; }
 input, textarea { font-family: inherit; }
@@ -37,10 +48,15 @@ input, textarea { font-family: inherit; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 80px; /* room for bottom nav */
+  /* Leave room for the fixed bottom nav including the home indicator */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
-h1 { font-size: 36px; margin-bottom: 8px; text-shadow: 2px 2px 6px rgba(0,0,0,0.3); }
+h1 {
+  font-size: clamp(24px, 6vw, 36px);
+  margin-bottom: 8px;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+}
 h2 { font-size: 24px; }
 h3 { font-size: 18px; }
 .subtitle { opacity: 0.85; margin-bottom: 20px; }
@@ -108,12 +124,22 @@ h3 { font-size: 18px; }
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  padding: var(--space-5) var(--space-5);
   width: 100%;
   max-width: 520px;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
 }
-.card h3 { margin-bottom: 12px; }
+.card h3 { margin-bottom: 10px; }
+
+/* Tight on phones — every pixel matters */
+@media (max-height: 740px) {
+  h1 { font-size: clamp(22px, 5.5vw, 30px); margin-bottom: 4px; }
+  .card { padding: var(--space-4); margin-bottom: var(--space-3); }
+  .card h3 { font-size: 16px; margin-bottom: 8px; }
+  .header { margin-bottom: 8px; }
+  .xp-bar { margin: 2px 0 8px; }
+  .daily-card { padding: var(--space-4) var(--space-4); }
+}
 
 /* ===== Buttons ===== */
 .btn {
@@ -252,16 +278,55 @@ h3 { font-size: 18px; }
 
 /* ===== Daily card ===== */
 .daily-card { text-align: center; }
-.daily-date { opacity: 0.7; font-size: 13px; }
+.daily-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.daily-head h3 { margin: 0; }
+.daily-date { opacity: 0.75; font-size: 12px; margin-bottom: 10px; }
 .daily-difficulty {
   display: inline-block;
   background: rgba(0,0,0,0.3);
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 12px;
-  margin: 8px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 .daily-status { font-size: 14px; opacity: 0.9; margin-bottom: 12px; }
+
+/* ===== Practice card — compact 4-col grid ===== */
+.practice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.practice-btn {
+  min-height: 56px;
+  padding: 6px 4px;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 18px;
+}
+.practice-btn span {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* ===== Compact save banner ===== */
+.save-banner--compact {
+  padding: 6px 10px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.save-banner--compact .btn { min-height: 30px; padding: 0 10px; font-size: 12px; }
+
+/* ===== Home view — tight gaps so all cards fit short screens ===== */
+.view--home { gap: 8px; }
+.view--home .card { margin-bottom: 0; }
+.view--home .quests-card { min-height: 70px; }
 
 /* ===== Modal ===== */
 .modal-bg {

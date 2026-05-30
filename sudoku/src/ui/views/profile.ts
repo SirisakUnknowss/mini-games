@@ -5,6 +5,7 @@ import { useStore } from '@state/store';
 import * as api from '@lib/api';
 import { escapeHtml, formatNumber } from '@lib/format';
 import { track } from '@lib/analytics';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 export interface ProfileProps {
   onBack: () => void;
@@ -15,6 +16,7 @@ export interface ProfileProps {
   onSignOut: () => void;
   onUpgradeAccount: () => void;
   onToast: (msg: string) => void;
+  nav: BottomNavCallbacks;
 }
 
 const DEFAULT_AVATARS = [
@@ -28,8 +30,12 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
   const user = state.user;
   const profile = state.profile ?? {};
   const isAnonymous = !!user?.is_anonymous;
+  // A real (signed-in) user has an email and is not anonymous.
+  // Anonymous Supabase users + offline-demo guests both lack a real account.
+  const isSignedIn = !!user && !isAnonymous;
+  const isGuest = !isSignedIn;
   const currentEmoji = (state.equipped.avatar?.emoji as string) ?? '👤';
-  const displayName = profile.display_name || profile.username || (isAnonymous ? 'Guest' : 'Player');
+  const displayName = profile.display_name || profile.username || (isGuest ? 'Guest' : 'Player');
 
   root.innerHTML = `
     <section class="view">
@@ -45,7 +51,7 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
           <span id="prof-name">${escapeHtml(displayName)}</span>
           <button class="icon-btn icon-btn--ghost" id="prof-edit-name" title="Edit name">✏️</button>
         </div>
-        ${isAnonymous ? `
+        ${isGuest ? `
           <div class="badge-tag" style="margin-top:6px;">guest</div>
           <button class="btn btn--small" id="prof-upgrade" style="margin-top:10px;">☁️ Save progress</button>
         ` : `<div style="opacity:0.7;font-size:12px;">${escapeHtml(user?.email ?? '')}</div>`}
@@ -83,7 +89,7 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
           <span><strong>💰 Coin Ledger</strong><br><small>Earned and spent</small></span>
           <span>›</span>
         </button>
-        ${!isAnonymous ? `
+        ${isSignedIn ? `
           <button class="profile-row danger" id="prof-signout">
             <span><strong>🚪 Sign out</strong></span>
             <span>›</span>
@@ -97,13 +103,9 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
         `).join('')}
       </div>
     </section>
-    <nav class="bottom-nav">
-      <button id="prof-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="prof-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="prof-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button class="active"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('profile')}
   `;
+  wireBottomNav(root, props.nav, 'profile');
 
   const avatarGrid = root.querySelector<HTMLElement>('#avatar-grid')!;
   const avatarBtn = root.querySelector<HTMLElement>('#prof-avatar-btn')!;
@@ -150,7 +152,6 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
   });
 
   root.querySelector('#prof-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#prof-nav-home')?.addEventListener('click', props.onBack);
   root.querySelector('#prof-stats')?.addEventListener('click', props.onOpenStats);
   root.querySelector('#prof-ach')?.addEventListener('click', props.onOpenAchievements);
   root.querySelector('#prof-recap')?.addEventListener('click', props.onOpenRecap);

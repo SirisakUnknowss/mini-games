@@ -10,10 +10,12 @@ import { applyBackground, BACKGROUNDS, bgPreviewIcon } from '@lib/backgrounds';
 import { countUp, floatReward } from '@lib/animate';
 import { PREMIUM_THEMES, isPremium } from '@lib/premium';
 import { showPaywall } from './paywall';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 export interface ShopProps {
   onBack: () => void;
   onToast: (msg: string) => void;
+  nav: BottomNavCallbacks;
 }
 
 type Category = 'theme' | 'background' | 'avatar' | 'all';
@@ -33,6 +35,26 @@ interface ShopItem {
 const RARITY_LABEL: Record<string, string> = {
   common: '⚪', rare: '🔵', epic: '🟣', legendary: '🟡',
 };
+
+const AVATAR_EMOJI: Record<string, string> = {
+  avatar_face_happy:   '😊',
+  avatar_face_cool:    '😎',
+  avatar_face_nerd:    '🤓',
+  avatar_face_lion:    '🦁',
+  avatar_hat_cap:      '🧢',
+  avatar_hat_top:      '🎩',
+  avatar_hat_crown:    '👑',
+  avatar_pet_dog:      '🐶',
+  avatar_pet_cat:      '🐱',
+  avatar_pet_dragon:   '🐲',
+  avatar_frame_bronze: '🥉',
+  avatar_frame_gold:   '🥇',
+  avatar_frame_rainbow:'🌈',
+};
+
+function avatarPreviewIcon(id: string): string {
+  return AVATAR_EMOJI[id] ?? '👤';
+}
 
 const CATEGORY_TABS: { key: Category; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -63,13 +85,9 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
 
       <div class="shop-grid" id="shop-grid"></div>
     </section>
-    <nav class="bottom-nav">
-      <button id="shop-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="shop-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button class="active"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button id="shop-nav-profile"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('shop')}
   `;
+  wireBottomNav(root, props.nav, 'shop');
 
   const gridEl = root.querySelector<HTMLElement>('#shop-grid')!;
 
@@ -146,7 +164,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       let preview = '🎁';
       if (item.category === 'theme') preview = themePreview(item.id);
       else if (item.category === 'background') preview = bgPreviewIcon(item.id);
-      else if (item.category === 'avatar') preview = '👤';
+      else if (item.category === 'avatar') preview = avatarPreviewIcon(item.id);
 
       const previewable = item.category === 'theme';
       return `
@@ -275,7 +293,6 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
   });
 
   root.querySelector('#shop-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#shop-nav-home')?.addEventListener('click', props.onBack);
 
   void load();
 

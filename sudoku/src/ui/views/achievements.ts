@@ -5,6 +5,7 @@ import * as api from '@lib/api';
 import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { escapeHtml } from '@lib/format';
+import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 
 interface AchievementDef {
   id: string;
@@ -29,10 +30,24 @@ const TIER_COLOR: Record<string, string> = {
   silver: '#c0c0c0',
   gold: '#ffd700',
   platinum: '#e5e4e2',
+  diamond: '#b9f2ff',
 };
+
+const CATEGORY_LABEL: Record<string, string> = {
+  play_volume:  '🎮 Volume',
+  daily:        '📅 Daily',
+  skill:        '🎯 Skill',
+  leaderboard:  '🏆 Ranks',
+  progression:  '⭐ Levels',
+  special:      '✨ Special',
+};
+function categoryLabel(c: string): string {
+  return CATEGORY_LABEL[c] || c.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+}
 
 export interface AchievementsProps {
   onBack: () => void;
+  nav: BottomNavCallbacks;
 }
 
 interface ProgressInputs {
@@ -117,13 +132,9 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
       <div class="shop-tabs" id="ach-tabs"></div>
       <div class="ach-grid" id="ach-grid"></div>
     </section>
-    <nav class="bottom-nav">
-      <button id="ach-nav-home"><span class="icon">🏠</span><span>Home</span></button>
-      <button id="ach-nav-lb"><span class="icon">🏆</span><span>Leaderboard</span></button>
-      <button id="ach-nav-shop"><span class="icon">🛍️</span><span>Shop</span></button>
-      <button class="active" id="ach-nav-profile"><span class="icon">👤</span><span>Profile</span></button>
-    </nav>
+    ${bottomNavHTML('profile')}
   `;
+  wireBottomNav(root, props.nav, 'profile');
 
   const gridEl = root.querySelector<HTMLElement>('#ach-grid')!;
   const tabsEl = root.querySelector<HTMLElement>('#ach-tabs')!;
@@ -143,7 +154,7 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
     tabsEl.innerHTML = `
       <button class="shop-tab${activeCategory === 'all' ? ' active' : ''}" data-cat="all">All</button>
       ${categories.map((c) => `
-        <button class="shop-tab${activeCategory === c ? ' active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>
+        <button class="shop-tab${activeCategory === c ? ' active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(categoryLabel(c))}</button>
       `).join('')}
     `;
     tabsEl.querySelectorAll<HTMLButtonElement>('.shop-tab').forEach((btn) => {
@@ -235,8 +246,6 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
   }
 
   root.querySelector('#ach-back')?.addEventListener('click', props.onBack);
-  root.querySelector('#ach-nav-home')?.addEventListener('click', props.onBack);
-  root.querySelector('#ach-nav-profile')?.addEventListener('click', props.onBack);
 
   void load();
 
