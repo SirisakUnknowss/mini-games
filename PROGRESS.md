@@ -14,12 +14,12 @@
                                      Code                       Launch / External
 Phase 0 — Foundation              ████████████████████ 100% ✅ │ ████████████████████ 100% ✅ (v0.0.0 released)
 Phase 1 — MVP                     ████████████████████ 100% ✅ │ ░░░░░░░░░░░░░░░░░░░░   0% ⏳ (soft launch + 500 users)
-Phase 2 — Customization           ███████████████████░  95% 🟡 │ ─── N/A
-Phase 3 — Progression             █████████████████░░░  85% 🟡 │ ─── N/A
+Phase 2 — Customization           ████████████████████ 100% ✅ │ ─── N/A
+Phase 3 — Progression             ███████████████████░  95% 🟡 │ ─── N/A (weekly email only)
 Phase 4 — Polish & Launch         ████████████████████ 100% ✅ │ ░░░░░░░░░░░░░░░░░░░░   0% ⏳ (Play+App Store submission)
 Phase 5 — Monetization            ██████░░░░░░░░░░░░░░  30% 🟡 │ ░░░░░░░░░░░░░░░░░░░░   0% ⏳ (RevenueCat + AdMob)
 
-Code progress to v1.0:            █████████████████░░░  85%
+Code progress to v1.0:            ██████████████████░░  90%
 Launch progress to v1.0:          ██░░░░░░░░░░░░░░░░░░  10%
 ```
 

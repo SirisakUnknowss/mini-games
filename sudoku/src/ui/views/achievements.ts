@@ -35,35 +35,60 @@ export interface AchievementsProps {
   onBack: () => void;
 }
 
-// Compute partial progress toward a few well-known countable achievements.
+interface ProgressInputs {
+  gameCount: number;
+  dailyCount: number;
+  perfectCount: number;
+  currentStreak: number;
+  level: number;
+  coins: number;
+  themesOwned: number;
+}
+
+// Compute partial progress toward countable achievements.
 // Returns { progress, target } or null if not progress-trackable client-side.
-function computeProgress(id: string, gameCount: number): { progress: number; target: number } | null {
-  const map: Record<string, number> = {
-    ACH_PLAY_10: 10, ACH_PLAY_50: 50, ACH_PLAY_100: 100,
-    ACH_PLAY_500: 500, ACH_PLAY_1000: 1000, ACH_PLAY_5000: 5000,
-  };
-  const target = map[id];
-  if (!target) return null;
-  return { progress: Math.min(gameCount, target), target };
-}
+function computeProgress(id: string, i: ProgressInputs): { progress: number; target: number } | null {
+  const COUNTERS: Record<string, [keyof ProgressInputs, number]> = {
+    // play_volume
+    ACH_PLAY_10:        ['gameCount',    10],
+    ACH_PLAY_50:        ['gameCount',    50],
+    ACH_PLAY_100:       ['gameCount',   100],
+    ACH_PLAY_500:       ['gameCount',   500],
+    ACH_PLAY_1000:      ['gameCount',  1000],
+    ACH_PLAY_5000:      ['gameCount',  5000],
 
-function computeStreakProgress(id: string, currentStreak: number): { progress: number; target: number } | null {
-  const map: Record<string, number> = {
-    ACH_STREAK_3: 3, ACH_STREAK_7: 7, ACH_STREAK_14: 14,
-    ACH_STREAK_30: 30, ACH_STREAK_60: 60, ACH_STREAK_100: 100, ACH_STREAK_365: 365,
-  };
-  const target = map[id];
-  if (!target) return null;
-  return { progress: Math.min(currentStreak, target), target };
-}
+    // daily volume
+    ACH_DAILY_10:       ['dailyCount',   10],
+    ACH_DAILY_50:       ['dailyCount',   50],
 
-function computeLevelProgress(id: string, level: number): { progress: number; target: number } | null {
-  const map: Record<string, number> = {
-    ACH_LEVEL_10: 10, ACH_LEVEL_25: 25, ACH_LEVEL_50: 50, ACH_LEVEL_100: 100,
+    // streak
+    ACH_STREAK_3:       ['currentStreak',   3],
+    ACH_STREAK_7:       ['currentStreak',   7],
+    ACH_STREAK_14:      ['currentStreak',  14],
+    ACH_STREAK_30:      ['currentStreak',  30],
+    ACH_STREAK_60:      ['currentStreak',  60],
+    ACH_STREAK_100:     ['currentStreak', 100],
+    ACH_STREAK_365:     ['currentStreak', 365],
+
+    // skill (perfect runs)
+    ACH_PERFECT_5:      ['perfectCount',   5],
+    ACH_PERFECT_25:     ['perfectCount',  25],
+
+    // level
+    ACH_LEVEL_10:       ['level',  10],
+    ACH_LEVEL_25:       ['level',  25],
+    ACH_LEVEL_50:       ['level',  50],
+    ACH_LEVEL_100:      ['level', 100],
+
+    // special
+    ACH_RICH:           ['coins',         10000],
+    ACH_THEME_COLLECT:  ['themesOwned',       5],
   };
-  const target = map[id];
-  if (!target) return null;
-  return { progress: Math.min(level, target), target };
+  const entry = COUNTERS[id];
+  if (!entry) return null;
+  const [field, target] = entry;
+  const progress = Math.min(i[field] as number, target);
+  return { progress, target };
 }
 
 export function mountAchievementsView(root: HTMLElement, props: AchievementsProps): { unmount: () => void } {
@@ -72,7 +97,15 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
   let loading = true;
   let errorMsg: string | null = null;
   let activeCategory: string = 'all';
-  let gameCount = 0;
+  let progressInputs: ProgressInputs = {
+    gameCount: 0,
+    dailyCount: 0,
+    perfectCount: 0,
+    currentStreak: 0,
+    level: 1,
+    coins: 0,
+    themesOwned: 0,
+  };
 
   root.innerHTML = `
     <section class="view">
@@ -132,17 +165,12 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
       return;
     }
 
-    const { currentStreak, level } = useStore.getState();
     gridEl.innerHTML = visible.map((d) => {
       const isUnlocked = unlocked.has(d.id);
       const tier = d.tier ?? 'bronze';
       const color = TIER_COLOR[tier] ?? '#cd7f32';
       const icon = d.icon || (isUnlocked ? '🏆' : '🔒');
-      const prog = !isUnlocked && (
-        computeProgress(d.id, gameCount)
-        || computeStreakProgress(d.id, currentStreak)
-        || computeLevelProgress(d.id, level)
-      );
+      const prog = !isUnlocked && computeProgress(d.id, progressInputs);
       return `
         <div class="ach-card${isUnlocked ? ' unlocked' : ' locked'}">
           <div class="ach-icon" style="--tier-color:${color}">${icon}</div>
@@ -169,17 +197,34 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
   async function load() {
     loading = true; errorMsg = null; render();
     try {
-      const userId = useStore.getState().user?.id;
-      const [defList, userList, history] = await Promise.all([
+      const state = useStore.getState();
+      const userId = state.user?.id;
+      const [defList, userList, history, daily, perfect, inventory] = await Promise.all([
         api.getAchievementDefinitions(),
         api.getUserAchievements().catch(() => []),
         userId
           ? supabase.from('user_game_history').select('id', { count: 'exact', head: true }).eq('user_id', userId)
           : Promise.resolve({ count: 0 } as any),
+        userId
+          ? supabase.from('user_game_history').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('mode', 'daily')
+          : Promise.resolve({ count: 0 } as any),
+        userId
+          ? supabase.from('user_game_history').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('mistakes', 0)
+          : Promise.resolve({ count: 0 } as any),
+        api.getInventory().catch(() => []),
       ]);
       defs = (defList ?? []) as AchievementDef[];
       unlocked = new Set(((userList ?? []) as UserAchievement[]).map((u) => u.achievement_id));
-      gameCount = (history as any)?.count ?? 0;
+      const ownedIds = ((inventory ?? []) as any[]).map((r) => r.item_id as string);
+      progressInputs = {
+        gameCount:     (history as any)?.count ?? 0,
+        dailyCount:    (daily as any)?.count ?? 0,
+        perfectCount:  (perfect as any)?.count ?? 0,
+        currentStreak: state.currentStreak,
+        level:         state.level,
+        coins:         state.coins,
+        themesOwned:   ownedIds.filter((id) => id.startsWith('theme_')).length,
+      };
       loading = false;
       render();
     } catch (err) {

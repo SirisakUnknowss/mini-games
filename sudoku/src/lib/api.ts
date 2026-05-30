@@ -155,6 +155,16 @@ export async function getUserAchievements() {
   return data ?? [];
 }
 
+// === Global stats (Phase 3) ===
+export async function getGlobalSummary() {
+  const { data, error } = await supabase
+    .from('global_stats_summary')
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 // === Settings ===
 export async function getSettings() {
   const { data, error } = await supabase.from('user_settings').select('*').maybeSingle();

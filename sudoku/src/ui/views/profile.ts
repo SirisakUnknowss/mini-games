@@ -11,6 +11,7 @@ export interface ProfileProps {
   onOpenStats: () => void;
   onOpenAchievements: () => void;
   onOpenRecap: () => void;
+  onOpenLedger: () => void;
   onSignOut: () => void;
   onUpgradeAccount: () => void;
   onToast: (msg: string) => void;
@@ -76,6 +77,10 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
         </button>
         <button class="profile-row" id="prof-recap">
           <span><strong>📅 Weekly Recap</strong><br><small>This week's highlights</small></span>
+          <span>›</span>
+        </button>
+        <button class="profile-row" id="prof-ledger">
+          <span><strong>💰 Coin Ledger</strong><br><small>Earned and spent</small></span>
           <span>›</span>
         </button>
         ${!isAnonymous ? `
@@ -149,6 +154,7 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
   root.querySelector('#prof-stats')?.addEventListener('click', props.onOpenStats);
   root.querySelector('#prof-ach')?.addEventListener('click', props.onOpenAchievements);
   root.querySelector('#prof-recap')?.addEventListener('click', props.onOpenRecap);
+  root.querySelector('#prof-ledger')?.addEventListener('click', props.onOpenLedger);
   root.querySelector('#prof-signout')?.addEventListener('click', props.onSignOut);
   root.querySelector('#prof-upgrade')?.addEventListener('click', props.onUpgradeAccount);
 

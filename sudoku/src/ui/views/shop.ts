@@ -6,6 +6,7 @@ import { useStore } from '@state/store';
 import { escapeHtml, formatNumber } from '@lib/format';
 import { track } from '@lib/analytics';
 import { applyTheme, themePreview, THEMES } from '@lib/themes';
+import { applyBackground, BACKGROUNDS, bgPreviewIcon } from '@lib/backgrounds';
 import { countUp, floatReward } from '@lib/animate';
 import { PREMIUM_THEMES, isPremium } from '@lib/premium';
 import { showPaywall } from './paywall';
@@ -144,7 +145,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
 
       let preview = '🎁';
       if (item.category === 'theme') preview = themePreview(item.id);
-      else if (item.category === 'background') preview = '🖼';
+      else if (item.category === 'background') preview = bgPreviewIcon(item.id);
       else if (item.category === 'avatar') preview = '👤';
 
       const previewable = item.category === 'theme';
@@ -220,6 +221,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       track('item_equipped', { item_id: itemId, category: item.category });
       useStore.getState().setEquipped(payload);
       if (item.category === 'theme' && THEMES[itemId]) applyTheme(itemId);
+      if (item.category === 'background' && BACKGROUNDS[itemId]) applyBackground(itemId);
       props.onToast(`✓ ${item.name} equipped`);
       render();
     } catch (err) {
@@ -227,6 +229,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       console.warn('Equip endpoint missing, local-only:', err);
       useStore.getState().setEquipped(payload);
       if (item.category === 'theme' && THEMES[itemId]) applyTheme(itemId);
+      if (item.category === 'background' && BACKGROUNDS[itemId]) applyBackground(itemId);
       props.onToast(`✓ ${item.name} equipped (local)`);
       render();
     }
@@ -249,6 +252,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
           avatar: equipped.avatar ?? { emoji: '👤' },
         });
         if (equipped.theme_id) applyTheme(equipped.theme_id);
+        if (equipped.background_id) applyBackground(equipped.background_id);
       }
       loading = false;
       render();

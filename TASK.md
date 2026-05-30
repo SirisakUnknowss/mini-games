@@ -15,12 +15,12 @@
 |---|---|---|---|
 | Phase 0 — Foundation | ✅ 100% | ✅ 100% (released) | 0 |
 | Phase 1 — MVP | ✅ 100% | ⏳ 0% (soft launch + 500 users) | 0 |
-| Phase 2 — Customization | 🟡 95% | — N/A | 1 (animated bg pattern) |
-| Phase 3 — Progression | 🟡 85% | — N/A | 2 (global compare + weekly email infra) |
+| Phase 2 — Customization | ✅ 100% | — N/A | 0 |
+| Phase 3 — Progression | ✅ 95% | — N/A | 1 (weekly email infra only) |
 | Phase 4 — Polish & Launch | ✅ 100% | ⏳ 0% (Play+App Store submission) | 0 |
 | Phase 5 — Monetization | 🟡 30% | ⏳ 0% (RevenueCat/AdMob accounts) | 5 (gates + premium flows) |
 
-**Overall:** Code **~85%** · Launch **~10%**
+**Overall:** Code **~90%** · Launch **~10%**
 
 ---
 
@@ -101,7 +101,7 @@
 - [x] 🟡 P1 — Coin balance widget (header) — already from Phase 0
 - [x] 🟡 P1 — Coin update reflected after purchase (optimistic)
 - [x] 🟢 P2 — Coin count-up animation + floating "−N 💰" indicator (`src/lib/animate.ts`)
-- [ ] 🟢 P2 — Audit ledger view (debug) — เลื่อน
+- [x] 🟢 P2 — Audit ledger view (`src/ui/views/ledger.ts`): earned/spent totals + last 100 transactions from `coin_transactions` (2026-05-30)
 
 ### 2B. Shop ✅ DONE (2026-05-30)
 - [x] 🟡 P1 — `src/ui/views/shop.ts`: grid + tabs (All / Themes / BG / Avatars)
@@ -113,7 +113,7 @@
 - [x] 🟡 P1 — `src/lib/themes.ts`: 11 themes (Classic, Paper, Dark, Pastel, Ocean,
   Forest, Sunset, Neon, Sakura, Thai, Mono Pro) — full CSS-var override
 - [x] 🟡 P1 — Apply theme on boot จาก `user_equipped` + cached localStorage
-- [ ] 🟢 P2 — Animated backgrounds (rain etc.) — เลื่อน
+- [x] 🟢 P2 — Animated backgrounds (`src/lib/backgrounds.ts`): rain, stars, aurora + 5 static patterns; CSS-only, prefers-reduced-motion aware (2026-05-30)
 
 ### 2D. Avatar System ✅ DONE
 - [x] 🟢 P2 — Avatar picker (21 emoji) ใน profile view
@@ -144,7 +144,7 @@
 - [x] 🟡 P1 — `src/ui/views/stats.ts`: games, best/avg time, streaks, mistakes/game
 - [x] 🟡 P1 — Difficulty breakdown bars from `user_game_history`
 - [x] 🟢 P2 — Time-per-game line chart (`src/lib/chart.ts` — vanilla canvas, no deps)
-- [ ] 🟢 P2 — Compare-to-global-average (needs server aggregation view)
+- [x] 🟢 P2 — Compare-to-global-average: migration adds `global_stats_summary` view; Stats view shows "X% faster/slower than global average" (2026-05-30)
 
 ### 3D. Weekly Recap
 - [ ] 🟢 P2 — Edge function: ส่ง weekly summary ทุกวันจันทร์ — เลื่อน (ต้อง email infra)

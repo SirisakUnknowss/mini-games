@@ -29,17 +29,17 @@ async function loadRecap(): Promise<Recap> {
 
   const { data, error } = await supabase
     .from('user_game_history')
-    .select('played_at, time_seconds, mistakes, score')
+    .select('completed_at, time_seconds, mistakes, score')
     .eq('user_id', userId)
-    .gte('played_at', sevenDaysAgo.toISOString());
+    .gte('completed_at', sevenDaysAgo.toISOString());
 
   if (error) throw error;
   const rows = (data ?? []) as Array<{
-    played_at: string; time_seconds: number; mistakes: number; score: number;
+    completed_at: string; time_seconds: number; mistakes: number; score: number;
   }>;
 
   const daysSet = new Set<string>();
-  for (const r of rows) daysSet.add(r.played_at.slice(0, 10));
+  for (const r of rows) daysSet.add(r.completed_at.slice(0, 10));
 
   return {
     daysPlayed: daysSet.size,

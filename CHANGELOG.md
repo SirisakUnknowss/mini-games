@@ -124,6 +124,36 @@ Release notes ละเอียดของแต่ละ version อยู่
 - **`sudoku/.gitignore`** — explicit deny for `*.keystore`, `keystore.properties`,
   and other release artifacts.
 
+### Phase 2/3 finish — 100% code (2026-05-30)
+
+#### Added
+- **`src/lib/backgrounds.ts`** — background system with 9 options:
+  default, blank white, navy/forest solids, dot + wave patterns, and 3
+  animated (rain, twinkling stars, aurora borealis). All CSS-only,
+  respects `prefers-reduced-motion`. Applied via single body class.
+- **`src/ui/views/ledger.ts`** — Coin Ledger view showing total earned /
+  spent / balance plus the 100 most recent `coin_transactions` entries.
+- **Migration `20260530120000_phase3_global_stats.sql`** — adds
+  `global_daily_stats` (per-day) and `global_stats_summary` (last 30 days)
+  views with public SELECT for anonymous + authenticated.
+- **Stats view: vs Global** — pulls `global_stats_summary` and shows
+  "X% faster/slower than global average" + "X% fewer/more mistakes"
+  with sample size disclosure.
+- **Achievement progress bars** extended — now covers ACH_PLAY_*,
+  ACH_DAILY_*, ACH_STREAK_*, ACH_PERFECT_*, ACH_LEVEL_*, ACH_RICH,
+  ACH_THEME_COLLECT (22 IDs total). Counts derived from
+  `user_game_history` heads + store state.
+
+#### Fixed
+- Stats / Recap views were querying the wrong column names
+  (`played_at` → `completed_at`, `difficulty` → `level`). Both views
+  would have silently failed on real data.
+
+#### Changed
+- Shop equip flow now also applies the equipped background.
+- Boot loads + applies cached background id before first paint.
+- Profile view adds Coin Ledger row.
+
 ### New game: 2048 (`2048/`)
 
 #### Added

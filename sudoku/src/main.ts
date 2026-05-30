@@ -23,8 +23,10 @@ import { mountProfileView } from './ui/views/profile';
 import { mountAchievementsView } from './ui/views/achievements';
 import { mountStatsView } from './ui/views/stats';
 import { mountRecapView } from './ui/views/recap';
+import { mountLedgerView } from './ui/views/ledger';
 import { showLevelUpModal } from './ui/views/level-up';
 import { applyTheme, loadCachedThemeId } from './lib/themes';
+import { applyBackground, loadCachedBgId } from './lib/backgrounds';
 import { levelFromXp } from './lib/level';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
@@ -65,6 +67,7 @@ async function loadUserData(): Promise<void> {
         avatar: equipped.avatar ?? { emoji: '👤' },
       });
       if (equipped.theme_id) applyTheme(equipped.theme_id);
+      if (equipped.background_id) applyBackground(equipped.background_id);
     }
     if (inventory) {
       useStore.getState().setInventory((inventory as any[]).map((r) => r.item_id));
@@ -115,6 +118,7 @@ function showProfile() {
     onOpenStats: showStats,
     onOpenAchievements: showAchievements,
     onOpenRecap: showRecap,
+    onOpenLedger: showLedger,
     onSignOut: () => {
       if (confirm('Sign out?')) {
         void signOut().then(() => {
@@ -144,6 +148,12 @@ function showStats() {
 function showRecap() {
   clearView();
   const view = mountRecapView(root, { onBack: showProfile, onToast: toast });
+  currentUnmount = view.unmount;
+}
+
+function showLedger() {
+  clearView();
+  const view = mountLedgerView(root, { onBack: showProfile });
   currentUnmount = view.unmount;
 }
 
@@ -390,9 +400,11 @@ function stringToBoard(s: string): number[][] {
 // Boot
 // =====================================================================
 async function boot() {
-  // Apply cached theme before first paint to avoid flicker
+  // Apply cached theme + background before first paint to avoid flicker
   const cachedTheme = loadCachedThemeId();
   if (cachedTheme) applyTheme(cachedTheme);
+  const cachedBg = loadCachedBgId();
+  if (cachedBg) applyBackground(cachedBg);
 
   // Init analytics first — safe even with empty keys
   initAnalytics();

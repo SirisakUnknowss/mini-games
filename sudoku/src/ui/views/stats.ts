@@ -3,6 +3,7 @@
 // =====================================================================
 import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
+import * as api from '@lib/api';
 import { formatTime, formatNumber, escapeHtml } from '@lib/format';
 import { drawLineChart, type LinePoint } from '@lib/chart';
 
@@ -15,7 +16,7 @@ interface StatRow {
   current_streak: number;
   longest_streak: number;
   difficulty_breakdown: Record<string, number>;
-  recent: Array<{ played_at: string; time_seconds: number }>;
+  recent: Array<{ completed_at: string; time_seconds: number }>;
 }
 
 export interface StatsProps {
@@ -29,9 +30,9 @@ async function loadStats(): Promise<StatRow> {
   // Aggregate from user_game_history — fall back gracefully if table is empty
   const { data: rows, error } = await supabase
     .from('user_game_history')
-    .select('mode, difficulty, time_seconds, mistakes, score, played_at')
+    .select('mode, level, time_seconds, mistakes, score, completed_at')
     .eq('user_id', userId)
-    .order('played_at', { ascending: false })
+    .order('completed_at', { ascending: false })
     .limit(60);
 
   if (error) throw error;
@@ -49,12 +50,12 @@ async function loadStats(): Promise<StatRow> {
     longest_streak: useStore.getState().longestStreak,
     difficulty_breakdown: {},
     recent: (games as any[]).map((r) => ({
-      played_at: r.played_at,
+      completed_at: r.completed_at,
       time_seconds: r.time_seconds ?? 0,
     })).reverse(), // oldest first for chart
   };
   for (const r of games as any[]) {
-    const d = r.difficulty ?? 'unknown';
+    const d = r.level ?? 'unknown';
     stats.difficulty_breakdown[d] = (stats.difficulty_breakdown[d] ?? 0) + 1;
   }
   return stats;
@@ -82,9 +83,37 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
 
   async function load() {
     try {
-      const s = await loadStats();
+      const [s, globalSummary] = await Promise.all([
+        loadStats(),
+        api.getGlobalSummary().catch(() => null),
+      ]);
       const avgTime = s.total_games > 0 ? Math.round(s.total_time_seconds / s.total_games) : 0;
       const mistakesPerGame = s.total_games > 0 ? (s.total_mistakes / s.total_games).toFixed(1) : '0';
+
+      // Compare-to-global delta strings
+      let timeDelta = '';
+      let mistakesDelta = '';
+      if (globalSummary && s.total_games > 0) {
+        const gAvgTime = globalSummary.avg_time_seconds ?? 0;
+        if (gAvgTime > 0 && avgTime > 0) {
+          const pct = Math.round(((gAvgTime - avgTime) / gAvgTime) * 100);
+          timeDelta = pct > 0
+            ? `⚡ ${pct}% faster than global average`
+            : pct < 0
+              ? `🐢 ${-pct}% slower than global average`
+              : `≈ average pace`;
+        }
+        const gAvgMistakes = Number(globalSummary.avg_mistakes ?? 0);
+        const myAvgMistakes = s.total_mistakes / s.total_games;
+        if (gAvgMistakes > 0) {
+          const pct = Math.round(((gAvgMistakes - myAvgMistakes) / gAvgMistakes) * 100);
+          mistakesDelta = pct > 0
+            ? `🎯 ${pct}% fewer mistakes than average`
+            : pct < 0
+              ? `❌ ${-pct}% more mistakes than average`
+              : '≈ average accuracy';
+        }
+      }
 
       body.innerHTML = `
         <div class="profile-stats">
@@ -101,6 +130,15 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
             <div class="stat-tile"><div class="stat-label">Mistakes/game</div><div class="stat-value">${mistakesPerGame}</div></div>
           </div>
         </div>
+
+        ${timeDelta || mistakesDelta ? `
+          <div class="card">
+            <h3>vs Global average</h3>
+            ${timeDelta ? `<p style="font-size:14px;margin:4px 0;">${escapeHtml(timeDelta)}</p>` : ''}
+            ${mistakesDelta ? `<p style="font-size:14px;margin:4px 0;">${escapeHtml(mistakesDelta)}</p>` : ''}
+            ${globalSummary ? `<p style="font-size:11px;opacity:0.7;margin-top:8px;">Based on ${formatNumber(globalSummary.total_games ?? 0)} games from ${formatNumber(globalSummary.total_players ?? 0)} players (last 30 days).</p>` : ''}
+          </div>
+        ` : ''}
 
         <div class="card">
           <h3>Time per game (last ${s.recent.length})</h3>
@@ -130,7 +168,7 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
       const canvas = body.querySelector<HTMLCanvasElement>('#stats-chart');
       if (canvas && s.recent.length) {
         const pts: LinePoint[] = s.recent.map((r, i) => ({
-          label: r.played_at ? r.played_at.slice(5, 10) : `#${i + 1}`,
+          label: r.completed_at ? r.completed_at.slice(5, 10) : `#${i + 1}`,
           value: r.time_seconds,
         }));
         // Use rAF so the canvas has its real layout width
