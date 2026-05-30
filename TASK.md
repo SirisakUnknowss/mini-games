@@ -7,16 +7,20 @@
 
 ---
 
-## 📊 Quick Status
+## 📊 Quick Status — separated tracks
 
-| Phase | Progress | Remaining tasks |
-|---|---|---|
-| Phase 0 — Foundation | ✅ 100% | 0 |
-| Phase 1 — MVP | 🟡 ~75% | 6 (launch-related only) |
-| Phase 2 — Customization | 🟡 ~95% | 1 (animated bg pattern only) |
-| Phase 3 — Progression | 🟡 ~85% | 2 (global compare + weekly email) |
-| Phase 4 — Polish & Launch | 🟡 75% | 4 (store accounts only) |
-| Phase 5 — Monetization | 🟡 10% | 8 (real IAP/ads pending accounts) |
+**Code** = สิ่งที่เขียน/commit ได้ในรอบ PR · **Launch** = ต้อง external accounts หรือ real users
+
+| Phase | Code | Launch / External | Remaining code tasks |
+|---|---|---|---|
+| Phase 0 — Foundation | ✅ 100% | ✅ 100% (released) | 0 |
+| Phase 1 — MVP | ✅ 100% | ⏳ 0% (soft launch + 500 users) | 0 |
+| Phase 2 — Customization | 🟡 95% | — N/A | 1 (animated bg pattern) |
+| Phase 3 — Progression | 🟡 85% | — N/A | 2 (global compare + weekly email infra) |
+| Phase 4 — Polish & Launch | ✅ 100% | ⏳ 0% (Play+App Store submission) | 0 |
+| Phase 5 — Monetization | 🟡 30% | ⏳ 0% (RevenueCat/AdMob accounts) | 5 (gates + premium flows) |
+
+**Overall:** Code **~85%** · Launch **~10%**
 
 ---
 
@@ -27,6 +31,8 @@
 ---
 
 ## 🟡 Phase 1 — MVP (Daily / Leaderboard / Streak)
+
+> **Code track:** ✅ 100% (1A–1F shipped) · **Launch track:** ⏳ 0% (real users + push notif)
 
 ### 1A. Daily Puzzle Backend ✅ DONE
 - [x] 🔴 P0 — Supabase Cloud project สร้าง + link
@@ -78,12 +84,14 @@
 - [ ] 🟢 P2 — Server-side: edge function ส่ง notification 9:00 local (~30 น.)
 - _หมายเหตุ: ต้องการ FCM/APNs credentials จริง + native build → ขยับไปทำคู่ Play Store/App Store ใน Phase 4_
 
-### 1Z. Phase 1 Exit Criteria
+### 1Z. Phase 1 Exit Criteria (🚀 Launch track — ไม่ใช่ code)
 - [ ] 🔴 P0 — Real users signed up ≥ 500
 - [ ] 🔴 P0 — D1 retention > 35%, D7 retention > 15%
 - [ ] 🔴 P0 — Daily completion rate > 50%
 - [ ] 🔴 P0 — No P0/P1 bugs open
 - [ ] 🔴 P0 — Soft launch executed
+
+> 📌 ทั้งหมดในส่วนนี้ทำได้หลัง launch จริง — ไม่นับใน **Code track**
 
 ---
 
