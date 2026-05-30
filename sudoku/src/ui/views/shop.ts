@@ -6,6 +6,9 @@ import { useStore } from '@state/store';
 import { escapeHtml, formatNumber } from '@lib/format';
 import { track } from '@lib/analytics';
 import { applyTheme, themePreview, THEMES } from '@lib/themes';
+import { countUp, floatReward } from '@lib/animate';
+import { PREMIUM_THEMES, isPremium } from '@lib/premium';
+import { showPaywall } from './paywall';
 
 export interface ShopProps {
   onBack: () => void;
@@ -69,9 +72,31 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
 
   const gridEl = root.querySelector<HTMLElement>('#shop-grid')!;
 
-  function refreshCoinBadge() {
+  function refreshCoinBadge(prev?: number) {
     const pill = root.querySelector<HTMLElement>('.top-bar .stat-pill');
-    if (pill) pill.textContent = `💰 ${formatNumber(useStore.getState().coins)}`;
+    if (!pill) return;
+    const now = useStore.getState().coins;
+    if (typeof prev === 'number') {
+      countUp(pill, prev, now, 600, (n) => `💰 ${formatNumber(Math.round(n))}`);
+    } else {
+      pill.textContent = `💰 ${formatNumber(now)}`;
+    }
+  }
+
+  // Theme preview: hover/touch a card to preview, leave to restore
+  let previewSavedTheme: string | null = null;
+  function previewIn(itemId: string) {
+    if (!THEMES[itemId]) return;
+    if (previewSavedTheme === null) {
+      previewSavedTheme = useStore.getState().equipped.theme_id || 'theme_classic';
+    }
+    applyTheme(itemId);
+  }
+  function previewOut() {
+    if (previewSavedTheme !== null) {
+      applyTheme(previewSavedTheme);
+      previewSavedTheme = null;
+    }
   }
 
   function render() {
@@ -103,11 +128,14 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       const canAfford = state.coins >= item.price_coin;
       const rarity = item.rarity ?? 'common';
 
+      const isPremiumGated = PREMIUM_THEMES.has(item.id) && !isOwned && !isPremium();
       let action = '';
       if (isEquipped) {
         action = `<span class="quest-tag">✓ Equipped</span>`;
       } else if (isOwned) {
         action = `<button class="btn btn--small" data-equip="${escapeHtml(item.id)}">Equip</button>`;
+      } else if (isPremiumGated) {
+        action = `<button class="btn btn--small" data-premium="${escapeHtml(item.id)}">✨ Premium</button>`;
       } else {
         action = `<button class="btn btn--small" data-buy="${escapeHtml(item.id)}" ${canAfford ? '' : 'disabled'}>
           💰 ${item.price_coin}
@@ -119,8 +147,10 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       else if (item.category === 'background') preview = '🖼';
       else if (item.category === 'avatar') preview = '👤';
 
+      const previewable = item.category === 'theme';
       return `
-        <div class="shop-card shop-rarity-${rarity}">
+        <div class="shop-card shop-rarity-${rarity}${previewable ? ' previewable' : ''}" data-preview="${previewable ? escapeHtml(item.id) : ''}">
+          ${isPremiumGated ? '<div class="shop-premium-badge" title="Premium-only">✨</div>' : ''}
           <div class="shop-preview">${preview}</div>
           <div class="shop-name">${escapeHtml(item.name)}</div>
           ${item.description ? `<div class="shop-desc">${escapeHtml(item.description)}</div>` : ''}
@@ -137,6 +167,19 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
     gridEl.querySelectorAll<HTMLButtonElement>('[data-equip]').forEach((btn) => {
       btn.addEventListener('click', () => void equip(btn.dataset.equip!, btn));
     });
+    gridEl.querySelectorAll<HTMLButtonElement>('[data-premium]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        showPaywall({ source: `shop_premium_item:${btn.dataset.premium}`, onClose: () => {} });
+      });
+    });
+    // Theme preview on hover (desktop) + on touchstart (mobile)
+    gridEl.querySelectorAll<HTMLElement>('.shop-card.previewable').forEach((card) => {
+      const id = card.dataset.preview!;
+      card.addEventListener('mouseenter', () => previewIn(id));
+      card.addEventListener('mouseleave', () => previewOut());
+      card.addEventListener('touchstart', () => previewIn(id), { passive: true });
+      card.addEventListener('touchend', () => setTimeout(previewOut, 800));
+    });
   }
 
   async function buy(itemId: string, btn: HTMLButtonElement) {
@@ -148,13 +191,13 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       const { error } = await api.purchaseItem(itemId);
       if (error) throw error;
       track('item_purchased', { item_id: itemId, category: item.category, price: item.price_coin });
-      // Optimistic: deduct coins + add to inventory
-      useStore.setState({
-        coins: Math.max(0, useStore.getState().coins - item.price_coin),
-      });
+      // Optimistic: deduct coins + add to inventory (animated)
+      const prevCoins = useStore.getState().coins;
+      useStore.setState({ coins: Math.max(0, prevCoins - item.price_coin) });
       useStore.getState().addToInventory(itemId);
       props.onToast(`✨ ${item.name} purchased!`);
-      refreshCoinBadge();
+      floatReward(btn, `−${item.price_coin} 💰`);
+      refreshCoinBadge(prevCoins);
       render();
     } catch (err) {
       console.warn('Purchase failed:', err);
@@ -232,5 +275,10 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
 
   void load();
 
-  return { unmount() { /* no listeners to clean */ } };
+  return {
+    unmount() {
+      // Restore equipped theme in case a preview was active
+      previewOut();
+    },
+  };
 }

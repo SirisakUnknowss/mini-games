@@ -4,6 +4,7 @@
 import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { formatTime, formatNumber, escapeHtml } from '@lib/format';
+import { drawLineChart, type LinePoint } from '@lib/chart';
 
 interface StatRow {
   total_games: number;
@@ -14,6 +15,7 @@ interface StatRow {
   current_streak: number;
   longest_streak: number;
   difficulty_breakdown: Record<string, number>;
+  recent: Array<{ played_at: string; time_seconds: number }>;
 }
 
 export interface StatsProps {
@@ -27,8 +29,10 @@ async function loadStats(): Promise<StatRow> {
   // Aggregate from user_game_history — fall back gracefully if table is empty
   const { data: rows, error } = await supabase
     .from('user_game_history')
-    .select('mode, difficulty, time_seconds, mistakes, score')
-    .eq('user_id', userId);
+    .select('mode, difficulty, time_seconds, mistakes, score, played_at')
+    .eq('user_id', userId)
+    .order('played_at', { ascending: false })
+    .limit(60);
 
   if (error) throw error;
 
@@ -44,6 +48,10 @@ async function loadStats(): Promise<StatRow> {
     current_streak: useStore.getState().currentStreak,
     longest_streak: useStore.getState().longestStreak,
     difficulty_breakdown: {},
+    recent: (games as any[]).map((r) => ({
+      played_at: r.played_at,
+      time_seconds: r.time_seconds ?? 0,
+    })).reverse(), // oldest first for chart
   };
   for (const r of games as any[]) {
     const d = r.difficulty ?? 'unknown';
@@ -95,6 +103,11 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         </div>
 
         <div class="card">
+          <h3>Time per game (last ${s.recent.length})</h3>
+          <canvas id="stats-chart" class="stats-chart"></canvas>
+        </div>
+
+        <div class="card">
           <h3>By difficulty</h3>
           ${Object.entries(s.difficulty_breakdown).length === 0
             ? '<p style="opacity:0.7;font-size:13px;">Play some puzzles to see breakdown.</p>'
@@ -112,6 +125,17 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
               `).join('')}
         </div>
       `;
+
+      // Draw chart after DOM update
+      const canvas = body.querySelector<HTMLCanvasElement>('#stats-chart');
+      if (canvas && s.recent.length) {
+        const pts: LinePoint[] = s.recent.map((r, i) => ({
+          label: r.played_at ? r.played_at.slice(5, 10) : `#${i + 1}`,
+          value: r.time_seconds,
+        }));
+        // Use rAF so the canvas has its real layout width
+        requestAnimationFrame(() => drawLineChart(canvas, pts));
+      }
     } catch (err) {
       body.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml((err as Error).message)}</p></div>`;
     }

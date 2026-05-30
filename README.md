@@ -14,6 +14,7 @@
 | 🧩 **Sudoku Daily** ([`sudoku/`](./sudoku)) | 🟡 Active dev (v0.0.0) | TypeScript + Vite + PWA + Capacitor + Supabase | Daily puzzle, leaderboard, streak, auth, Android/iOS apps |
 | 🎯 **Match Three** ([`match-three/`](./match-three)) | ✅ Playable | Vanilla JS + localStorage | จับคู่ 3 แบบคลาสสิก, 8×8, combo chain |
 | 🏀 **Suika / Ball Merge** ([`suika/`](./suika)) | ✅ Playable | Vanilla JS + custom physics | ปล่อยลูกชนรวมร่าง 11 ระดับ |
+| 🔢 **2048** ([`2048/`](./2048)) | ✅ Playable | Vanilla JS + localStorage | Slide tiles, merge pairs, reach 2048 |
 
 ---
 
@@ -91,6 +92,20 @@ npm run build && npx cap sync ios && npx cap open ios
 
 ---
 
+## 🔢 2048 (`2048/`)
+
+Classic 2048 — slide and combine like-numbered tiles to reach 2048 (or beyond)
+
+- 4×4 board, swipe on mobile / arrow keys (or WASD / HJKL) on desktop
+- **Undo** (1 step) and persistent saved board across sessions
+- 11+ tile tiers with custom palettes (2 → 4 → 8 → ... → 4096 → 8192)
+- Multi-user login + global leaderboard (`g2048_db_v1`)
+- Stats: total games, total score, high score, highest tile, play time
+
+**รัน:** เปิด `2048/index.html` ใน browser ได้เลย
+
+---
+
 ## 🏀 Suika / Ball Merge (`suika/`)
 
 ปล่อยลูกบอลลงมา ชนชนิดเดียวกัน → รวมร่างเป็นลูกถัดไป — Vanilla JS + custom physics (ไม่ใช้ engine)
@@ -115,7 +130,10 @@ mini-games/
 ├── releases/            ← release notes per version
 ├── sudoku/              ← 🧩 Sudoku Daily (TS + Vite + PWA + mobile)
 ├── match-three/         ← 🎯 Match Three (Vanilla JS)
-└── suika/               ← 🏀 Ball Merge (Vanilla JS)
+├── suika/               ← 🏀 Ball Merge (Vanilla JS)
+├── 2048/                ← 🔢 2048 (Vanilla JS)
+├── legal/               ← 📜 Privacy + Terms
+└── landing/             ← 🌐 Marketing landing page
 ```
 
 ---

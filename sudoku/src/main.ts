@@ -22,6 +22,7 @@ import { mountShopView } from './ui/views/shop';
 import { mountProfileView } from './ui/views/profile';
 import { mountAchievementsView } from './ui/views/achievements';
 import { mountStatsView } from './ui/views/stats';
+import { mountRecapView } from './ui/views/recap';
 import { showLevelUpModal } from './ui/views/level-up';
 import { applyTheme, loadCachedThemeId } from './lib/themes';
 import { levelFromXp } from './lib/level';
@@ -113,6 +114,7 @@ function showProfile() {
     onBack: showHome,
     onOpenStats: showStats,
     onOpenAchievements: showAchievements,
+    onOpenRecap: showRecap,
     onSignOut: () => {
       if (confirm('Sign out?')) {
         void signOut().then(() => {
@@ -136,6 +138,12 @@ function showAchievements() {
 function showStats() {
   clearView();
   const view = mountStatsView(root, { onBack: showProfile });
+  currentUnmount = view.unmount;
+}
+
+function showRecap() {
+  clearView();
+  const view = mountRecapView(root, { onBack: showProfile, onToast: toast });
   currentUnmount = view.unmount;
 }
 

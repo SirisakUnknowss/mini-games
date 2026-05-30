@@ -13,9 +13,9 @@
 |---|---|---|
 | Phase 0 — Foundation | ✅ 100% | 0 |
 | Phase 1 — MVP | 🟡 ~75% | 6 (launch-related only) |
-| Phase 2 — Customization | 🟡 ~85% | 2 (preview mode + filters) |
-| Phase 3 — Progression | 🟡 ~75% | 3 (weekly recap + global compare) |
-| Phase 4 — Polish & Launch | 🟡 60% | 7 (store submission only) |
+| Phase 2 — Customization | 🟡 ~95% | 1 (animated bg pattern only) |
+| Phase 3 — Progression | 🟡 ~85% | 2 (global compare + weekly email) |
+| Phase 4 — Polish & Launch | 🟡 75% | 4 (store accounts only) |
 | Phase 5 — Monetization | 🟡 10% | 8 (real IAP/ads pending accounts) |
 
 ---
@@ -92,7 +92,7 @@
 ### 2A. Coin Economy ✅ DONE
 - [x] 🟡 P1 — Coin balance widget (header) — already from Phase 0
 - [x] 🟡 P1 — Coin update reflected after purchase (optimistic)
-- [ ] 🟢 P2 — Coin earn animation (count-up) — เลื่อนเป็น polish
+- [x] 🟢 P2 — Coin count-up animation + floating "−N 💰" indicator (`src/lib/animate.ts`)
 - [ ] 🟢 P2 — Audit ledger view (debug) — เลื่อน
 
 ### 2B. Shop ✅ DONE (2026-05-30)
@@ -112,8 +112,9 @@
 - [x] 🟢 P2 — Equip persists to `user_equipped.avatar` (with local fallback)
 - [x] 🟢 P2 — Leaderboard view already pulls `avatar` from `leaderboard_view`
 
-### 2E. Preview Mode
-- [ ] 🟢 P2 — "Try before buy" preview ใน shop modal — เลื่อน
+### 2E. Preview Mode ✅ DONE (2026-05-30)
+- [x] 🟢 P2 — Theme preview on hover/touch ใน shop — applies theme live, restores on leave/unmount
+- [x] 🟢 P2 — Premium badge + paywall trigger สำหรับ premium-only themes
 
 ---
 
@@ -129,17 +130,17 @@
 - [x] 🟡 P1 — `src/ui/views/achievements.ts`: grid + tier color + lock/unlock states
 - [x] 🟡 P1 — Category tabs (All + dynamic) + hidden-achievement support
 - [x] 🟡 P1 — Migration `20260530000000_phase3_more_achievements.sql` — adds 33 new entries (total → 53)
-- [ ] 🟢 P2 — Inline progress bar (e.g. 7/30 games for ACH_PLAY_50) — server-side calc TBD
+- [x] 🟢 P2 — Inline progress bar for ACH_PLAY_*, ACH_STREAK_*, ACH_LEVEL_* — client-side calc from `user_game_history` + store
 
 ### 3C. Stats Dashboard ✅ DONE (2026-05-30)
 - [x] 🟡 P1 — `src/ui/views/stats.ts`: games, best/avg time, streaks, mistakes/game
 - [x] 🟡 P1 — Difficulty breakdown bars from `user_game_history`
-- [ ] 🟢 P2 — Time-over-days chart (needs charting lib or canvas helper)
+- [x] 🟢 P2 — Time-per-game line chart (`src/lib/chart.ts` — vanilla canvas, no deps)
 - [ ] 🟢 P2 — Compare-to-global-average (needs server aggregation view)
 
 ### 3D. Weekly Recap
 - [ ] 🟢 P2 — Edge function: ส่ง weekly summary ทุกวันจันทร์ — เลื่อน (ต้อง email infra)
-- [ ] 🟢 P2 — Recap view in-app — เลื่อน
+- [x] 🟢 P2 — Recap view in-app (`src/ui/views/recap.ts`) — last 7 days, share button
 
 ---
 
@@ -157,8 +158,10 @@
 - [ ] 🟡 P1 — Decide: $99 Apple Dev account (~15 น.)
 
 ### 4C. Android Release
-- [ ] 🔴 P0 — Generate signing keystore + secure backup (~30 น.)
-- [ ] 🔴 P0 — Build signed release APK + AAB (~45 น.)
+- [x] 🔴 P0 — Keystore generator script (`scripts/generate-keystore.sh`)
+- [x] 🔴 P0 — Release build script (`scripts/release-android.sh`) → AAB + APK
+- [x] 🔴 P0 — `docs/RELEASE.md` — full release guide
+- [ ] 🔴 P0 — Run keystore generator (manual — needs you)
 - [ ] 🔴 P0 — Play Console account ($25) + app listing draft (~1 ชม.)
 - [ ] 🔴 P0 — Submit to Play Internal Testing track (~45 น.)
 

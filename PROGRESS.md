@@ -11,12 +11,12 @@
 ```
 Phase 0 — Foundation              ████████████████████  100%   ✅ DONE (v0.0.0)
 Phase 1 — MVP (Daily/Leaderboard) ███████████████░░░░░   75%   🟡 IN PROGRESS (1A-1F done, 1G deferred)
-Phase 2 — Customization           █████████████████░░░   85%   🟡 Shop + Themes + Avatars done
-Phase 3 — Progression             ███████████████░░░░░   75%   🟡 XP + Levels + 53 Achievements + Stats done
-Phase 4 — Polish & Launch         ████████████░░░░░░░░   60%   (Legal docs + Landing added)
+Phase 2 — Customization           ███████████████████░   95%   🟡 + count-up, preview, premium gate
+Phase 3 — Progression             █████████████████░░░   85%   🟡 + chart, achievement progress, weekly recap
+Phase 4 — Polish & Launch         ███████████████░░░░░   75%   (+ release scripts + RELEASE.md)
 Phase 5 — Monetization            ██░░░░░░░░░░░░░░░░░░   10%   (Paywall UI stub only)
 
-Overall progress to v1.0:         █████████████░░░░░░░   65%
+Overall progress to v1.0:         ███████████████░░░░░   75%
 ```
 
 ---

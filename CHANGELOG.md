@@ -95,6 +95,48 @@ Release notes ละเอียดของแต่ละ version อยู่
 - `src/state/store.ts` — added `equipped`, `inventory`, `longestStreak`,
   `setEquipped()`, `setInventory()`, `addToInventory()`
 
+### Polish round (2026-05-30)
+
+#### Added
+- **`src/lib/animate.ts`** — `countUp()` and `floatReward()` helpers
+  (no deps, respects `prefers-reduced-motion`). Shop now animates the coin
+  counter and floats a "−N 💰" indicator on purchase.
+- **`src/lib/premium.ts`** — single source of truth for premium status
+  (localStorage flag). 3 themes (Sakura, Thai, Mono Pro) marked premium —
+  show ✨ badge and trigger the paywall when tapped if not owned.
+- **Theme preview in shop** — hover/touch a theme card to preview it live;
+  restore on leave or unmount.
+- **`src/lib/chart.ts`** — tiny vanilla canvas line chart used in Stats
+  to render last-60-games time-per-game. devicePixelRatio aware.
+- **Achievement progress bars** — inline `progress/target` bars for
+  ACH_PLAY_*, ACH_STREAK_*, ACH_LEVEL_* computed client-side from
+  `user_game_history.count` + store state.
+- **`src/ui/views/recap.ts`** — in-app Weekly Recap (last 7 days summary,
+  share button via Web Share API + clipboard fallback). New row in Profile.
+
+#### Release tooling (Phase 4)
+- **`scripts/generate-keystore.sh`** — guided keytool wrapper with safety
+  warnings about backup.
+- **`scripts/release-android.sh`** — one-shot build of signed AAB + APK
+  into `releases/sudoku-daily-v${version}.{aab,apk}`.
+- **`docs/RELEASE.md`** — end-to-end release guide (Play Store, App Store,
+  PWA hosting, GitHub Releases, secrets management, rollback playbook).
+- **`sudoku/.gitignore`** — explicit deny for `*.keystore`, `keystore.properties`,
+  and other release artifacts.
+
+### New game: 2048 (`2048/`)
+
+#### Added
+- **`2048/index.html`** + `style.css` + `db.js` + `game.js` + `app.js` —
+  vanilla JS, no build step, plays from a `file://` URL. Matches the pattern
+  of `match-three/` and `suika/`.
+- 4×4 board, swipe (mobile) + arrow/WASD/HJKL (desktop) controls
+- Undo (1 step), New Game, persistent saved board across sessions
+- Multi-user login (per-game, `g2048_db_v1` localStorage namespace)
+- Stats: total games, total score, high score, highest tile, play time
+- Global leaderboard view (sorted by high score)
+- Profile view with change password / reset / delete account
+
 ---
 
 ## [v0.0.0] — 2026-05-24

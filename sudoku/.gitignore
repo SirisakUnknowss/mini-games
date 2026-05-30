@@ -42,3 +42,17 @@ Thumbs.db
 *.apk
 *.ipa
 *.aab
+
+# Signing secrets — NEVER commit
+*.keystore
+*.jks
+android/keystore.properties
+android/app/release-key*
+ios/**/exportOptions.plist
+
+# Capacitor generated content (synced from src)
+android/app/src/main/assets/public/
+ios/App/App/public/
+
+# Generated database types
+src/lib/database.types.ts

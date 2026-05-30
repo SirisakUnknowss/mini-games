@@ -2,6 +2,8 @@
 // Achievements view — grid of locked/unlocked achievements
 // =====================================================================
 import * as api from '@lib/api';
+import { supabase } from '@lib/supabase';
+import { useStore } from '@state/store';
 import { escapeHtml } from '@lib/format';
 
 interface AchievementDef {
@@ -33,12 +35,44 @@ export interface AchievementsProps {
   onBack: () => void;
 }
 
+// Compute partial progress toward a few well-known countable achievements.
+// Returns { progress, target } or null if not progress-trackable client-side.
+function computeProgress(id: string, gameCount: number): { progress: number; target: number } | null {
+  const map: Record<string, number> = {
+    ACH_PLAY_10: 10, ACH_PLAY_50: 50, ACH_PLAY_100: 100,
+    ACH_PLAY_500: 500, ACH_PLAY_1000: 1000, ACH_PLAY_5000: 5000,
+  };
+  const target = map[id];
+  if (!target) return null;
+  return { progress: Math.min(gameCount, target), target };
+}
+
+function computeStreakProgress(id: string, currentStreak: number): { progress: number; target: number } | null {
+  const map: Record<string, number> = {
+    ACH_STREAK_3: 3, ACH_STREAK_7: 7, ACH_STREAK_14: 14,
+    ACH_STREAK_30: 30, ACH_STREAK_60: 60, ACH_STREAK_100: 100, ACH_STREAK_365: 365,
+  };
+  const target = map[id];
+  if (!target) return null;
+  return { progress: Math.min(currentStreak, target), target };
+}
+
+function computeLevelProgress(id: string, level: number): { progress: number; target: number } | null {
+  const map: Record<string, number> = {
+    ACH_LEVEL_10: 10, ACH_LEVEL_25: 25, ACH_LEVEL_50: 50, ACH_LEVEL_100: 100,
+  };
+  const target = map[id];
+  if (!target) return null;
+  return { progress: Math.min(level, target), target };
+}
+
 export function mountAchievementsView(root: HTMLElement, props: AchievementsProps): { unmount: () => void } {
   let defs: AchievementDef[] = [];
   let unlocked: Set<string> = new Set();
   let loading = true;
   let errorMsg: string | null = null;
   let activeCategory: string = 'all';
+  let gameCount = 0;
 
   root.innerHTML = `
     <section class="view">
@@ -98,16 +132,28 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
       return;
     }
 
+    const { currentStreak, level } = useStore.getState();
     gridEl.innerHTML = visible.map((d) => {
       const isUnlocked = unlocked.has(d.id);
       const tier = d.tier ?? 'bronze';
       const color = TIER_COLOR[tier] ?? '#cd7f32';
       const icon = d.icon || (isUnlocked ? '🏆' : '🔒');
+      const prog = !isUnlocked && (
+        computeProgress(d.id, gameCount)
+        || computeStreakProgress(d.id, currentStreak)
+        || computeLevelProgress(d.id, level)
+      );
       return `
         <div class="ach-card${isUnlocked ? ' unlocked' : ' locked'}">
           <div class="ach-icon" style="--tier-color:${color}">${icon}</div>
           <div class="ach-name">${escapeHtml(d.name)}</div>
           <div class="ach-desc">${escapeHtml(d.description)}</div>
+          ${prog ? `
+            <div class="quest-bar" style="width:100%;margin-top:4px;">
+              <div class="quest-bar-fill" style="width:${(prog.progress / prog.target) * 100}%"></div>
+            </div>
+            <div style="font-size:10px;opacity:0.8;">${prog.progress} / ${prog.target}</div>
+          ` : ''}
           <div class="ach-tier" style="background:${color};color:#1a1a2e;">${escapeHtml(tier)}</div>
           ${d.reward_coin || d.reward_xp ? `
             <div class="ach-rewards">
@@ -123,12 +169,17 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
   async function load() {
     loading = true; errorMsg = null; render();
     try {
-      const [defList, userList] = await Promise.all([
+      const userId = useStore.getState().user?.id;
+      const [defList, userList, history] = await Promise.all([
         api.getAchievementDefinitions(),
         api.getUserAchievements().catch(() => []),
+        userId
+          ? supabase.from('user_game_history').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+          : Promise.resolve({ count: 0 } as any),
       ]);
       defs = (defList ?? []) as AchievementDef[];
       unlocked = new Set(((userList ?? []) as UserAchievement[]).map((u) => u.achievement_id));
+      gameCount = (history as any)?.count ?? 0;
       loading = false;
       render();
     } catch (err) {

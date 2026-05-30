@@ -784,6 +784,51 @@ h3 { font-size: 18px; }
   border-color: var(--color-xp);
 }
 
+/* ===== Float reward (count-up companion) ===== */
+.float-reward {
+  position: fixed;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-xp);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  z-index: 250;
+  animation: floatUp 1.2s ease-out forwards;
+}
+@keyframes floatUp {
+  0%   { opacity: 0; transform: translate(-50%, 0); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50px); }
+}
+
+/* ===== Shop premium badge + preview ===== */
+.shop-premium-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: linear-gradient(135deg, var(--color-xp), var(--color-warning));
+  color: #1a1a2e;
+  border-radius: var(--radius-full);
+  padding: 2px 6px;
+  font-size: 10px; font-weight: 700;
+}
+.shop-card.previewable { cursor: pointer; position: relative; }
+.shop-card.previewable:hover { transform: translateY(-2px); transition: transform var(--duration-fast); }
+
+/* ===== Stats chart ===== */
+.stats-chart {
+  width: 100%;
+  display: block;
+  margin-top: 8px;
+}
+
+/* ===== Recap ===== */
+.recap-hero {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.recap-hero h2 { margin-top: 6px; }
+
 /* ===== Toast ===== */
 .toast {
   position: fixed;

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>2048 — Mini Games</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- LOGIN -->
+    <section id="view-login" class="view active">
+      <h1>🔢 2048</h1>
+      <p class="subtitle">Slide tiles, combine pairs, reach 2048.</p>
+      <div class="card">
+        <h2 id="auth-title">Sign in</h2>
+        <input id="auth-username" placeholder="Username" autocomplete="username">
+        <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password">
+        <p class="error" id="auth-error" aria-live="polite"></p>
+        <button class="btn" id="auth-submit">Sign in</button>
+        <p class="hint">
+          New player? <button class="link" id="auth-toggle">Create an account</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <header class="top">
+        <span class="badge"><span id="user-label">player</span></span>
+        <div class="scores">
+          <div class="score-box"><div class="label">Score</div><div class="value" id="score">0</div></div>
+          <div class="score-box"><div class="label">Best</div><div class="value" id="best">0</div></div>
+        </div>
+      </header>
+
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+        <div class="overlay" id="overlay">
+          <div id="overlay-title">You win!</div>
+          <button class="btn" id="overlay-action">Keep going</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn small" id="new-game">↻ New game</button>
+        <button class="btn small ghost" id="undo">↶ Undo</button>
+      </div>
+
+      <p class="instructions">
+        <strong>Swipe</strong> (mobile) or <strong>arrow keys</strong> (desktop) to move tiles.
+      </p>
+
+      <nav class="bottom-nav">
+        <button class="active"><span class="icon">🎮</span><span>Play</span></button>
+        <button id="nav-leaderboard"><span class="icon">🏆</span><span>Leaderboard</span></button>
+        <button id="nav-profile"><span class="icon">👤</span><span>Profile</span></button>
+      </nav>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section id="view-leaderboard" class="view">
+      <header class="top">
+        <button class="icon-btn" data-back>‹</button>
+        <h2>🏆 Leaderboard</h2>
+        <span style="width:36px;"></span>
+      </header>
+      <div id="lb-list" class="lb-list"></div>
+      <nav class="bottom-nav">
+        <button id="nav-home-from-lb"><span class="icon">🎮</span><span>Play</span></button>
+        <button class="active"><span class="icon">🏆</span><span>Leaderboard</span></button>
+        <button id="nav-profile-from-lb"><span class="icon">👤</span><span>Profile</span></button>
+      </nav>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="view-profile" class="view">
+      <header class="top">
+        <button class="icon-btn" data-back>‹</button>
+        <h2>👤 Profile</h2>
+        <span style="width:36px;"></span>
+      </header>
+      <div class="card">
+        <div class="profile-row"><span>Total games</span><strong id="p-games">0</strong></div>
+        <div class="profile-row"><span>Total score</span><strong id="p-score">0</strong></div>
+        <div class="profile-row"><span>Best score</span><strong id="p-best">0</strong></div>
+        <div class="profile-row"><span>Highest tile</span><strong id="p-tile">—</strong></div>
+        <div class="profile-row"><span>Play time</span><strong id="p-time">0m</strong></div>
+      </div>
+      <div class="card">
+        <button class="btn full" id="change-pw">Change password</button>
+        <button class="btn full ghost" id="reset-progress">Reset progress</button>
+        <button class="btn full ghost" id="logout">Sign out</button>
+        <button class="btn full danger" id="delete-account">Delete account</button>
+      </div>
+      <nav class="bottom-nav">
+        <button id="nav-home-from-profile"><span class="icon">🎮</span><span>Play</span></button>
+        <button id="nav-leaderboard-from-profile"><span class="icon">🏆</span><span>Leaderboard</span></button>
+        <button class="active"><span class="icon">👤</span><span>Profile</span></button>
+      </nav>
+    </section>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="db.js"></script>
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
