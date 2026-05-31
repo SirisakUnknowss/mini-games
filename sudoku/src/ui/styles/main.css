@@ -990,6 +990,20 @@ body.bg-anim-aurora {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Mute button ===== */
+.mute-btn {
+  background: rgba(0,0,0,0.3);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 34px; height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--duration-fast);
+}
+.mute-btn:hover { background: rgba(0,0,0,0.5); }
+.mute-btn:active { transform: scale(0.95); }
+
 /* ===== Toast ===== */
 .toast {
   position: fixed;

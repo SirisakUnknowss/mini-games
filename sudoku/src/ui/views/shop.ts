@@ -11,6 +11,7 @@ import { countUp, floatReward } from '@lib/animate';
 import { PREMIUM_THEMES, isPremium } from '@lib/premium';
 import { showPaywall } from './paywall';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { sfxThemeChange, sfxCoin } from '@lib/sound';
 
 export interface ShopProps {
   onBack: () => void;
@@ -214,6 +215,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       const prevCoins = useStore.getState().coins;
       useStore.setState({ coins: Math.max(0, prevCoins - item.price_coin) });
       useStore.getState().addToInventory(itemId);
+      sfxCoin();
       props.onToast(`✨ ${item.name} purchased!`);
       floatReward(btn, `−${item.price_coin} 💰`);
       refreshCoinBadge(prevCoins);
@@ -238,7 +240,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       if (error) throw error;
       track('item_equipped', { item_id: itemId, category: item.category });
       useStore.getState().setEquipped(payload);
-      if (item.category === 'theme' && THEMES[itemId]) applyTheme(itemId);
+      if (item.category === 'theme' && THEMES[itemId]) { applyTheme(itemId); sfxThemeChange(); }
       if (item.category === 'background' && BACKGROUNDS[itemId]) applyBackground(itemId);
       props.onToast(`✓ ${item.name} equipped`);
       render();
@@ -246,7 +248,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       // Server may not have equip-item function in MVP — fall back to local-only
       console.warn('Equip endpoint missing, local-only:', err);
       useStore.getState().setEquipped(payload);
-      if (item.category === 'theme' && THEMES[itemId]) applyTheme(itemId);
+      if (item.category === 'theme' && THEMES[itemId]) { applyTheme(itemId); sfxThemeChange(); }
       if (item.category === 'background' && BACKGROUNDS[itemId]) applyBackground(itemId);
       props.onToast(`✓ ${item.name} equipped (local)`);
       render();

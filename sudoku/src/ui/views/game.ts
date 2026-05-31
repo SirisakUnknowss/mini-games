@@ -7,6 +7,7 @@ import { computeDailyScore, computePracticeScore } from '@engine/scoring';
 import { renderBoard } from '@ui/components/board';
 import { renderNumpad } from '@ui/components/numpad';
 import { formatTime } from '@lib/format';
+import { sfxPlace, sfxSelect, sfxError, sfxErase, sfxHint, sfxWin, sfxDailyWin } from '@lib/sound';
 
 export interface GameViewProps {
   mode: 'daily' | 'practice';
@@ -90,6 +91,7 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
 
   function onCellClick(r: number, c: number) {
     selected = { r, c };
+    sfxSelect();
     rerender();
   }
 
@@ -100,11 +102,15 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
 
     if (n === 0) {
       userBoard[r][c] = 0;
+      sfxErase();
     } else {
       userBoard[r][c] = n;
       if (n !== solution[r][c]) {
         mistakes++;
         mistakeEl.textContent = String(mistakes);
+        sfxError();
+      } else {
+        sfxPlace();
       }
     }
     moves.push({ r, c, n, t: Date.now() - startTime });
@@ -138,6 +144,7 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
     hintCountEl.textContent = String(hintsLeft);
     moves.push({ r: target.r, c: target.c, n: solution[target.r][target.c], t: Date.now() - startTime, isHint: true });
     if (hintsLeft <= 0) hintBtn.disabled = true;
+    sfxHint();
     selected = target;
     rerender();
     checkWin();
@@ -154,6 +161,8 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
     const score = mode === 'daily'
       ? computeDailyScore(scoreInput).score
       : computePracticeScore(scoreInput);
+
+    if (mode === 'daily') sfxDailyWin(); else sfxWin();
 
     props.onWin({
       mode, difficulty,

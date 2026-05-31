@@ -28,6 +28,7 @@ import { showLevelUpModal } from './ui/views/level-up';
 import { applyTheme, loadCachedThemeId } from './lib/themes';
 import { applyBackground, loadCachedBgId } from './lib/backgrounds';
 import { levelFromXp } from './lib/level';
+import { initSound, sfxCoin, sfxStreakMilestone, sfxLevelUp } from './lib/sound';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
 
@@ -282,7 +283,10 @@ async function handleWin(result: GameResult, date?: string) {
   });
   if (newLevel > prevLevel) {
     // Show level-up modal after the win modal closes
-    setTimeout(() => showLevelUpModal({ newLevel, rewardCoins: 50 * (newLevel - prevLevel) }), 600);
+    setTimeout(() => {
+      sfxLevelUp();
+      showLevelUpModal({ newLevel, rewardCoins: 50 * (newLevel - prevLevel) });
+    }, 600);
     track('level_up', { from: prevLevel, to: newLevel });
   }
 
@@ -352,8 +356,10 @@ async function refreshStreakAndToast() {
     if (newStreak > prevStreak) {
       if (STREAK_MILESTONES.has(newStreak)) {
         track(Events.STREAK_MILESTONE, { streak: newStreak });
+        sfxStreakMilestone();
         toast(`🔥 ${newStreak}-day streak! Keep it up!`, 4000);
       } else {
+        sfxCoin();
         toast(`🔥 Streak saved — ${newStreak} day${newStreak === 1 ? '' : 's'}!`);
       }
     } else if (newStreak < prevStreak && prevStreak > 0) {
@@ -412,6 +418,9 @@ async function boot() {
   if (cachedTheme) applyTheme(cachedTheme);
   const cachedBg = loadCachedBgId();
   if (cachedBg) applyBackground(cachedBg);
+
+  // Init sound (loads mute preference)
+  initSound();
 
   // Init analytics first — safe even with empty keys
   initAnalytics();

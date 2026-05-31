@@ -2,6 +2,7 @@
 // Shared bottom-nav — single source of truth for the 4-tab navigation
 // =====================================================================
 import { escapeHtml } from '@lib/format';
+import { sfxNav } from '@lib/sound';
 
 export type NavTab = 'home' | 'leaderboard' | 'shop' | 'profile';
 
@@ -38,6 +39,7 @@ export function wireBottomNav(root: ParentNode, cb: BottomNavCallbacks, active: 
     const tab = btn.dataset.navTab as NavTab;
     if (tab === active) return; // no-op on the current tab
     btn.addEventListener('click', () => {
+      sfxNav();
       if (tab === 'home') cb.onHome();
       else if (tab === 'leaderboard') cb.onLeaderboard();
       else if (tab === 'shop') cb.onShop();

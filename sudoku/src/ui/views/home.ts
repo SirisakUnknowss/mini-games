@@ -6,6 +6,7 @@ import { todayUtc, formatNumber } from '@lib/format';
 import { difficultyForDayOfWeek } from '@engine/generator';
 import { levelProgress } from '@lib/level';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { isMuted, toggleMute } from '@lib/sound';
 
 export interface HomeViewProps {
   onPlayDaily: () => void;
@@ -35,9 +36,10 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
           <span>${displayName}</span>
           ${isAnonymous ? '<span class="badge-tag">guest</span>' : ''}
         </button>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:6px;align-items:center;">
           <span class="stat-pill">🔥 ${state.currentStreak}</span>
           <span class="stat-pill">💰 ${formatNumber(state.coins)}</span>
+          <button class="mute-btn" id="mute-btn" title="${isMuted() ? 'Unmute' : 'Mute'}">${isMuted() ? '🔇' : '🔊'}</button>
         </div>
       </div>
 
@@ -94,6 +96,12 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
   wireBottomNav(root, props.nav, 'home');
   root.querySelector('#user-badge')?.addEventListener('click', props.onAuthAction);
   root.querySelector('#save-progress')?.addEventListener('click', props.onAuthAction);
+  root.querySelector('#mute-btn')?.addEventListener('click', (e) => {
+    const muted = toggleMute();
+    const btn = e.currentTarget as HTMLButtonElement;
+    btn.textContent = muted ? '🔇' : '🔊';
+    btn.title = muted ? 'Unmute' : 'Mute';
+  });
 
   return { unmount() { /* no listeners to clean */ } };
 }
