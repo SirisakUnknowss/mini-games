@@ -9,8 +9,13 @@ Release notes ละเอียดของแต่ละ version อยู่
 
 ## [Unreleased]
 
-### Phase 1 — MVP (in progress)
-ดู [PROGRESS.md](./PROGRESS.md) + [TASK.md](./TASK.md) สำหรับ task breakdown
+---
+
+## [v0.1.0] — 2026-05-31
+
+🚀 **First feature release** — Phase 1-3 complete, ready for Play Store / App Store submission
+
+📦 [Full release notes](./releases/v0.1.0.md)
 
 #### Added
 - Task 1A — Daily puzzle backend live บน Supabase Cloud (7 migrations, 2 edge functions, pg_cron, 30 puzzles pre-generated)

@@ -1,7 +1,7 @@
 # 📊 Progress Update — Sudoku Daily
 
-> **Last updated:** 2026-05-30
-> **Current release:** [v0.0.0](https://github.com/SirisakUnknowss/mini-games/releases/tag/v0.0.0)
+> **Last updated:** 2026-05-31
+> **Current release:** [v0.1.0](https://github.com/SirisakUnknowss/mini-games/releases/tag/v0.1.0) — submitting to Play Store / App Store
 > **Branch:** `main`
 
 ---
