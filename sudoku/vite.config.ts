@@ -3,6 +3,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
 
 export default defineConfig({
+  // GitHub Pages deploys to /mini-games/ — use env var so local dev still uses /
+  base: process.env.GITHUB_ACTIONS ? '/mini-games/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -24,8 +26,8 @@ export default defineConfig({
         background_color: '#667eea',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: process.env.GITHUB_ACTIONS ? '/mini-games/' : '/',
+        start_url: process.env.GITHUB_ACTIONS ? '/mini-games/' : '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
