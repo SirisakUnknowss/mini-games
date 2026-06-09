@@ -7,6 +7,7 @@ import { difficultyForDayOfWeek } from '@engine/generator';
 import { levelProgress } from '@lib/level';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 import { isMuted, toggleMute } from '@lib/sound';
+import { useVisitorStore } from '@state/visitor-store';
 
 export interface HomeViewProps {
   onPlayDaily: () => void;
@@ -15,12 +16,19 @@ export interface HomeViewProps {
   nav: BottomNavCallbacks;
 }
 
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
 export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmount: () => void } {
   const state = useStore.getState();
   const today = todayUtc();
   const dow = new Date(today + 'T00:00:00Z').getUTCDay();
   const todayDifficulty = difficultyForDayOfWeek(dow);
 
+  const visitorStats = useVisitorStore.getState();
   const isAnonymous = !!state.user?.is_anonymous;
   const isGuest = !state.user || isAnonymous;
   const displayName = state.profile?.display_name || state.profile?.username || (isGuest ? 'Guest' : 'Player');
@@ -66,6 +74,14 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
           <span class="daily-difficulty">${todayDifficulty}</span>
         </div>
         <div class="daily-date" id="daily-status">${today} · Ready to play!</div>
+        <div class="visitor-counter">
+          <span class="visitor-pill" title="Players today">
+            🌍 <span id="visitor-today">${visitorStats.loaded ? fmtCount(visitorStats.today) : '—'}</span> today
+          </span>
+          <span class="visitor-pill" title="All-time players">
+            👥 <span id="visitor-total">${visitorStats.loaded ? fmtCount(visitorStats.total) : '—'}</span> total
+          </span>
+        </div>
         <button class="btn btn--full" id="play-daily">▶ Play Daily</button>
       </div>
 

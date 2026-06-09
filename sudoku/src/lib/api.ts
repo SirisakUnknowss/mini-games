@@ -165,6 +165,44 @@ export async function getGlobalSummary() {
   return data;
 }
 
+// === Visitor Counter ===
+
+export interface VisitorStats {
+  today: number;
+  week: number;
+  total: number;
+}
+
+/**
+ * Record a visit for today (upsert — safe to call multiple times).
+ * Silently ignores errors so offline / demo mode is unaffected.
+ */
+export async function trackVisit(): Promise<void> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // not authenticated yet — skip
+    await supabase
+      .from('visitor_logs')
+      .upsert({ user_id: user.id, visited_date: new Date().toISOString().slice(0, 10) }, { onConflict: 'user_id,visited_date' });
+  } catch {
+    // offline / demo mode — ignore
+  }
+}
+
+/**
+ * Fetch today / week / all-time unique visitor counts.
+ * Returns null when Supabase is not configured or request fails.
+ */
+export async function getVisitorStats(): Promise<VisitorStats | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_visitor_stats');
+    if (error || !data) return null;
+    return data as VisitorStats;
+  } catch {
+    return null;
+  }
+}
+
 // === Settings ===
 export async function getSettings() {
   const { data, error } = await supabase.from('user_settings').select('*').maybeSingle();

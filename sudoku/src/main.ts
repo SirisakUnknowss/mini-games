@@ -31,6 +31,8 @@ import { levelFromXp } from './lib/level';
 import { initSound, sfxCoin, sfxStreakMilestone, sfxLevelUp } from './lib/sound';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
+import { trackVisit, getVisitorStats } from './lib/api';
+import { useVisitorStore } from './state/visitor-store';
 
 const root = document.getElementById('app')!;
 let currentUnmount: (() => void) | null = null;
@@ -385,6 +387,15 @@ async function shareResult(result: GameResult, date: string, rank?: number, tota
 }
 
 // =====================================================================
+// Visitor count formatter  e.g. 1200 → "1.2K"
+// =====================================================================
+function formatVisitorCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
+// =====================================================================
 // Toast
 // =====================================================================
 function toast(msg: string, durationMs = 2500) {
@@ -473,6 +484,20 @@ async function boot() {
   await splash.unmount();
 
   showHome();
+
+  // Track this visit + fetch visitor stats (best-effort, non-blocking)
+  void (async () => {
+    await trackVisit();
+    const stats = await getVisitorStats();
+    if (stats) {
+      useVisitorStore.getState().setStats(stats);
+      // Refresh home UI counter if it's currently visible
+      const el = document.getElementById('visitor-today');
+      if (el) el.textContent = formatVisitorCount(stats.today);
+      const elTotal = document.getElementById('visitor-total');
+      if (elTotal) elTotal.textContent = formatVisitorCount(stats.total);
+    }
+  })();
 
   // Show onboarding once per device (after home is mounted so it has a backdrop)
   if (!hasCompletedOnboarding()) {
