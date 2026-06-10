@@ -100,6 +100,12 @@ h3 { font-size: 18px; }
 }
 .user-badge:hover { background: rgba(0,0,0,0.5); }
 .user-badge:active { transform: scale(0.98); }
+.user-avatar-img {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
 .badge-tag {
   background: rgba(255,236,179,0.25);
   color: #ffe082;

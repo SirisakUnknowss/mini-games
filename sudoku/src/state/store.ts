@@ -14,7 +14,7 @@ interface Equipped {
 
 interface AppState {
   user: User | null;
-  profile: { username?: string; display_name?: string; country?: string; bio?: string } | null;
+  profile: { username?: string; display_name?: string; avatar_url?: string; country?: string; bio?: string } | null;
   coins: number;
   xp: number;
   level: number;

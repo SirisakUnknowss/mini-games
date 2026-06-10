@@ -34,14 +34,20 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
   const isGuest = !state.user || isAnonymous;
   const displayName = state.profile?.display_name || state.profile?.username || (isGuest ? 'Guest' : 'Player');
   const equippedEmoji = (state.equipped.avatar?.emoji as string) ?? null;
-  const userIcon = equippedEmoji || (isGuest ? '👻' : '👤');
+  const avatarUrl = state.profile?.avatar_url ?? null;
+  // Priority: equipped emoji > Google/OAuth photo > default emoji
+  const userIcon = equippedEmoji
+    ? `<span>${equippedEmoji}</span>`
+    : avatarUrl
+      ? `<img src="${avatarUrl}" class="user-avatar-img" alt="avatar" referrerpolicy="no-referrer">`
+      : `<span>${isGuest ? '👻' : '👤'}</span>`;
   const lvl = levelProgress(state.xp);
 
   root.innerHTML = `
     <section class="view view--home">
       <div class="header">
         <button class="user-badge" id="user-badge" type="button">
-          <span>${userIcon}</span>
+          ${userIcon}
           <span>${displayName}</span>
           ${isAnonymous ? '<span class="badge-tag">guest</span>' : ''}
         </button>
