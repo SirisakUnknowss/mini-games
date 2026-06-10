@@ -9,6 +9,12 @@ Release notes ละเอียดของแต่ละ version อยู่
 
 ## [Unreleased]
 
+### Fixed (2026-06-10)
+- **Background split เวลา scroll** — เพิ่ม `background-attachment: fixed` บน `body` และทุก bg variant (`bg-pattern-dots`, `bg-pattern-waves`, `bg-anim-stars`, `bg-anim-aurora`) ให้ gradient ติดกับ viewport ไม่เลื่อนตาม content
+- **Header dark box** — เปลี่ยน sticky headers ทุกตัว (`.header`, `.top-bar`, `.xp-bar`, `.shop-tabs`, `.lb-tabs`) จาก `rgba(0,0,0,0.18)` → `background: transparent` + `backdrop-filter: blur(20px)` ไม่มีกรอบสี่เหลี่ยมดำแล้ว
+- **Visitor tracking 401** — เปลี่ยน boot sequence จาก `ensureUser()` (เรียก `signInAnonymously()` ซึ่ง 422 แล้ว clear auth state) เป็น `getCurrentUser()` เท่านั้น → anon Bearer token ยังคงอยู่ `trackVisit()` และ `heartbeat()` ทำงานได้โดยไม่ต้อง login
+- **Leaderboard mistake count** — ลบ `❌×N` ออกจาก row ทั้ง Members และ Guests แสดงแค่ score + time
+
 ---
 
 ## [v0.1.0] — 2026-05-31
