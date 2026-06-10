@@ -4,266 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sudoku Daily — Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:       #0f0f1a;
-      --surface:  #1a1a2e;
-      --surface2: #16213e;
-      --border:   rgba(255,255,255,0.08);
-      --accent:   #667eea;
-      --accent2:  #764ba2;
-      --green:    #10b981;
-      --yellow:   #fbbf24;
-      --red:      #f87171;
-      --text:     #e2e8f0;
-      --muted:    rgba(255,255,255,0.45);
-      --radius:   12px;
+      --bg:#0f0f1a; --surface:#1a1a2e; --surface2:#16213e;
+      --border:rgba(255,255,255,0.08); --accent:#667eea; --accent2:#764ba2;
+      --green:#10b981; --yellow:#fbbf24; --red:#f87171;
+      --text:#e2e8f0; --muted:rgba(255,255,255,0.45); --radius:12px;
     }
+    html,body { height:100%; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
 
-    html, body { height: 100%; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    /* ── Login screen ─────────────────────────────────── */
+    /* ── Login ───────────────────────────────────────── */
     #login-screen {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f0f1a, #1a1a2e, #0f0f1a);
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
+      background:linear-gradient(135deg,#0f0f1a,#1a1a2e,#0f0f1a);
     }
     .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px 36px;
-      width: 100%; max-width: 380px;
-      text-align: center;
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:20px; padding:40px 36px;
+      width:100%; max-width:360px; text-align:center;
     }
-    .login-card .logo { font-size: 48px; margin-bottom: 12px; }
-    .login-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
-    .login-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      padding: 12px 16px;
-      font-size: 15px;
-      margin-bottom: 12px;
-      outline: none;
-      transition: border-color 0.2s;
+    .login-card .logo { font-size:52px; margin-bottom:14px; }
+    .login-card h1   { font-size:22px; font-weight:700; margin-bottom:6px; }
+    .login-card p    { color:var(--muted); font-size:13px; margin-bottom:30px; }
+    .btn-google {
+      width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+      background:white; color:#1f1f1f; border:none; border-radius:10px;
+      padding:13px 16px; font-size:15px; font-weight:600; cursor:pointer;
+      box-shadow:0 1px 3px rgba(0,0,0,0.3); transition:background .15s,box-shadow .15s;
     }
-    .login-input:focus { border-color: var(--accent); }
-    .login-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 13px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .login-btn:hover { opacity: 0.88; }
-    .login-error {
-      color: var(--red);
-      font-size: 13px;
-      margin-top: 10px;
-      min-height: 20px;
-    }
+    .btn-google:hover  { background:#f5f5f5; box-shadow:0 2px 6px rgba(0,0,0,0.35); }
+    .btn-google:disabled { opacity:0.6; cursor:not-allowed; }
+    .login-error { color:var(--red); font-size:13px; margin-top:14px; min-height:20px; }
 
-    /* ── Dashboard ────────────────────────────────────── */
-    #dashboard { display: none; }
-
+    /* ── Dashboard ───────────────────────────────────── */
+    #dashboard { display:none; }
     .topbar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10;
+      background:var(--surface); border-bottom:1px solid var(--border);
+      padding:14px 24px; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:10;
     }
-    .topbar-left { display: flex; align-items: center; gap: 10px; }
-    .topbar-left .logo { font-size: 22px; }
-    .topbar-left h1 { font-size: 17px; font-weight: 700; }
-    .topbar-left .badge {
-      background: var(--accent);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 99px;
-      letter-spacing: 0.5px;
-    }
-    .topbar-right { display: flex; align-items: center; gap: 14px; }
-    .refresh-btn {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 7px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: background 0.2s;
-    }
-    .refresh-btn:hover { background: rgba(255,255,255,0.14); }
-    .logout-btn {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 13px;
-      padding: 7px 10px;
-    }
-    .logout-btn:hover { color: var(--red); }
-    .last-update { font-size: 11px; color: var(--muted); }
-    #live-dot {
-      display: inline-block;
-      width: 7px; height: 7px;
-      background: var(--green);
-      border-radius: 50%;
-      margin-right: 5px;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .topbar-left  { display:flex; align-items:center; gap:10px; }
+    .topbar-left .logo { font-size:22px; }
+    .topbar-left h1 { font-size:17px; font-weight:700; }
+    .topbar-left .badge { background:var(--accent); color:white; font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; }
+    .topbar-right { display:flex; align-items:center; gap:14px; }
+    .refresh-btn { background:rgba(255,255,255,0.07); border:1px solid var(--border); color:var(--text); padding:7px 16px; border-radius:8px; cursor:pointer; font-size:13px; }
+    .refresh-btn:hover { background:rgba(255,255,255,0.14); }
+    .logout-btn { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:7px 10px; }
+    .logout-btn:hover { color:var(--red); }
+    .user-pill { display:flex; align-items:center; gap:8px; }
+    .user-pill img { width:28px; height:28px; border-radius:50%; object-fit:cover; }
+    .user-pill span { font-size:13px; font-weight:600; }
+    #live-dot { display:inline-block; width:7px; height:7px; background:var(--green); border-radius:50%; margin-right:5px; animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+    .last-update { font-size:11px; color:var(--muted); }
 
-    .content { padding: 24px; max-width: 1280px; margin: 0 auto; }
+    .content { padding:24px; max-width:1280px; margin:0 auto; }
 
-    /* ── Stat cards ───────────────────────────────────── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-    }
-    .stat-card .label {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 8px;
-    }
-    .stat-card .value {
-      font-size: 32px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .stat-card .sub {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .stat-card.green .value { color: var(--green); }
-    .stat-card.yellow .value { color: var(--yellow); }
-    .stat-card.purple .value { color: var(--accent); }
-    .stat-card.pink   .value { color: #f472b6; }
+    /* KPI cards */
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:14px; margin-bottom:24px; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+    .stat-card .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+    .stat-card .value { font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; margin-bottom:4px; }
+    .stat-card .sub   { font-size:12px; color:var(--muted); }
+    .stat-card.green  .value { color:var(--green); }
+    .stat-card.yellow .value { color:var(--yellow); }
+    .stat-card.purple .value { color:var(--accent); }
+    .stat-card.pink   .value { color:#f472b6; }
 
-    /* ── Charts section ───────────────────────────────── */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    @media (max-width: 768px) {
-      .charts-grid { grid-template-columns: 1fr; }
-    }
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-    }
-    .chart-card h3 {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 16px;
-    }
-    .chart-wrap { position: relative; }
-
-    /* ── Bottom grid ──────────────────────────────────── */
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 768px) {
-      .bottom-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── Table ────────────────────────────────────────── */
-    .table-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      overflow: hidden;
-    }
-    .table-card h3 {
-      font-size: 13px; font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 14px;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0 8px 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    td {
-      padding: 10px 8px;
-      font-size: 13px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-    tr:last-child td { border-bottom: none; }
-    .diff-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .diff-easy   { background: rgba(16,185,129,0.15); color: #10b981; }
-    .diff-medium { background: rgba(251,191,36,0.15);  color: #fbbf24; }
-    .diff-hard   { background: rgba(248,113,113,0.15); color: #f87171; }
-    .diff-expert { background: rgba(167,139,250,0.15); color: #a78bfa; }
-
-    .skeleton {
-      background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.05) 50%, var(--surface2) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.4s infinite;
-      border-radius: 6px;
-      height: 32px;
-      width: 80%;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-    .empty { color: var(--muted); text-align: center; padding: 24px; font-size: 13px; }
+    /* Charts */
+    .charts-grid { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:24px; }
+    @media(max-width:768px){ .charts-grid,.bottom-grid { grid-template-columns:1fr; } }
+    .chart-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+    .chart-card h3 { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; }
+    .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .table-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+    .table-card h3 { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; padding:0 8px 10px; border-bottom:1px solid var(--border); }
+    td { padding:10px 8px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); }
+    tr:last-child td { border-bottom:none; }
+    .diff-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; }
+    .diff-easy   { background:rgba(16,185,129,.15); color:#10b981; }
+    .diff-medium { background:rgba(251,191,36,.15);  color:#fbbf24; }
+    .diff-hard   { background:rgba(248,113,113,.15); color:#f87171; }
+    .diff-expert { background:rgba(167,139,250,.15); color:#a78bfa; }
+    .skeleton { background:linear-gradient(90deg,var(--surface2) 25%,rgba(255,255,255,.05) 50%,var(--surface2) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; height:32px; width:80%; }
+    @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+    .empty { color:var(--muted); text-align:center; padding:24px; font-size:13px; }
   </style>
 </head>
 <body>
@@ -273,9 +106,16 @@
   <div class="login-card">
     <div class="logo">🧩</div>
     <h1>Admin Dashboard</h1>
-    <p>Sudoku Daily — Backend Analytics</p>
-    <input id="password-input" class="login-input" type="password" placeholder="Admin password" autofocus>
-    <button class="login-btn" id="login-btn">เข้าสู่ระบบ</button>
+    <p>เข้าสู่ระบบด้วย Google account ของคุณ</p>
+    <button class="btn-google" id="login-google">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Sign in with Google
+    </button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
@@ -291,22 +131,25 @@
     <div class="topbar-right">
       <span class="last-update"><span id="live-dot"></span><span id="last-update-txt">—</span></span>
       <button class="refresh-btn" id="refresh-btn">⟳ Refresh</button>
+      <div class="user-pill">
+        <img id="user-avatar" src="" alt="" style="display:none">
+        <span id="user-name"></span>
+      </div>
       <button class="logout-btn" id="logout-btn">Logout</button>
     </div>
   </div>
 
   <div class="content">
-    <!-- KPI Cards -->
     <div class="cards-grid">
       <div class="stat-card green">
         <div class="label">🟢 Online Now</div>
         <div class="value" id="c-online">—</div>
-        <div class="sub" id="c-online-sub">guests / members</div>
+        <div class="sub"  id="c-online-sub">guests / members</div>
       </div>
       <div class="stat-card yellow">
         <div class="label">👥 Visitors Today</div>
         <div class="value" id="c-today">—</div>
-        <div class="sub" id="c-today-sub">guests / members</div>
+        <div class="sub"  id="c-today-sub">guests / members</div>
       </div>
       <div class="stat-card purple">
         <div class="label">📅 This Week</div>
@@ -326,291 +169,227 @@
       <div class="stat-card yellow">
         <div class="label">🎮 Games Today</div>
         <div class="value" id="c-games-today">—</div>
-        <div class="sub" id="c-games-today-sub">members / guests</div>
+        <div class="sub"  id="c-games-today-sub">members / guests</div>
       </div>
       <div class="stat-card purple">
         <div class="label">🏆 Games Total</div>
         <div class="value" id="c-games-total">—</div>
-        <div class="sub" id="c-games-total-sub">members / guests</div>
+        <div class="sub"  id="c-games-total-sub">members / guests</div>
       </div>
     </div>
 
-    <!-- Charts row -->
     <div class="charts-grid">
       <div class="chart-card">
         <h3>📈 14-Day Visitor Trend</h3>
-        <div class="chart-wrap" style="height:220px">
-          <canvas id="trend-chart"></canvas>
-        </div>
+        <div style="position:relative;height:220px"><canvas id="trend-chart"></canvas></div>
       </div>
       <div class="chart-card">
         <h3>🎯 Difficulty Breakdown</h3>
-        <div class="chart-wrap" style="height:220px">
-          <canvas id="diff-chart"></canvas>
-        </div>
+        <div style="position:relative;height:220px"><canvas id="diff-chart"></canvas></div>
       </div>
     </div>
 
-    <!-- Bottom row -->
     <div class="bottom-grid">
       <div class="chart-card">
         <h3>⏰ Hourly Activity (Today, Bangkok)</h3>
-        <div class="chart-wrap" style="height:180px">
-          <canvas id="hourly-chart"></canvas>
-        </div>
+        <div style="position:relative;height:180px"><canvas id="hourly-chart"></canvas></div>
       </div>
       <div class="table-card">
         <h3>🎮 Difficulty Stats (All-Time)</h3>
-        <div id="diff-table-wrap">
-          <div class="skeleton"></div>
-        </div>
+        <div id="diff-table-wrap"><div class="skeleton"></div></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://sqjllqilozhxbzvfjhra.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxamxscWlsb3poeGJ6dmZqaHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzQ4NzcsImV4cCI6MjA5NTQ1MDg3N30.jE514bJw8x550rR64ks7X2rN6bO_y7G1e0JjkBaf8xM';
-const ADMIN_SECRET_KEY = 'sudoku_admin_secret';
-const AUTO_REFRESH_MS  = 60_000;
+const ADMIN_UID     = 'a2dac4b1-a905-4838-ae30-9c32d395da80';
+const AUTO_REFRESH  = 60_000;
 
-// ── Chart instances ───────────────────────────────────────────────────
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
 let trendChart = null, diffChart = null, hourlyChart = null;
 
-// ── Auth ─────────────────────────────────────────────────────────────
-function getSavedSecret() { return sessionStorage.getItem(ADMIN_SECRET_KEY) || ''; }
-function saveSecret(s)    { sessionStorage.setItem(ADMIN_SECRET_KEY, s); }
-function clearSecret()    { sessionStorage.removeItem(ADMIN_SECRET_KEY); }
-
-async function tryLogin(secret) {
-  const res = await callRpc('get_admin_stats', { p_secret: secret });
-  if (!res || res.error === 'unauthorized') return false;
-  return true;
-}
-
-document.getElementById('login-btn').onclick = async () => {
-  const btn = document.getElementById('login-btn');
-  const secret = document.getElementById('password-input').value.trim();
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  btn.disabled = true; btn.textContent = 'Checking…';
-  const ok = await tryLogin(secret);
-  btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
-  if (ok) {
-    saveSecret(secret);
-    showDashboard();
-  } else {
-    errEl.textContent = '❌ รหัสผ่านไม่ถูกต้อง';
-  }
+// ── Auth ──────────────────────────────────────────────────────────────
+document.getElementById('login-google').onclick = async () => {
+  const btn = document.getElementById('login-google');
+  btn.disabled = true; btn.childNodes[1].textContent = ' Redirecting…';
+  const redirectTo = window.location.href.split('?')[0];
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo, queryParams: { prompt: 'select_account' } },
+  });
 };
-document.getElementById('password-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('login-btn').click();
-});
-document.getElementById('logout-btn').onclick = () => {
-  clearSecret();
+
+document.getElementById('logout-btn').onclick = async () => {
+  await sb.auth.signOut();
   location.reload();
 };
+
 document.getElementById('refresh-btn').onclick = () => loadData();
 
 // ── API ───────────────────────────────────────────────────────────────
-async function callRpc(fn, params = {}) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+async function callAdminStats(accessToken) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_admin_stats`, {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
       'apikey':        SUPABASE_ANON,
-      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Authorization': `Bearer ${accessToken}`,
     },
-    body: JSON.stringify(params),
+    body: '{}',
   });
   return r.ok ? r.json() : null;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────
+// ── Render helpers ────────────────────────────────────────────────────
 function fmt(n) {
   if (n == null) return '—';
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
-  if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(1)+'M';
+  if (n >= 1_000)     return (n/1_000).toFixed(1)+'K';
   return String(n);
 }
 function fmtTime(s) {
   if (!s) return '—';
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
-function setEl(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val ?? '—';
-}
+function setEl(id, v) { const e = document.getElementById(id); if (e) e.textContent = v ?? '—'; }
 
-// ── Render ────────────────────────────────────────────────────────────
 function renderCards(d) {
-  setEl('c-online',      fmt(d.online_now));
-  setEl('c-online-sub',  `👻 ${fmt(d.online_guests)} guests · ✉️ ${fmt(d.online_members)} members`);
-  setEl('c-today',       fmt(d.visitors_today));
-  setEl('c-today-sub',   `👻 ${fmt(d.visitors_guests_today)} · ✉️ ${fmt(d.visitors_members_today)}`);
-  setEl('c-week',        fmt(d.visitors_week));
-  setEl('c-total',       fmt(d.visitors_total));
-  setEl('c-members',     fmt(d.total_members));
-  const gToday = (d.games_members_today || 0) + (d.games_guests_today || 0);
-  setEl('c-games-today',     fmt(gToday));
+  setEl('c-online',          fmt(d.online_now));
+  setEl('c-online-sub',      `👻 ${fmt(d.online_guests)} guests · ✉️ ${fmt(d.online_members)} members`);
+  setEl('c-today',           fmt(d.visitors_today));
+  setEl('c-today-sub',       `👻 ${fmt(d.visitors_guests_today)} · ✉️ ${fmt(d.visitors_members_today)}`);
+  setEl('c-week',            fmt(d.visitors_week));
+  setEl('c-total',           fmt(d.visitors_total));
+  setEl('c-members',         fmt(d.total_members));
+  const gt = (d.games_members_today||0)+(d.games_guests_today||0);
+  setEl('c-games-today',     fmt(gt));
   setEl('c-games-today-sub', `✉️ ${fmt(d.games_members_today)} · 👻 ${fmt(d.games_guests_today)}`);
-  const gTotal = (d.games_members_total || 0) + (d.games_guests_total || 0);
-  setEl('c-games-total',     fmt(gTotal));
+  const gT = (d.games_members_total||0)+(d.games_guests_total||0);
+  setEl('c-games-total',     fmt(gT));
   setEl('c-games-total-sub', `✉️ ${fmt(d.games_members_total)} · 👻 ${fmt(d.games_guests_total)}`);
 }
 
-function renderTrend(trend14d) {
-  const data = trend14d || [];
-  // Fill missing dates
-  const map = {};
-  data.forEach(r => { map[r.d] = r; });
-  const labels = [], guests = [], members = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    const short = `${d.getDate()}/${d.getMonth()+1}`;
-    labels.push(short);
-    guests.push(map[key]?.guests || 0);
-    members.push(map[key]?.members || 0);
+function renderTrend(data) {
+  data = data || [];
+  const map = {}; data.forEach(r => { map[r.d] = r; });
+  const labels=[], guests=[], members=[];
+  for (let i=13;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    labels.push(`${d.getDate()}/${d.getMonth()+1}`);
+    guests.push(map[key]?.guests||0);
+    members.push(map[key]?.members||0);
   }
   const ctx = document.getElementById('trend-chart').getContext('2d');
   if (trendChart) trendChart.destroy();
-  trendChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Guests',  data: guests,  backgroundColor: 'rgba(102,126,234,0.6)', borderRadius: 4, borderSkipped: false },
-        { label: 'Members', data: members, backgroundColor: 'rgba(16,185,129,0.7)',  borderRadius: 4, borderSkipped: false },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#e2e8f0', font: { size: 11 } } } },
-      scales: {
-        x: { stacked: true, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { stacked: true, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.06)' } },
-      }
-    }
+  trendChart = new Chart(ctx, { type:'bar', data: { labels, datasets:[
+    { label:'Guests',  data:guests,  backgroundColor:'rgba(102,126,234,.6)', borderRadius:4, borderSkipped:false },
+    { label:'Members', data:members, backgroundColor:'rgba(16,185,129,.7)',  borderRadius:4, borderSkipped:false },
+  ]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e2e8f0',font:{size:11}}}},
+    scales:{ x:{stacked:true,ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+             y:{stacked:true,ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'}} } }
   });
 }
 
-function renderDiffChart(breakdown) {
-  const data = breakdown || [];
-  const labels = data.map(r => r.difficulty);
-  const counts = data.map(r => r.cnt);
-  const colors = { easy:'#10b981', medium:'#fbbf24', hard:'#f87171', expert:'#a78bfa' };
-  const bgColors = labels.map(l => colors[l] || '#667eea');
+function renderDiffChart(data) {
+  data = data || [];
+  const colors = {easy:'#10b981',medium:'#fbbf24',hard:'#f87171',expert:'#a78bfa'};
   const ctx = document.getElementById('diff-chart').getContext('2d');
   if (diffChart) diffChart.destroy();
-  diffChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{ data: counts, backgroundColor: bgColors, borderWidth: 2, borderColor: '#1a1a2e' }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { color: '#e2e8f0', font: { size: 11 }, padding: 12 } }
-      }
-    }
+  diffChart = new Chart(ctx, { type:'doughnut', data:{
+    labels: data.map(r=>r.difficulty),
+    datasets:[{ data:data.map(r=>r.cnt), backgroundColor:data.map(r=>colors[r.difficulty]||'#667eea'), borderWidth:2, borderColor:'#1a1a2e' }]
+  }, options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'right', labels:{color:'#e2e8f0',font:{size:11},padding:12} } } }
   });
 }
 
-function renderHourly(hourly) {
-  const data = hourly || [];
-  const hours = Array.from({length:24}, (_,i) => i);
-  const counts = hours.map(h => (data.find(r => r.hr === h)?.cnt || 0));
-  const labels = hours.map(h => `${h}:00`);
+function renderHourly(data) {
+  data = data || [];
+  const hours=Array.from({length:24},(_,i)=>i);
+  const counts=hours.map(h=>(data.find(r=>r.hr===h)?.cnt||0));
   const ctx = document.getElementById('hourly-chart').getContext('2d');
   if (hourlyChart) hourlyChart.destroy();
-  hourlyChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Games',
-        data: counts,
-        backgroundColor: 'rgba(118,75,162,0.7)',
-        borderRadius: 3,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#94a3b8', font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } },
-        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      }
-    }
+  hourlyChart = new Chart(ctx, { type:'bar', data:{
+    labels:hours.map(h=>`${h}:00`),
+    datasets:[{ label:'Games', data:counts, backgroundColor:'rgba(118,75,162,.7)', borderRadius:3, borderSkipped:false }]
+  }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+    scales:{ x:{ticks:{color:'#94a3b8',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8},grid:{display:false}},
+             y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}} } }
   });
 }
 
-function renderDiffTable(breakdown) {
+function renderTable(data) {
   const wrap = document.getElementById('diff-table-wrap');
-  const data = breakdown || [];
-  if (!data.length) { wrap.innerHTML = '<div class="empty">No game data yet</div>'; return; }
-  const diffClass = d => `diff-badge diff-${d}`;
-  wrap.innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>Difficulty</th>
-          <th style="text-align:right">Games</th>
-          <th style="text-align:right">Avg Score</th>
-          <th style="text-align:right">Avg Time</th>
-          <th style="text-align:right">Avg ❌</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${data.map(r => `
-          <tr>
-            <td><span class="${diffClass(r.difficulty)}">${r.difficulty}</span></td>
-            <td style="text-align:right; font-variant-numeric:tabular-nums">${fmt(r.cnt)}</td>
-            <td style="text-align:right; font-variant-numeric:tabular-nums">${fmt(r.avg_score)}</td>
-            <td style="text-align:right">${fmtTime(r.avg_time)}</td>
-            <td style="text-align:right">${r.avg_mistakes ?? '—'}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
+  data = data || [];
+  if (!data.length) { wrap.innerHTML='<div class="empty">No game data yet</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr>
+    <th>Difficulty</th>
+    <th style="text-align:right">Games</th>
+    <th style="text-align:right">Avg Score</th>
+    <th style="text-align:right">Avg Time</th>
+    <th style="text-align:right">Avg ❌</th>
+  </tr></thead><tbody>${data.map(r=>`
+    <tr>
+      <td><span class="diff-badge diff-${r.difficulty}">${r.difficulty}</span></td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(r.cnt)}</td>
+      <td style="text-align:right">${fmt(r.avg_score)}</td>
+      <td style="text-align:right">${fmtTime(r.avg_time)}</td>
+      <td style="text-align:right">${r.avg_mistakes??'—'}</td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
 // ── Load data ─────────────────────────────────────────────────────────
 async function loadData() {
-  const secret = getSavedSecret();
-  const d = await callRpc('get_admin_stats', { p_secret: secret });
-  if (!d || d.error) { clearSecret(); location.reload(); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { location.reload(); return; }
+  const d = await callAdminStats(session.access_token);
+  if (!d || d.error) {
+    document.getElementById('login-error').textContent = '⛔ บัญชีนี้ไม่มีสิทธิ์เข้าถึง Admin';
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
   renderCards(d);
   renderTrend(d.trend_14d);
   renderDiffChart(d.difficulty_breakdown);
   renderHourly(d.hourly_today);
-  renderDiffTable(d.difficulty_breakdown);
+  renderTable(d.difficulty_breakdown);
   const now = new Date();
-  setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
+  setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────
-function showDashboard() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  loadData();
-  setInterval(loadData, AUTO_REFRESH_MS);
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (session) {
+    if (session.user.id !== ADMIN_UID) {
+      await sb.auth.signOut();
+      document.getElementById('login-error').textContent = '⛔ บัญชีนี้ไม่มีสิทธิ์ใช้งาน Admin Dashboard';
+      return;
+    }
+    // Show user info
+    const meta = session.user.user_metadata || {};
+    const avatar = document.getElementById('user-avatar');
+    if (meta.avatar_url || meta.picture) {
+      avatar.src = meta.avatar_url || meta.picture;
+      avatar.style.display = 'block';
+    }
+    setEl('user-name', meta.full_name || meta.name || session.user.email);
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    await loadData();
+    setInterval(loadData, AUTO_REFRESH);
+  }
 }
 
-// Auto-login if session exists
-const saved = getSavedSecret();
-if (saved) {
-  tryLogin(saved).then(ok => {
-    if (ok) showDashboard();
-    else clearSecret();
-  });
-}
+boot();
 </script>
 </body>
 </html>
