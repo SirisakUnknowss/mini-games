@@ -18,6 +18,7 @@ html, body { height: 100%; }
 body {
   font-family: var(--font-base);
   background: var(--brand-gradient);
+  background-attachment: fixed;
   color: white;
   /* dvh = dynamic viewport (excludes iOS URL bar) so no phantom scroll.
      Fallbacks for older browsers. */
@@ -1113,8 +1114,9 @@ h3 { font-size: 18px; }
 .recap-hero h2 { margin-top: 6px; }
 
 /* ===== Backgrounds ===== */
-body { background: var(--brand-gradient); transition: background 0.4s ease; position: relative; }
-body.bg-default       { background: var(--brand-gradient); }
+/* background-attachment: fixed keeps gradient pinned to viewport — prevents color split when scrolling long pages */
+body { background: var(--brand-gradient); background-attachment: fixed; transition: background 0.4s ease; position: relative; }
+body.bg-default       { background: var(--brand-gradient); background-attachment: fixed; }
 body.bg-blank-white   { background: #fafafa; color: #1a1a2e; }
 body.bg-solid-navy    { background: #0d1b2a; }
 body.bg-solid-forest  { background: #1b4332; }
@@ -1125,6 +1127,7 @@ body.bg-pattern-dots {
     radial-gradient(circle at 1px 1px, rgba(255,255,255,0.18) 1px, transparent 1px),
     var(--brand-gradient);
   background-size: 22px 22px, auto;
+  background-attachment: fixed, fixed;
 }
 
 /* Wavy stripes */
@@ -1134,6 +1137,7 @@ body.bg-pattern-waves {
       rgba(255,255,255,0.05) 0 10px,
       rgba(255,255,255,0) 10px 20px),
     var(--brand-gradient);
+  background-attachment: fixed, fixed;
 }
 
 /* Animated rain — pseudo elements stream diagonal lines */
@@ -1164,6 +1168,7 @@ body.bg-anim-stars {
     radial-gradient(circle at 85% 15%, rgba(255,255,255,0.6) 0.5px, transparent 1.5px),
     linear-gradient(135deg, #0d1b2a, #1b1b3a);
   background-size: 200px 200px, 240px 240px, 180px 180px, 260px 260px, auto;
+  background-attachment: fixed;
   animation: starsTwinkle 4s ease-in-out infinite alternate;
 }
 @keyframes starsTwinkle {
@@ -1175,6 +1180,7 @@ body.bg-anim-stars {
 body.bg-anim-aurora {
   background: linear-gradient(120deg, #0f2027, #2c5364, #1e6091, #4eba6f, #1f4068);
   background-size: 400% 400%;
+  background-attachment: fixed;
   animation: auroraShift 14s ease infinite;
 }
 @keyframes auroraShift {
