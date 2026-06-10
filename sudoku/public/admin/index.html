@@ -15,7 +15,7 @@
       --text:#e2e8f0; --muted:rgba(255,255,255,0.45); --radius:12px;
     }
     html,body { height:100%; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:16px; }
 
     /* ── Login ───────────────────────────────────────── */
     #login-screen {
@@ -67,11 +67,11 @@
     .content { padding:24px; max-width:1280px; margin:0 auto; }
 
     /* KPI cards */
-    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:14px; margin-bottom:24px; }
-    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
-    .stat-card .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
-    .stat-card .value { font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; margin-bottom:4px; }
-    .stat-card .sub   { font-size:12px; color:var(--muted); }
+    .cards-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:28px; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 28px; }
+    .stat-card .label { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px; }
+    .stat-card .value { font-size:40px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; margin-bottom:6px; }
+    .stat-card .sub   { font-size:14px; color:var(--muted); }
     .stat-card.green  .value { color:var(--green); }
     .stat-card.yellow .value { color:var(--yellow); }
     .stat-card.purple .value { color:var(--accent); }
@@ -83,20 +83,27 @@
     .chart-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
     .chart-card h3 { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:16px; }
     .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .lists-grid  { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
     .table-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
     .table-card h3 { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
     table { width:100%; border-collapse:collapse; }
-    th { text-align:left; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; padding:0 8px 10px; border-bottom:1px solid var(--border); }
-    td { padding:10px 8px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); }
+    th { text-align:left; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; padding:0 8px 10px; border-bottom:1px solid var(--border); }
+    td { padding:10px 8px; font-size:14px; border-bottom:1px solid rgba(255,255,255,.04); }
     tr:last-child td { border-bottom:none; }
-    .diff-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; }
+    .diff-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
     .diff-easy   { background:rgba(16,185,129,.15); color:#10b981; }
     .diff-medium { background:rgba(251,191,36,.15);  color:#fbbf24; }
     .diff-hard   { background:rgba(248,113,113,.15); color:#f87171; }
     .diff-expert { background:rgba(167,139,250,.15); color:#a78bfa; }
     .skeleton { background:linear-gradient(90deg,var(--surface2) 25%,rgba(255,255,255,.05) 50%,var(--surface2) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; height:32px; width:80%; }
     @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
-    .empty { color:var(--muted); text-align:center; padding:24px; font-size:13px; }
+    .empty { color:var(--muted); text-align:center; padding:24px; font-size:14px; }
+    .online-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+    .online-dot.member { background:var(--green); }
+    .online-dot.guest  { background:var(--muted); }
+    .badge-online { background:rgba(16,185,129,.15); color:#10b981; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
+    .badge-banned { background:rgba(248,113,113,.15); color:#f87171; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
+    .list-scroll { max-height:340px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
   </style>
 </head>
 <body>
@@ -199,6 +206,21 @@
         <div id="diff-table-wrap"><div class="skeleton"></div></div>
       </div>
     </div>
+
+    <div class="lists-grid">
+      <div class="table-card">
+        <h3>🟢 Online Now <span id="online-count" style="font-weight:400;color:var(--muted);font-size:12px"></span></h3>
+        <div class="list-scroll">
+          <div id="online-list-wrap"><div class="skeleton"></div></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <h3>✉️ Members <span id="member-count" style="font-weight:400;color:var(--muted);font-size:12px"></span></h3>
+        <div class="list-scroll">
+          <div id="member-list-wrap"><div class="skeleton"></div></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -250,6 +272,21 @@ async function callAdminStats(accessToken) {
       return { error: { message: `HTTP ${r.status} ${r.statusText}` } };
     }
   }
+}
+
+async function callRpc(name, accessToken) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_ANON,
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: '{}',
+    });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
 }
 
 // ── Render helpers ────────────────────────────────────────────────────
@@ -351,6 +388,56 @@ function renderTable(data) {
     </tr>`).join('')}</tbody></table>`;
 }
 
+function renderOnlineList(data) {
+  data = data || [];
+  const wrap = document.getElementById('online-list-wrap');
+  const countEl = document.getElementById('online-count');
+  if (countEl) countEl.textContent = `(${data.length})`;
+  if (!data.length) { wrap.innerHTML = '<div class="empty">ไม่มีใคร online ขณะนี้</div>'; return; }
+  const members = data.filter(r => !r.is_guest);
+  const guests  = data.filter(r => r.is_guest);
+  const rows = [
+    ...members.map(r => `
+      <tr>
+        <td><span class="online-dot member"></span><strong>${r.display_name || r.username || 'Member'}</strong></td>
+        <td style="color:var(--muted);font-size:13px">@${r.username || '—'}</td>
+        <td style="text-align:right"><span class="badge-online">✉️ Member</span></td>
+      </tr>`),
+    ...guests.map((_,i) => `
+      <tr>
+        <td><span class="online-dot guest"></span><span style="color:var(--muted)">Guest ${i+1}</span></td>
+        <td style="color:var(--muted);font-size:13px">—</td>
+        <td style="text-align:right"><span style="color:var(--muted);font-size:12px">👻 Guest</span></td>
+      </tr>`),
+  ].join('');
+  wrap.innerHTML = `<table><thead><tr>
+    <th>Name</th><th>Username</th><th style="text-align:right">Type</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderMemberList(data) {
+  data = data || [];
+  const wrap = document.getElementById('member-list-wrap');
+  const countEl = document.getElementById('member-count');
+  if (countEl) countEl.textContent = `(${data.length})`;
+  if (!data.length) { wrap.innerHTML = '<div class="empty">ยังไม่มี member</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr>
+    <th>Name</th>
+    <th>Username</th>
+    <th style="text-align:right">Coins</th>
+    <th style="text-align:right">Joined</th>
+  </tr></thead><tbody>${data.map(r => `
+    <tr>
+      <td>
+        ${r.is_banned ? '<span class="badge-banned">⛔</span> ' : ''}
+        <strong>${r.display_name || r.username}</strong>
+      </td>
+      <td style="color:var(--muted);font-size:13px">@${r.username}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(r.coins)} 🪙</td>
+      <td style="text-align:right;color:var(--muted);font-size:13px">${new Date(r.created_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
 // ── Load data ─────────────────────────────────────────────────────────
 async function loadData() {
   const { data: { session } } = await sb.auth.getSession();
@@ -375,6 +462,15 @@ async function loadData() {
   renderDiffChart(d.difficulty_breakdown);
   renderHourly(d.hourly_today);
   renderTable(d.difficulty_breakdown);
+
+  // Load lists in parallel
+  const [onlineList, memberList] = await Promise.all([
+    callRpc('get_admin_online_list', session.access_token),
+    callRpc('get_admin_member_list', session.access_token),
+  ]);
+  renderOnlineList(onlineList);
+  renderMemberList(memberList);
+
   const now = new Date();
   setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
 }
