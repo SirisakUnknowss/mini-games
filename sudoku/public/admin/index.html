@@ -104,6 +104,17 @@
     .badge-online { background:rgba(16,185,129,.15); color:#10b981; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
     .badge-banned { background:rgba(248,113,113,.15); color:#f87171; padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; }
     .list-scroll { max-height:340px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+    /* ── Shop ── */
+    .section-divider { border:none; border-top:1px solid var(--border); margin:28px 0; }
+    .section-title { font-size:16px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+    .shop-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+    .shop-mid-grid { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px; }
+    .rarity-common    { color:#94a3b8; }
+    .rarity-uncommon  { color:#10b981; }
+    .rarity-rare      { color:#60a5fa; }
+    .rarity-epic      { color:#a78bfa; }
+    .rarity-legendary { color:#fbbf24; }
+    .cat-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; background:rgba(102,126,234,.15); color:#667eea; }
   </style>
 </head>
 <body>
@@ -221,6 +232,56 @@
         </div>
       </div>
     </div>
+
+    <hr class="section-divider">
+    <div class="section-title">🛍️ Shop Analytics</div>
+
+    <!-- Shop KPI cards -->
+    <div class="shop-kpi-grid">
+      <div class="stat-card yellow">
+        <div class="label">🛒 Total Purchases</div>
+        <div class="value" id="s-total">—</div>
+        <div class="sub">items bought</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="label">🪙 Coins Spent</div>
+        <div class="value" id="s-coins">—</div>
+        <div class="sub">total revenue</div>
+      </div>
+      <div class="stat-card green">
+        <div class="label">👤 Unique Buyers</div>
+        <div class="value" id="s-buyers">—</div>
+        <div class="sub">members</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="label">📊 Avg / Buyer</div>
+        <div class="value" id="s-avg">—</div>
+        <div class="sub">coins per person</div>
+      </div>
+    </div>
+
+    <!-- Top items + Category chart -->
+    <div class="shop-mid-grid">
+      <div class="table-card">
+        <h3>🏆 Top Purchased Items</h3>
+        <div class="list-scroll">
+          <div id="shop-top-wrap"><div class="skeleton"></div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>📂 By Category</h3>
+        <div style="position:relative;height:260px"><canvas id="shop-cat-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Recent purchases full-width -->
+    <div class="table-card">
+      <h3>🕐 Recent Purchases</h3>
+      <div class="list-scroll" style="max-height:320px">
+        <div id="shop-recent-wrap"><div class="skeleton"></div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -231,7 +292,7 @@ const AUTO_REFRESH  = 60_000;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let trendChart = null, diffChart = null, hourlyChart = null;
+let trendChart = null, diffChart = null, hourlyChart = null, shopCatChart = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────
 document.getElementById('login-google').onclick = async () => {
@@ -438,6 +499,73 @@ function renderMemberList(data) {
     </tr>`).join('')}</tbody></table>`;
 }
 
+// ── Shop Analytics Renders ─────────────────────────────────────────────
+function renderShopStats(d) {
+  setEl('s-total',  fmt(d.total_purchases));
+  setEl('s-coins',  fmt(d.total_coins_spent));
+  setEl('s-buyers', fmt(d.unique_buyers));
+  setEl('s-avg',    fmt(d.avg_coins_per_buyer));
+}
+
+const RARITY_ORDER = ['legendary','epic','rare','uncommon','common'];
+function renderShopTopItems(data) {
+  data = data || [];
+  const wrap = document.getElementById('shop-top-wrap');
+  if (!data.some(r => r.purchase_count > 0)) {
+    wrap.innerHTML = '<div class="empty">ยังไม่มีการซื้อ</div>'; return;
+  }
+  wrap.innerHTML = `<table><thead><tr>
+    <th>#</th><th>Item</th><th>Category</th>
+    <th style="text-align:right">Price</th>
+    <th style="text-align:right">Sold</th>
+    <th style="text-align:right">Revenue</th>
+  </tr></thead><tbody>${data.map((r,i) => `
+    <tr>
+      <td style="color:var(--muted);font-size:13px">${i+1}</td>
+      <td><strong class="rarity-${r.rarity}">${r.name}</strong></td>
+      <td><span class="cat-badge">${r.category}</span></td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(r.price_coin)} 🪙</td>
+      <td style="text-align:right;font-weight:700">${fmt(r.purchase_count)}</td>
+      <td style="text-align:right;color:var(--yellow)">${fmt(r.total_revenue)} 🪙</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function renderShopCatChart(data) {
+  data = (data || []).filter(r => r.purchase_count > 0);
+  const ctx = document.getElementById('shop-cat-chart').getContext('2d');
+  if (shopCatChart) shopCatChart.destroy();
+  if (!data.length) { ctx.canvas.parentElement.innerHTML = '<div class="empty">ยังไม่มีข้อมูล</div>'; return; }
+  const palette = ['#667eea','#10b981','#fbbf24','#f87171','#a78bfa','#60a5fa','#f472b6','#34d399'];
+  shopCatChart = new Chart(ctx, { type:'doughnut', data:{
+    labels: data.map(r => r.category),
+    datasets:[{ data:data.map(r => r.purchase_count),
+      backgroundColor: data.map((_,i) => palette[i % palette.length]),
+      borderWidth:2, borderColor:'#1a1a2e' }]
+  }, options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'bottom', labels:{color:'#e2e8f0',font:{size:11},padding:10} } } }
+  });
+}
+
+function renderShopRecent(data) {
+  data = data || [];
+  const wrap = document.getElementById('shop-recent-wrap');
+  if (!data.length) { wrap.innerHTML = '<div class="empty">ยังไม่มีการซื้อ</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr>
+    <th>Item</th><th>Buyer</th>
+    <th style="text-align:right">Price</th>
+    <th style="text-align:right">Time</th>
+  </tr></thead><tbody>${data.map(r => `
+    <tr>
+      <td>
+        <strong class="rarity-${r.rarity}">${r.item_name}</strong>
+        <span class="cat-badge" style="margin-left:6px">${r.category}</span>
+      </td>
+      <td style="color:var(--muted);font-size:13px">${r.buyer_name}${r.buyer_username ? ' (@'+r.buyer_username+')' : ''}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(r.price_coin)} 🪙</td>
+      <td style="text-align:right;color:var(--muted);font-size:13px;white-space:nowrap">${new Date(r.acquired_at).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
 // ── Load data ─────────────────────────────────────────────────────────
 async function loadData() {
   const { data: { session } } = await sb.auth.getSession();
@@ -463,13 +591,20 @@ async function loadData() {
   renderHourly(d.hourly_today);
   renderTable(d.difficulty_breakdown);
 
-  // Load lists in parallel
-  const [onlineList, memberList] = await Promise.all([
+  // Load lists + shop stats in parallel
+  const [onlineList, memberList, shopStats] = await Promise.all([
     callRpc('get_admin_online_list', session.access_token),
     callRpc('get_admin_member_list', session.access_token),
+    callRpc('get_admin_shop_stats', session.access_token),
   ]);
   renderOnlineList(onlineList);
   renderMemberList(memberList);
+  if (shopStats && !shopStats.error) {
+    renderShopStats(shopStats);
+    renderShopTopItems(shopStats.top_items);
+    renderShopCatChart(shopStats.category_breakdown);
+    renderShopRecent(shopStats.recent_purchases);
+  }
 
   const now = new Date();
   setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
