@@ -192,13 +192,16 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
         showPaywall({ source: `shop_premium_item:${btn.dataset.premium}`, onClose: () => {} });
       });
     });
-    // Theme preview on hover (desktop) + on touchstart (mobile)
+    // Theme preview on hover (desktop) + on tap (mobile)
+    // touchmove / touchcancel / scroll all restore the theme immediately
     gridEl.querySelectorAll<HTMLElement>('.shop-card.previewable').forEach((card) => {
       const id = card.dataset.preview!;
       card.addEventListener('mouseenter', () => previewIn(id));
       card.addEventListener('mouseleave', () => previewOut());
       card.addEventListener('touchstart', () => previewIn(id), { passive: true });
-      card.addEventListener('touchend', () => setTimeout(previewOut, 800));
+      card.addEventListener('touchend',    () => previewOut());
+      card.addEventListener('touchmove',   () => previewOut(), { passive: true });
+      card.addEventListener('touchcancel', () => previewOut());
     });
   }
 
@@ -296,12 +299,16 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
 
   root.querySelector('#shop-back')?.addEventListener('click', props.onBack);
 
+  // Cancel any active preview when the page scrolls (mobile safety net)
+  const onScroll = () => previewOut();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   void load();
 
   return {
     unmount() {
-      // Restore equipped theme in case a preview was active
       previewOut();
+      window.removeEventListener('scroll', onScroll);
     },
   };
 }
