@@ -115,6 +115,43 @@
     .rarity-epic      { color:#a78bfa; }
     .rarity-legendary { color:#fbbf24; }
     .cat-badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600; background:rgba(102,126,234,.15); color:#667eea; }
+
+    /* ── Tab Bar ── */
+    .tab-container { display:flex; gap:10px; margin-bottom:24px; border-bottom:1px solid var(--border); padding-bottom:12px; }
+    .tab-btn { background:transparent; border:none; color:var(--muted); padding:8px 16px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px; }
+    .tab-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+    .tab-btn.active { color:white; background:var(--accent); }
+
+    /* ── Log Monitor ── */
+    .log-filter-bar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; background:var(--surface2); padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border); }
+    .filter-group { display:flex; align-items:center; gap:8px; }
+    .filter-label { font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; }
+    .filter-btn { background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; transition:background .15s; }
+    .filter-btn:hover { background:rgba(255,255,255,0.12); }
+    .filter-btn.active { background:var(--accent); border-color:var(--accent); color:white; }
+    
+    .clear-btn { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; }
+    .clear-btn:hover { background:rgba(239,68,68,0.25); }
+
+    .audit-card { background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius); padding:16px 20px; margin-bottom:20px; }
+    .audit-card.success { background:rgba(16,185,129,0.06); border-color:rgba(16,185,129,0.2); }
+    .audit-card h3 { font-size:14px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .audit-card.success h3 { color:var(--green); }
+    .audit-card.danger h3 { color:var(--red); }
+    .audit-list { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    .audit-item { font-size:13px; background:rgba(0,0,0,0.2); padding:12px; border-radius:6px; border-left:3px solid var(--red); display:flex; flex-direction:column; gap:4px; }
+    .audit-item.payment-missing { border-left-color:var(--yellow); }
+    
+    .badge-level { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase; text-align:center; min-width:60px; }
+    .level-info { background:rgba(16,185,129,0.15); color:#10b981; }
+    .level-warn { background:rgba(251,191,36,0.15); color:#fbbf24; }
+    .level-error { background:rgba(248,113,113,0.15); color:#f87171; }
+    
+    .log-row { cursor:pointer; transition:background .15s; }
+    .log-row:hover { background:rgba(255,255,255,0.02); }
+    .log-meta-box { background:#07070d; padding:12px; border-radius:6px; border:1px dashed var(--border); font-family:monospace; font-size:12px; color:#a3e635; overflow-x:auto; margin:8px 0; white-space:pre-wrap; }
+    .log-meta-toggle { background:transparent; border:none; color:var(--muted); font-size:12px; cursor:pointer; text-decoration:underline; }
+    .log-meta-toggle:hover { color:var(--text); }
   </style>
 </head>
 <body>
@@ -158,7 +195,15 @@
   </div>
 
   <div class="content">
-    <div class="cards-grid">
+    <!-- Tab Bar -->
+    <div class="tab-container">
+      <button class="tab-btn active" id="btn-tab-analytics">📊 Dashboard & Analytics</button>
+      <button class="tab-btn" id="btn-tab-logs">📋 Log Monitor & Audit</button>
+    </div>
+
+    <!-- Panel 1: Analytics -->
+    <div id="panel-analytics">
+      <div class="cards-grid">
       <div class="stat-card green">
         <div class="label">🟢 Online Now</div>
         <div class="value" id="c-online">—</div>
@@ -281,9 +326,47 @@
         <div id="shop-recent-wrap"><div class="skeleton"></div></div>
       </div>
     </div>
+    
+    </div> <!-- end of panel-analytics -->
 
-  </div>
-</div>
+    <!-- Panel 2: Log Monitor -->
+    <div id="panel-logs" style="display:none">
+      <!-- Integrity Alerts -->
+      <div id="audit-alerts-wrap"></div>
+
+      <!-- System Logs Table Card -->
+      <div class="table-card">
+        <div class="log-filter-bar">
+          <div class="filter-group">
+            <span class="filter-label">Level:</span>
+            <button class="filter-btn active" data-filter-level="all">All</button>
+            <button class="filter-btn" data-filter-level="info" style="color:#10b981">Info</button>
+            <button class="filter-btn" data-filter-level="warn" style="color:#fbbf24">Warn</button>
+            <button class="filter-btn" data-filter-level="error" style="color:#f87171">Error</button>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Category:</span>
+            <button class="filter-btn active" data-filter-cat="all">All</button>
+            <button class="filter-btn" data-filter-cat="shop">Shop</button>
+            <button class="filter-btn" data-filter-cat="auth">Auth</button>
+            <button class="filter-btn" data-filter-cat="game">Game</button>
+            <button class="filter-btn" data-filter-cat="db">DB</button>
+            <button class="filter-btn" data-filter-cat="system">System</button>
+          </div>
+          <div>
+            <button class="clear-btn" id="clear-logs-btn">🗑️ Clear Logs</button>
+          </div>
+        </div>
+
+        <h3>📋 System Activity & Error Logs</h3>
+        <div class="list-scroll" style="max-height:500px">
+          <div id="system-logs-wrap"><div class="skeleton"></div></div>
+        </div>
+      </div>
+    </div> <!-- end of panel-logs -->
+
+  </div> <!-- end of content -->
+</div> <!-- end of dashboard -->
 
 <script>
 const SUPABASE_URL  = 'https://sqjllqilozhxbzvfjhra.supabase.co';
@@ -293,6 +376,11 @@ const AUTO_REFRESH  = 60_000;
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let trendChart = null, diffChart = null, hourlyChart = null, shopCatChart = null;
+
+let currentTab = 'analytics';
+let activeFilterLevel = 'all';
+let activeFilterCat = 'all';
+let loadedLogs = [];
 
 // ── Auth ──────────────────────────────────────────────────────────────
 document.getElementById('login-google').onclick = async () => {
@@ -362,6 +450,20 @@ function fmtTime(s) {
   return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 function setEl(id, v) { const e = document.getElementById(id); if (e) e.textContent = v ?? '—'; }
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  if (typeof str !== 'string') return String(str);
+  return str.replace(/[&<>"']/g, function(m) {
+    switch (m) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#039;';
+    }
+  });
+}
 
 function renderCards(d) {
   setEl('c-online',          fmt(d.online_now));
@@ -566,10 +668,178 @@ function renderShopRecent(data) {
     </tr>`).join('')}</tbody></table>`;
 }
 
+// ── Log Monitor Renders ────────────────────────────────────────────────
+function renderSystemLogs() {
+  const systemLogsWrap = document.getElementById('system-logs-wrap');
+  let filtered = loadedLogs;
+  
+  if (activeFilterLevel !== 'all') {
+    filtered = filtered.filter(l => l.level === activeFilterLevel);
+  }
+  if (activeFilterCat !== 'all') {
+    filtered = filtered.filter(l => l.category === activeFilterCat);
+  }
+  
+  if (!filtered.length) {
+    systemLogsWrap.innerHTML = '<div class="empty">ไม่มีบันทึกกิจกรรมตามเงื่อนไขที่เลือก</div>';
+    return;
+  }
+  
+  systemLogsWrap.innerHTML = `<table>
+    <thead>
+      <tr>
+        <th style="width: 140px;">Time</th>
+        <th style="width: 80px;">Level</th>
+        <th style="width: 80px;">Category</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${filtered.map(l => {
+        const dateStr = new Date(l.created_at).toLocaleString('th-TH', {
+          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        const hasMeta = l.metadata && Object.keys(l.metadata).length > 0;
+        const metaToggle = hasMeta ? `<br><button class="log-meta-toggle" onclick="toggleMeta(${l.id})">🔍 View Metadata</button>` : '';
+        return `
+          <tr class="log-row" id="log-row-${l.id}">
+            <td style="color:var(--muted);font-size:13px;white-space:nowrap">${dateStr}</td>
+            <td><span class="badge-level level-${l.level}">${l.level}</span></td>
+            <td><span class="cat-badge">${l.category}</span></td>
+            <td>
+              <strong>${escapeHtml(l.message)}</strong>
+              ${metaToggle}
+              <div id="log-meta-${l.id}" class="log-meta-box" style="display:none">
+                <pre>${escapeHtml(JSON.stringify(l.metadata, null, 2))}</pre>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+function toggleMeta(id) {
+  const el = document.getElementById(`log-meta-${id}`);
+  if (el) {
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+function renderAuditAlerts(anomalies) {
+  const auditAlertsWrap = document.getElementById('audit-alerts-wrap');
+  if (!anomalies) {
+    auditAlertsWrap.innerHTML = `
+      <div class="audit-card success">
+        <h3>🟢 ตรวจสอบระบบฐานข้อมูล: ปกติ</h3>
+        <p style="font-size:13px;color:var(--muted)">ไม่พบข้อมูลการทำธุรกรรมหรือประวัติผู้ใช้ที่ขัดแย้งกัน</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const mi = anomalies.missing_inventory || [];
+  const mp = anomalies.missing_payment || [];
+  
+  if (mi.length === 0 && mp.length === 0) {
+    auditAlertsWrap.innerHTML = `
+      <div class="audit-card success">
+        <h3>🟢 ตรวจสอบระบบฐานข้อมูล: ปกติ</h3>
+        <p style="font-size:13px;color:var(--muted)">ไม่พบความขัดแย้งของเงินเหรียญและประวัติไอเท็มของสมาชิก</p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = `
+    <div class="audit-card danger">
+      <h3>⚠️ ตรวจพบความขัดแย้งของข้อมูล (Database Anomalies Detected)</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        ระบบตรวจสอบความสอดคล้องระหว่างประวัติการหักเหรียญและการเป็นเจ้าของไอเท็มพบข้อผิดพลาดดังนี้:
+      </p>
+      <div class="audit-list">
+  `;
+  
+  mi.forEach(item => {
+    html += `
+      <div class="audit-item">
+        <div>
+          <strong style="color:var(--red)">🚨 [เงินลดแต่ไม่ได้ของ] สมาชิกชำระเงินแล้ว แต่ไม่พบไอเท็มในระบบ</strong><br>
+          <span>ผู้ใช้: <strong>${escapeHtml(item.display_name)}</strong> (@${escapeHtml(item.email)})</span><br>
+          <span>UUID: <code style="color:#f472b6">${item.user_id}</code></span><br>
+          <span>รหัสไอเท็มที่สั่งซื้อ: <strong style="color:white">${escapeHtml(item.item_id)}</strong> (ถูกหัก ${Math.abs(item.coins_deducted)} 🪙)</span>
+        </div>
+        <span style="color:var(--muted);font-size:11px">${new Date(item.transaction_time).toLocaleString('th-TH')}</span>
+      </div>
+    `;
+  });
+  
+  mp.forEach(item => {
+    html += `
+      <div class="audit-item payment-missing">
+        <div>
+          <strong style="color:var(--yellow)">⚠️ [ได้ของฟรี / บั๊กยอดเงินไม่ลด] สมาชิกมีไอเท็ม แต่ไม่มีรายการชำระเงิน</strong><br>
+          <span>ผู้ใช้: <strong>${escapeHtml(item.display_name)}</strong> (@${escapeHtml(item.email)})</span><br>
+          <span>UUID: <code style="color:#f472b6">${item.user_id}</code></span><br>
+          <span>ไอเท็มที่ครอบครอง: <strong style="color:white">${escapeHtml(item.item_id)}</strong> (ราคาจริงควรเป็น ${item.item_price} 🪙)</span>
+        </div>
+        <span style="color:var(--muted);font-size:11px">${new Date(item.acquisition_time).toLocaleString('th-TH')}</span>
+      </div>
+    `;
+  });
+  
+  html += `
+      </div>
+    </div>
+  `;
+  
+  auditAlertsWrap.innerHTML = html;
+}
+
+async function loadLogsData() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  
+  const systemLogsWrap = document.getElementById('system-logs-wrap');
+  const auditAlertsWrap = document.getElementById('audit-alerts-wrap');
+  
+  // Show skeletons
+  systemLogsWrap.innerHTML = '<div class="skeleton"></div>';
+  auditAlertsWrap.innerHTML = '<div class="skeleton"></div>';
+  
+  const [logs, anomalies] = await Promise.all([
+    callRpc('get_admin_system_logs', session.access_token),
+    callRpc('get_admin_audit_anomalies', session.access_token)
+  ]);
+  
+  loadedLogs = logs || [];
+  renderSystemLogs();
+  renderAuditAlerts(anomalies);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('btn-tab-analytics').classList.toggle('active', tab === 'analytics');
+  document.getElementById('btn-tab-logs').classList.toggle('active', tab === 'logs');
+  document.getElementById('panel-analytics').style.display = tab === 'analytics' ? 'block' : 'none';
+  document.getElementById('panel-logs').style.display = tab === 'logs' ? 'block' : 'none';
+  
+  loadData();
+}
+
 // ── Load data ─────────────────────────────────────────────────────────
 async function loadData() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { location.reload(); return; }
+
+  if (currentTab === 'logs') {
+    await loadLogsData();
+    const now = new Date();
+    setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
+    return;
+  }
+
   const d = await callAdminStats(session.access_token);
   if (!d || d.error) {
     const errorMsg = d && d.error && d.error.message ? d.error.message : (d && d.message ? d.message : 'Unknown error');
@@ -623,6 +893,42 @@ async function boot() {
       avatar.style.display = 'block';
     }
     setEl('user-name', meta.full_name || meta.name || session.user.email);
+
+    // Wire Log Monitor tabs & buttons
+    document.getElementById('btn-tab-analytics').onclick = () => switchTab('analytics');
+    document.getElementById('btn-tab-logs').onclick = () => switchTab('logs');
+
+    document.querySelectorAll('[data-filter-level]').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('[data-filter-level]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilterLevel = btn.dataset.filterLevel;
+        renderSystemLogs();
+      };
+    });
+
+    document.querySelectorAll('[data-filter-cat]').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('[data-filter-cat]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilterCat = btn.dataset.filterCat;
+        renderSystemLogs();
+      };
+    });
+
+    document.getElementById('clear-logs-btn').onclick = async () => {
+      if (!confirm('คุณต้องการลบประวัติ Log ทั้งหมดในระบบจริงหรือไม่?')) return;
+      const { data: { session: currentSession } } = await sb.auth.getSession();
+      if (!currentSession) return;
+      
+      const ok = await callRpc('clear_admin_system_logs', currentSession.access_token);
+      if (ok) {
+        loadedLogs = [];
+        renderSystemLogs();
+      } else {
+        alert('ไม่สามารถลบ Log ได้');
+      }
+    };
 
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
