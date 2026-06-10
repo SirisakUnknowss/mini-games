@@ -82,14 +82,21 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) return reject('UNAUTHORIZED');
 
-  const supabase = createClient(
+  // Client used ONLY to verify the user identity via token
+  const supabaseUser = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
     { global: { headers: { Authorization: authHeader } } }
   );
 
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user }, error: authErr } = await supabaseUser.auth.getUser();
   if (authErr || !user) return reject('UNAUTHORIZED');
+
+  // Admin client used to perform DB queries and bypass RLS (using service_role key)
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  );
 
   let payload: Payload;
   try { payload = await req.json(); } catch { return reject('INVALID_PAYLOAD'); }
@@ -97,7 +104,7 @@ Deno.serve(async (req) => {
   if (!payload.date || !Array.isArray(payload.moves)) return reject('INVALID_PAYLOAD');
 
   // Fetch puzzle (service role bypasses RLS)
-  const { data: puzzle, error: pErr } = await supabase
+  const { data: puzzle, error: pErr } = await supabaseAdmin
     .from('daily_puzzles').select('*').eq('date', payload.date).single();
   if (pErr || !puzzle) return reject('PUZZLE_NOT_FOUND');
 
@@ -133,7 +140,7 @@ Deno.serve(async (req) => {
 
   const score = computeScore(puzzle.difficulty, payload.time_seconds, mistakeCount, hintCount);
 
-  const { error: insErr } = await supabase.from('daily_leaderboard').insert({
+  const { error: insErr } = await supabaseAdmin.from('daily_leaderboard').insert({
     date: payload.date,
     user_id: user.id,
     score,
@@ -147,7 +154,7 @@ Deno.serve(async (req) => {
   }
 
   // Rank
-  const { data: rankRow } = await supabase
+  const { data: rankRow } = await supabaseAdmin
     .from('leaderboard_view').select('rank, total_players')
     .eq('date', payload.date).eq('user_id', user.id).maybeSingle();
 
@@ -155,21 +162,21 @@ Deno.serve(async (req) => {
   const coinReward = computeCoin(puzzle.difficulty, mistakeCount, hintCount);
   const xpReward = computeXp(puzzle.difficulty, mistakeCount, hintCount);
 
-  await supabase.rpc('grant_coins', {
+  await supabaseAdmin.rpc('grant_coins', {
     p_user_id: user.id,
     p_amount: coinReward,
     p_reason: 'daily_complete',
     p_metadata: { date: payload.date, score },
   });
-  const { data: xpResult } = await supabase.rpc('grant_xp', {
+  const { data: xpResult } = await supabaseAdmin.rpc('grant_xp', {
     p_user_id: user.id, p_amount: xpReward,
   });
-  const { data: streakResult } = await supabase.rpc('bump_streak_for_today', {
+  const { data: streakResult } = await supabaseAdmin.rpc('bump_streak_for_today', {
     p_user_id: user.id, p_date: payload.date,
   });
 
   // History log
-  await supabase.from('user_game_history').insert({
+  await supabaseAdmin.from('user_game_history').insert({
     user_id: user.id,
     mode: 'daily',
     level: puzzle.difficulty,

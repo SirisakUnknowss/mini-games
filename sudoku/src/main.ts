@@ -260,6 +260,17 @@ async function playPractice(level: Difficulty) {
   currentUnmount = view.unmount;
 }
 
+function showLoadingOverlay(text = 'Saving your score...'): () => void {
+  const overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.innerHTML = `
+    <div class="spinner"></div>
+    <p style="font-weight: 600; font-size: 15px; text-align: center;">${text}</p>
+  `;
+  document.body.appendChild(overlay);
+  return () => overlay.remove();
+}
+
 async function handleWin(result: GameResult, date?: string) {
   const event = result.mode === 'daily' ? Events.DAILY_PUZZLE_COMPLETED : Events.PRACTICE_COMPLETED;
   track(event, {
@@ -303,49 +314,59 @@ async function handleWin(result: GameResult, date?: string) {
 
   const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
 
-  if (isGuest) {
-    // Guest path — save to guest_game_history (no auth needed)
-    await submitGuestScore({
-      mode: result.mode,
-      daily_date: date,
-      level: result.difficulty,
-      time_seconds: result.timeSeconds,
-      mistakes: result.mistakes,
-      hints_used: result.hintsUsed,
-      score: result.score,
-    });
-  } else if (result.mode === 'daily' && date) {
-    // Signed-in member — submit to real leaderboard
-    try {
-      const { data } = await api.submitDailyScore({
-        date,
-        started_at: result.startedAt,
-        completed_at: result.completedAt,
-        time_seconds: result.timeSeconds,
-        mistakes: result.mistakes,
-        hints_used: result.hintsUsed,
-        moves: result.moves,
-      });
-      if (data?.rank) {
-        rank = data.rank;
-        totalPlayers = data.total_players;
-      }
-      await refreshStreakAndToast();
-    } catch (err) {
-      console.warn('Submit failed (offline?):', err);
-    }
-  } else if (result.mode === 'practice' && !isGuest) {
-    try {
-      await api.submitPracticeScore({
+  const hideLoading = showLoadingOverlay(
+    result.mode === 'daily'
+      ? 'Submitting daily score...'
+      : 'Saving practice progress...'
+  );
+
+  try {
+    if (isGuest) {
+      // Guest path — save to guest_game_history (no auth needed)
+      await submitGuestScore({
+        mode: result.mode,
+        daily_date: date,
         level: result.difficulty,
-        stage: 1,
         time_seconds: result.timeSeconds,
         mistakes: result.mistakes,
         hints_used: result.hintsUsed,
+        score: result.score,
       });
-    } catch (err) {
-      console.warn('Practice submit failed:', err);
+    } else if (result.mode === 'daily' && date) {
+      // Signed-in member — submit to real leaderboard
+      try {
+        const { data } = await api.submitDailyScore({
+          date,
+          started_at: result.startedAt,
+          completed_at: result.completedAt,
+          time_seconds: result.timeSeconds,
+          mistakes: result.mistakes,
+          hints_used: result.hintsUsed,
+          moves: result.moves,
+        });
+        if (data?.rank) {
+          rank = data.rank;
+          totalPlayers = data.total_players;
+        }
+        await refreshStreakAndToast();
+      } catch (err) {
+        console.warn('Submit failed (offline?):', err);
+      }
+    } else if (result.mode === 'practice' && !isGuest) {
+      try {
+        await api.submitPracticeScore({
+          level: result.difficulty,
+          stage: 1,
+          time_seconds: result.timeSeconds,
+          mistakes: result.mistakes,
+          hints_used: result.hintsUsed,
+        });
+      } catch (err) {
+        console.warn('Practice submit failed:', err);
+      }
     }
+  } finally {
+    hideLoading();
   }
 
   showWinModal({
