@@ -163,7 +163,7 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
           <span class="lb-name">${name}${isMe ? ' <span class="lb-you">you</span>' : ''}</span>
           <span class="lb-score">
             <strong>${r.score.toLocaleString()}</strong>
-            <small>${formatTime(r.time_seconds)} · ❌${r.mistakes}</small>
+            <small>${formatTime(r.time_seconds)}</small>
           </span>
         </div>`;
     }).join('');
@@ -197,7 +197,7 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
           </span>
           <span class="lb-score">
             <strong>${r.score.toLocaleString()}</strong>
-            <small>${formatTime(r.time_seconds)} · ❌${r.mistakes}</small>
+            <small>${formatTime(r.time_seconds)}</small>
           </span>
         </div>`;
     }).join('');

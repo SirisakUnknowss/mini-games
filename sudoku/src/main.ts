@@ -2,7 +2,7 @@
 // Main entry point
 // =====================================================================
 import './ui/styles/main.css';
-import { ensureUser, onAuthChange } from './lib/auth';
+import { getCurrentUser, onAuthChange } from './lib/auth';
 import { useStore } from './state/store';
 import * as api from './lib/api';
 import { initAnalytics, track, identify, captureError, Events } from './lib/analytics';
@@ -485,8 +485,12 @@ async function boot() {
         useStore.setState({ user });
         if (user) identify(user.id);
       });
+      // Use getCurrentUser() only — never auto-sign-in anonymously at boot.
+      // signInAnonymously() on a project without anonymous auth enabled
+      // invalidates the supabase-js auth state, which strips the Bearer token
+      // from subsequent REST requests and causes 401 on visitor_sessions.
       const user = await Promise.race([
-        ensureUser(),
+        getCurrentUser(),
         new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
       ]);
       if (user) {
@@ -501,7 +505,7 @@ async function boot() {
         }
         await loadUserData();
       } else {
-        console.warn('[Boot] Supabase unreachable — running in offline demo mode');
+        // No existing session → run as guest (visitor tracking still works via anon key)
         useStore.setState({ profile: { display_name: 'Guest' }, coins: 100 });
       }
     } catch (err) {
