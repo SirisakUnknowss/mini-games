@@ -20,7 +20,11 @@ export async function signInAnonymously(): Promise<AuthResult> {
 
 /** Sign up with email + password */
 export async function signUp(email: string, password: string): Promise<AuthResult> {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  // redirectTo must point to the deployed origin so email confirmation
+  // links don't send the user back to localhost.
+  // BASE_URL = '/mini-games/' on GitHub Pages, '/' in local dev.
+  const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } });
   if (error || !data.user) return { ok: false, error: error?.message };
   return { ok: true, user: data.user };
 }
