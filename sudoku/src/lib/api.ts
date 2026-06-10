@@ -173,17 +173,28 @@ export interface VisitorStats {
   total: number;
 }
 
+/** Get or create a stable session UUID in localStorage (no auth required) */
+function getSessionId(): string {
+  const KEY = 'sudoku_session_id_v1';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+
 /**
- * Record a visit for today (upsert — safe to call multiple times).
- * Silently ignores errors so offline / demo mode is unaffected.
+ * Record a visit for today (upsert — safe to call multiple times, no auth needed).
+ * Uses a stable session_id from localStorage so every device is counted once per day.
  */
 export async function trackVisit(): Promise<void> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return; // not authenticated yet — skip
+    const session_id = getSessionId();
+    const visited_date = new Date().toISOString().slice(0, 10);
     await supabase
-      .from('visitor_logs')
-      .upsert({ user_id: user.id, visited_date: new Date().toISOString().slice(0, 10) }, { onConflict: 'user_id,visited_date' });
+      .from('visitor_sessions')
+      .upsert({ session_id, visited_date }, { onConflict: 'session_id,visited_date' });
   } catch {
     // offline / demo mode — ignore
   }
