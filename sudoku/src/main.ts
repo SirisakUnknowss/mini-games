@@ -31,7 +31,7 @@ import { levelFromXp } from './lib/level';
 import { initSound, sfxCoin, sfxStreakMilestone, sfxLevelUp } from './lib/sound';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
-import { trackVisit, heartbeat, leaveOnline, getVisitorStats } from './lib/api';
+import { trackVisit, heartbeat, leaveOnline, getVisitorStats, submitGuestScore, migrateGuestScores } from './lib/api';
 import { useVisitorStore } from './state/visitor-store';
 
 const root = document.getElementById('app')!;
@@ -173,9 +173,13 @@ function openAuthAction() {
     showAuthModal({
       isUpgrade: true,
       onSuccess: async () => {
+        const migrated = await migrateGuestScores();
         await loadUserData();
         showHome();
-        toast('Progress saved! Sign in from any device to continue.');
+        const msg = migrated > 0
+          ? `Progress saved! ${migrated} game${migrated > 1 ? 's' : ''} transferred to your account.`
+          : 'Progress saved! Sign in from any device to continue.';
+        toast(msg, 3500);
       },
       onCancel: () => {},
     });
@@ -185,8 +189,10 @@ function openAuthAction() {
   } else {
     showAuthModal({
       onSuccess: async () => {
+        const migrated = await migrateGuestScores();
         await loadUserData();
         showHome();
+        if (migrated > 0) toast(`Welcome back! ${migrated} guest game${migrated > 1 ? 's' : ''} imported.`, 3500);
       },
       onCancel: () => {},
     });
@@ -295,8 +301,21 @@ async function handleWin(result: GameResult, date?: string) {
   let rank: number | undefined;
   let totalPlayers: number | undefined;
 
-  // Submit to server
-  if (result.mode === 'daily' && date) {
+  const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
+
+  if (isGuest) {
+    // Guest path — save to guest_game_history (no auth needed)
+    await submitGuestScore({
+      mode: result.mode,
+      daily_date: date,
+      level: result.difficulty,
+      time_seconds: result.timeSeconds,
+      mistakes: result.mistakes,
+      hints_used: result.hintsUsed,
+      score: result.score,
+    });
+  } else if (result.mode === 'daily' && date) {
+    // Signed-in member — submit to real leaderboard
     try {
       const { data } = await api.submitDailyScore({
         date,
@@ -311,17 +330,15 @@ async function handleWin(result: GameResult, date?: string) {
         rank = data.rank;
         totalPlayers = data.total_players;
       }
-      // Refresh progression to pick up new streak from server
       await refreshStreakAndToast();
     } catch (err) {
       console.warn('Submit failed (offline?):', err);
-      // TODO: queue for sync
     }
-  } else if (result.mode === 'practice') {
+  } else if (result.mode === 'practice' && !isGuest) {
     try {
       await api.submitPracticeScore({
         level: result.difficulty,
-        stage: 1, // TODO
+        stage: 1,
         time_seconds: result.timeSeconds,
         mistakes: result.mistakes,
         hints_used: result.hintsUsed,

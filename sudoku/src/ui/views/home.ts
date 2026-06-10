@@ -8,6 +8,7 @@ import { levelProgress } from '@lib/level';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 import { isMuted, toggleMute } from '@lib/sound';
 import { useVisitorStore } from '@state/visitor-store';
+import { getGuestDisplayId } from '@lib/api';
 
 export interface HomeViewProps {
   onPlayDaily: () => void;
@@ -63,8 +64,8 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
 
       ${isGuest ? `
         <div class="save-banner save-banner--compact" id="save-banner">
-          <span>💾 Guest mode</span>
-          <button class="btn btn--small" id="save-progress">Save</button>
+          <span>💾 Guest <span class="guest-id-chip">${getGuestDisplayId()}</span></span>
+          <button class="btn btn--small" id="save-progress">Save progress</button>
         </div>
       ` : ''}
 

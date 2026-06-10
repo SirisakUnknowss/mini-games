@@ -190,6 +190,25 @@ export function getSessionId(): string {
 }
 
 /**
+ * Get or create a human-readable guest display ID (e.g. "G-A1B2C3").
+ * Persisted in localStorage — same device = same ID even after login.
+ */
+export function getGuestDisplayId(): string {
+  const KEY = 'sudoku_guest_display_id_v1';
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    // Alphabet without confusing chars (O/0, I/1, S/5, Z/2)
+    const chars = 'ABCDEFGHJKLMNPQRTUVWXY3467';
+    const rand = Array.from({ length: 6 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+    id = `G-${rand}`;
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
+
+/**
  * Record a visit for today + mark as guest or member.
  * Uses session_id from localStorage — no auth required.
  */
@@ -230,6 +249,80 @@ export async function leaveOnline(): Promise<void> {
     const session_id = getSessionId();
     await supabase.from('online_sessions').delete().eq('session_id', session_id);
   } catch { /* ignore */ }
+}
+
+// === Guest Leaderboard ===
+
+export interface GuestLeaderboardRow {
+  session_id: string;
+  guest_display_id: string;
+  daily_date: string;
+  time_seconds: number;
+  mistakes: number;
+  hints_used: number;
+  score: number;
+  rank: number;
+  total_players: number;
+  completed_at: string;
+}
+
+export interface SubmitGuestScorePayload {
+  mode: 'daily' | 'practice';
+  daily_date?: string;
+  level: string;
+  time_seconds: number;
+  mistakes: number;
+  hints_used: number;
+  score: number;
+}
+
+/** Save a guest game result (no auth required). */
+export async function submitGuestScore(payload: SubmitGuestScorePayload): Promise<void> {
+  try {
+    const session_id = getSessionId();
+    const guest_display_id = getGuestDisplayId();
+    await supabase.from('guest_game_history').insert({
+      session_id,
+      guest_display_id,
+      mode: payload.mode,
+      daily_date: payload.daily_date ?? null,
+      level: payload.level,
+      time_seconds: payload.time_seconds,
+      mistakes: payload.mistakes,
+      hints_used: payload.hints_used,
+      score: payload.score,
+    });
+  } catch { /* offline / demo mode */ }
+}
+
+/** Fetch guest leaderboard for a given date. */
+export async function getGuestLeaderboard(date: string, limit = 100): Promise<GuestLeaderboardRow[]> {
+  const { data, error } = await supabase
+    .from('guest_leaderboard_view')
+    .select('*')
+    .eq('daily_date', date)
+    .order('rank', { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as GuestLeaderboardRow[];
+}
+
+/**
+ * Move all guest scores on this device to a real user account.
+ * Called automatically after a guest signs up / logs in.
+ */
+export async function migrateGuestScores(): Promise<number> {
+  try {
+    const session_id = getSessionId();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const { data, error } = await supabase.rpc('migrate_guest_scores', {
+      p_session_id: session_id,
+      p_user_id: user.id,
+    });
+    if (error) { console.warn('[migrateGuestScores]', error); return 0; }
+    return (data as number) ?? 0;
+  } catch { return 0; }
 }
 
 /**

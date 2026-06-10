@@ -406,6 +406,19 @@ h3 { font-size: 18px; }
   margin-bottom: 8px;
 }
 .save-banner--compact .btn { min-height: 30px; padding: 0 10px; font-size: 12px; }
+.guest-id-chip {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fde68a;
+  background: rgba(253,230,138,0.12);
+  border: 1px solid rgba(253,230,138,0.3);
+  border-radius: 4px;
+  padding: 0 5px;
+  margin-left: 4px;
+}
 
 /* ===== Home view — tight gaps so all cards fit short screens ===== */
 .view--home { gap: 8px; }
@@ -533,9 +546,27 @@ h3 { font-size: 18px; }
   background: rgba(0,0,0,0.25);
   padding: 4px;
   border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   width: 100%; max-width: 520px;
 }
+/* Main tabs: Members | Guests — slightly bigger */
+.lb-tabs--main .lb-tab { padding: 10px; font-size: 14px; }
+/* Date sub-tabs: Today | Yesterday — compact */
+.lb-tabs--date {
+  margin-bottom: 10px;
+  background: rgba(0,0,0,0.15);
+}
+.lb-tab-sm {
+  flex: 1;
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.55);
+  padding: 7px;
+  font-size: 12px; font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.lb-tab-sm.active { background: rgba(255,255,255,0.14); color: white; }
+
 .lb-tab {
   flex: 1;
   background: transparent; border: none;
@@ -543,8 +574,35 @@ h3 { font-size: 18px; }
   padding: 10px;
   font-size: 14px; font-weight: 700;
   border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 .lb-tab.active { background: rgba(255,255,255,0.18); color: white; }
+
+/* Guest ID badge */
+.lb-guest-badge {
+  width: 100%; max-width: 520px;
+  background: rgba(255,255,255,0.08);
+  border: 1px dashed rgba(255,255,255,0.25);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.lb-guest-badge strong {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #fde68a;
+}
+
+/* Guest display ID in leaderboard row — monospace */
+.lb-guest-id {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
 
 .lb-meta {
   width: 100%; max-width: 520px;
