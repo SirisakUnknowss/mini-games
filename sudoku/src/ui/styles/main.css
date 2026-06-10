@@ -52,13 +52,14 @@ input, textarea { font-family: inherit; }
 
 /* ===== Layout ===== */
 .view {
-  max-width: 720px;
+  width: 100%;
+  max-width: 520px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Leave room for the fixed bottom nav including the home indicator */
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  /* Leave room for the fixed bottom nav */
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
 }
 
 h1 {
@@ -70,11 +71,18 @@ h2 { font-size: 24px; }
 h3 { font-size: 18px; }
 .subtitle { opacity: 0.85; margin-bottom: 20px; }
 
-/* ===== Header ===== */
+/* ===== Header (Home) — sticky so it never scrolls away ===== */
 .header {
-  width: 100%; max-width: 520px;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  width: 100%;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.18);
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
+  padding: 8px 0;
+  margin-bottom: 8px;
 }
 .user-badge {
   background: rgba(0,0,0,0.3);
@@ -176,10 +184,18 @@ h3 { font-size: 18px; }
 .btn--small { min-height: 36px; padding: 0 12px; font-size: 13px; }
 
 /* ===== Game ===== */
+/* Top-bar (Leaderboard, Shop, Profile, etc.) — sticky */
 .top-bar {
-  width: 100%; max-width: 520px;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  width: 100%;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.18);
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 14px;
+  padding: 10px 0;
+  margin-bottom: 10px;
   gap: 10px;
 }
 .icon-btn {
@@ -550,20 +566,33 @@ h3 { font-size: 18px; }
 }
 
 /* ===== Leaderboard ===== */
+/* Leaderboard main tabs — sticky below top-bar */
 .lb-tabs {
   display: flex; gap: 6px;
   background: rgba(0,0,0,0.25);
   padding: 4px;
   border-radius: var(--radius-md);
-  margin-bottom: 8px;
-  width: 100%; max-width: 520px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+.lb-tabs--main {
+  position: sticky;
+  top: 54px;
+  z-index: 24;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 /* Main tabs: Members | Guests — slightly bigger */
 .lb-tabs--main .lb-tab { padding: 10px; font-size: 14px; }
-/* Date sub-tabs: Today | Yesterday — compact */
+/* Date sub-tabs: Today | Yesterday — compact, sticky below main tabs */
 .lb-tabs--date {
-  margin-bottom: 10px;
-  background: rgba(0,0,0,0.15);
+  position: sticky;
+  top: 110px;
+  z-index: 23;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.2);
 }
 .lb-tab-sm {
   flex: 1;
@@ -692,10 +721,12 @@ h3 { font-size: 18px; }
 }
 
 .lb-scroll {
+  /* Sits at bottom of the viewport above the nav — never overlaps list rows */
   position: sticky;
-  bottom: 90px;
-  margin-top: 12px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
   align-self: center;
+  margin-top: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 
 /* ===== Daily Quests ===== */
@@ -786,8 +817,15 @@ h3 { font-size: 18px; }
 
 /* ===== XP bar (home) ===== */
 .xp-bar {
-  width: 100%; max-width: 520px;
-  margin: 4px 0 14px;
+  position: sticky;
+  top: 52px;   /* just below sticky .header */
+  z-index: 24;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.12);
+  width: 100%;
+  padding: 4px 0 6px;
+  margin: 0 0 8px;
 }
 .xp-bar-label {
   display: flex; justify-content: space-between;
@@ -808,10 +846,18 @@ h3 { font-size: 18px; }
 }
 
 /* ===== Shop ===== */
+/* Shop filter tabs — sticky below top-bar */
 .shop-tabs {
+  position: sticky;
+  top: 54px;
+  z-index: 24;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(0,0,0,0.15);
   display: flex; gap: 6px; flex-wrap: wrap;
-  margin-bottom: 12px;
-  width: 100%; max-width: 720px;
+  padding: 6px 0;
+  margin-bottom: 8px;
+  width: 100%;
 }
 .shop-tab {
   background: rgba(0,0,0,0.25);
