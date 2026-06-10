@@ -68,20 +68,45 @@ export function mountHomeView(root: HTMLElement, props: HomeViewProps): { unmoun
         </div>
       ` : ''}
 
+      <!-- Live Stats Widget -->
+      <div class="card live-stats-card">
+        <div class="live-stats-header">
+          <span class="live-dot-wrap"><span class="live-dot"></span>LIVE</span>
+          <span class="live-stats-title">Community</span>
+        </div>
+        <div class="live-stats-grid">
+          <div class="ls-block ls-block--online">
+            <div class="ls-value"><span id="vs-online">${visitorStats.loaded ? fmtCount(visitorStats.online) : '—'}</span></div>
+            <div class="ls-label">online now</div>
+            <div class="ls-sub">
+              <span>👻 <span id="vs-online-guests">${visitorStats.loaded ? fmtCount(visitorStats.online_guests) : '—'}</span> guest</span>
+              <span>✉️ <span id="vs-online-members">${visitorStats.loaded ? fmtCount(visitorStats.online_members) : '—'}</span> member</span>
+            </div>
+          </div>
+          <div class="ls-divider"></div>
+          <div class="ls-block">
+            <div class="ls-value"><span id="vs-today">${visitorStats.loaded ? fmtCount(visitorStats.today) : '—'}</span></div>
+            <div class="ls-label">today</div>
+            <div class="ls-sub">
+              <span>👻 <span id="vs-today-guests">${visitorStats.loaded ? fmtCount(visitorStats.today_guests) : '—'}</span></span>
+              <span>✉️ <span id="vs-today-members">${visitorStats.loaded ? fmtCount(visitorStats.today_members) : '—'}</span></span>
+            </div>
+          </div>
+          <div class="ls-divider"></div>
+          <div class="ls-block">
+            <div class="ls-value"><span id="vs-total">${visitorStats.loaded ? fmtCount(visitorStats.total) : '—'}</span></div>
+            <div class="ls-label">all time</div>
+            <div class="ls-sub"><span>unique visitors</span></div>
+          </div>
+        </div>
+      </div>
+
       <div class="card daily-card">
         <div class="daily-head">
           <h3>📅 Daily Puzzle</h3>
           <span class="daily-difficulty">${todayDifficulty}</span>
         </div>
         <div class="daily-date" id="daily-status">${today} · Ready to play!</div>
-        <div class="visitor-counter">
-          <span class="visitor-pill" title="Players today">
-            🌍 <span id="visitor-today">${visitorStats.loaded ? fmtCount(visitorStats.today) : '—'}</span> today
-          </span>
-          <span class="visitor-pill" title="All-time players">
-            👥 <span id="visitor-total">${visitorStats.loaded ? fmtCount(visitorStats.total) : '—'}</span> total
-          </span>
-        </div>
         <button class="btn btn--full" id="play-daily">▶ Play Daily</button>
       </div>
 

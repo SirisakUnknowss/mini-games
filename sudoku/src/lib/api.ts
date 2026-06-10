@@ -169,12 +169,17 @@ export async function getGlobalSummary() {
 
 export interface VisitorStats {
   today: number;
+  today_guests: number;
+  today_members: number;
   week: number;
   total: number;
+  online: number;
+  online_guests: number;
+  online_members: number;
 }
 
 /** Get or create a stable session UUID in localStorage (no auth required) */
-function getSessionId(): string {
+export function getSessionId(): string {
   const KEY = 'sudoku_session_id_v1';
   let id = localStorage.getItem(KEY);
   if (!id) {
@@ -185,24 +190,50 @@ function getSessionId(): string {
 }
 
 /**
- * Record a visit for today (upsert — safe to call multiple times, no auth needed).
- * Uses a stable session_id from localStorage so every device is counted once per day.
+ * Record a visit for today + mark as guest or member.
+ * Uses session_id from localStorage — no auth required.
  */
-export async function trackVisit(): Promise<void> {
+export async function trackVisit(isGuest: boolean): Promise<void> {
   try {
     const session_id = getSessionId();
     const visited_date = new Date().toISOString().slice(0, 10);
     await supabase
       .from('visitor_sessions')
-      .upsert({ session_id, visited_date }, { onConflict: 'session_id,visited_date' });
-  } catch {
-    // offline / demo mode — ignore
-  }
+      .upsert(
+        { session_id, visited_date, is_guest: isGuest },
+        { onConflict: 'session_id,visited_date' }
+      );
+  } catch { /* offline / demo mode */ }
 }
 
 /**
- * Fetch today / week / all-time unique visitor counts.
- * Returns null when Supabase is not configured or request fails.
+ * Heartbeat — call every 30s to stay "online".
+ * Upserts into online_sessions; stale rows (>2min) = offline.
+ */
+export async function heartbeat(isGuest: boolean): Promise<void> {
+  try {
+    const session_id = getSessionId();
+    await supabase
+      .from('online_sessions')
+      .upsert(
+        { session_id, last_seen: new Date().toISOString(), is_guest: isGuest },
+        { onConflict: 'session_id' }
+      );
+  } catch { /* offline / demo mode */ }
+}
+
+/**
+ * Remove this session from online list (call on page close).
+ */
+export async function leaveOnline(): Promise<void> {
+  try {
+    const session_id = getSessionId();
+    await supabase.from('online_sessions').delete().eq('session_id', session_id);
+  } catch { /* ignore */ }
+}
+
+/**
+ * Fetch full visitor stats: today (guest/member), week, total, online now.
  */
 export async function getVisitorStats(): Promise<VisitorStats | null> {
   try {

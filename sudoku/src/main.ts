@@ -31,7 +31,7 @@ import { levelFromXp } from './lib/level';
 import { initSound, sfxCoin, sfxStreakMilestone, sfxLevelUp } from './lib/sound';
 import { signOut } from './lib/auth';
 import { computeDailyCoinReward, computePracticeCoinReward, computeXpReward } from './engine/scoring';
-import { trackVisit, getVisitorStats } from './lib/api';
+import { trackVisit, heartbeat, leaveOnline, getVisitorStats } from './lib/api';
 import { useVisitorStore } from './state/visitor-store';
 
 const root = document.getElementById('app')!;
@@ -395,6 +395,24 @@ function formatVisitorCount(n: number): string {
   return String(n);
 }
 
+async function refreshVisitorStats() {
+  const stats = await getVisitorStats();
+  if (!stats) return;
+  useVisitorStore.getState().setStats(stats);
+  // Live-patch DOM without re-rendering the whole view
+  const patch = (id: string, val: number) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatVisitorCount(val);
+  };
+  patch('vs-online',         stats.online);
+  patch('vs-online-guests',  stats.online_guests);
+  patch('vs-online-members', stats.online_members);
+  patch('vs-today',          stats.today);
+  patch('vs-today-guests',   stats.today_guests);
+  patch('vs-today-members',  stats.today_members);
+  patch('vs-total',          stats.total);
+}
+
 // =====================================================================
 // Toast
 // =====================================================================
@@ -485,19 +503,26 @@ async function boot() {
 
   showHome();
 
-  // Track this visit + fetch visitor stats (best-effort, non-blocking)
+  // Track visit + start heartbeat loop (best-effort, non-blocking)
   void (async () => {
-    await trackVisit();
-    const stats = await getVisitorStats();
-    if (stats) {
-      useVisitorStore.getState().setStats(stats);
-      // Refresh home UI counter if it's currently visible
-      const el = document.getElementById('visitor-today');
-      if (el) el.textContent = formatVisitorCount(stats.today);
-      const elTotal = document.getElementById('visitor-total');
-      if (elTotal) elTotal.textContent = formatVisitorCount(stats.total);
-    }
+    const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
+    await trackVisit(isGuest);
+    await heartbeat(isGuest);
+    await refreshVisitorStats();
   })();
+
+  // Heartbeat every 30s — keeps "online now" count accurate
+  const heartbeatInterval = setInterval(async () => {
+    const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
+    await heartbeat(isGuest);
+    await refreshVisitorStats();
+  }, 30_000);
+
+  // Leave online on tab close
+  window.addEventListener('beforeunload', () => {
+    void leaveOnline();
+    clearInterval(heartbeatInterval);
+  });
 
   // Show onboarding once per device (after home is mounted so it has a backdrop)
   if (!hasCompletedOnboarding()) {
