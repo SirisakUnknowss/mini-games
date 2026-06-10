@@ -29,6 +29,22 @@ export async function signUp(email: string, password: string): Promise<AuthResul
   return { ok: true, user: data.user };
 }
 
+/**
+ * Sign in with Google OAuth.
+ * Redirects the browser to Google → comes back to BASE_URL on success.
+ * Session is picked up automatically by onAuthStateChange on return.
+ */
+export async function signInWithGoogle(): Promise<void> {
+  const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      queryParams: { access_type: 'offline', prompt: 'select_account' },
+    },
+  });
+}
+
 /** Sign in with email + password */
 export async function signIn(email: string, password: string): Promise<AuthResult> {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });

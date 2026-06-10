@@ -524,6 +524,14 @@ async function boot() {
             console.info('[Boot] Migrated v1 data:', result.imported);
           }
         }
+        // Migrate any local guest scores (handles Google OAuth redirect login)
+        // migrateGuestScores() is idempotent — safe to call on every boot when user exists
+        if (localStorage.getItem('sudoku_guest_display_id_v1')) {
+          const migrated = await migrateGuestScores();
+          if (migrated > 0) {
+            console.info(`[Boot] Migrated ${migrated} guest score(s) from local session`);
+          }
+        }
         await loadUserData();
       } else {
         // No existing session → run as guest (visitor tracking still works via anon key)
