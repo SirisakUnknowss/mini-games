@@ -205,7 +205,6 @@
 <script>
 const SUPABASE_URL  = 'https://sqjllqilozhxbzvfjhra.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxamxscWlsb3poeGJ6dmZqaHJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NzQ4NzcsImV4cCI6MjA5NTQ1MDg3N30.jE514bJw8x550rR64ks7X2rN6bO_y7G1e0JjkBaf8xM';
-const ADMIN_UID     = 'a2dac4b1-a905-4838-ae30-9c32d395da80';
 const AUTO_REFRESH  = 60_000;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -241,7 +240,16 @@ async function callAdminStats(accessToken) {
     },
     body: '{}',
   });
-  return r.ok ? r.json() : null;
+  if (r.ok) {
+    return await r.json();
+  } else {
+    try {
+      const err = await r.json();
+      return { error: err };
+    } catch (e) {
+      return { error: { message: `HTTP ${r.status} ${r.statusText}` } };
+    }
+  }
 }
 
 // ── Render helpers ────────────────────────────────────────────────────
@@ -349,7 +357,15 @@ async function loadData() {
   if (!session) { location.reload(); return; }
   const d = await callAdminStats(session.access_token);
   if (!d || d.error) {
-    document.getElementById('login-error').textContent = '⛔ บัญชีนี้ไม่มีสิทธิ์เข้าถึง Admin';
+    const errorMsg = d && d.error && d.error.message ? d.error.message : (d && d.message ? d.message : 'Unknown error');
+    document.getElementById('login-error').innerHTML = `
+      ⛔ บัญชีนี้ไม่มีสิทธิ์เข้าถึง Admin<br>
+      <span style="font-size: 11px; opacity: 0.8; display: block; margin-top: 6px; line-height: 1.4;">
+        Logged in: <strong>${session.user.email}</strong><br>
+        UUID: <strong>${session.user.id}</strong><br>
+        Detail: ${errorMsg}
+      </span>
+    `;
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
     return;
@@ -368,11 +384,6 @@ async function boot() {
   const { data: { session } } = await sb.auth.getSession();
 
   if (session) {
-    if (session.user.id !== ADMIN_UID) {
-      await sb.auth.signOut();
-      document.getElementById('login-error').textContent = '⛔ บัญชีนี้ไม่มีสิทธิ์ใช้งาน Admin Dashboard';
-      return;
-    }
     // Show user info
     const meta = session.user.user_metadata || {};
     const avatar = document.getElementById('user-avatar');
