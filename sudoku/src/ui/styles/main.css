@@ -210,14 +210,13 @@ h3 { font-size: 18px; }
 .icon-btn:hover { background: rgba(0,0,0,0.5); }
 
 .game-stats {
-  display: flex; gap: 16px;
-  margin-bottom: 12px;
-  font-size: 15px; font-weight: bold;
+  display: flex; gap: 10px;
+  font-size: 14px; font-weight: bold;
   font-variant-numeric: tabular-nums;
 }
 .game-stats span {
   background: rgba(0,0,0,0.3);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: var(--radius-md);
 }
 
@@ -225,7 +224,8 @@ h3 { font-size: 18px; }
 .board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
-  width: min(92vw, 500px);
+  /* fit inside viewport: leave room for top-bar(54) + label(28) + numpad(56) + nav(88) + padding(32) = ~258px */
+  width: min(92vw, calc(100dvh - 260px), 440px);
   aspect-ratio: 1;
   background: var(--border-thick);
   border: 3px solid var(--border-thick);
@@ -260,8 +260,9 @@ h3 { font-size: 18px; }
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   gap: 5px;
-  width: min(92vw, 500px);
-  margin-top: 14px;
+  /* same width as board */
+  width: min(92vw, calc(100dvh - 260px), 440px);
+  margin-top: 10px;
 }
 .numpad button {
   aspect-ratio: 1;
@@ -450,6 +451,21 @@ h3 { font-size: 18px; }
 .view--home { gap: 8px; }
 .view--home .card { margin-bottom: 0; }
 .view--home .quests-card { min-height: 70px; }
+
+/* Game view — no bottom nav so minimal bottom padding */
+.view--game {
+  padding-bottom: 16px;
+  /* Prevent any scroll — everything must fit in viewport */
+  overflow: hidden;
+  height: 100dvh;
+  justify-content: center;
+}
+/* Game label compact */
+.view--game #game-label {
+  font-size: 13px;
+  margin-bottom: 6px !important;
+  opacity: 0.85;
+}
 
 /* ===== Modal ===== */
 .modal-bg {
@@ -722,11 +738,9 @@ h3 { font-size: 18px; }
 }
 
 .lb-scroll {
-  /* Sits at bottom of the viewport above the nav — never overlaps list rows */
-  position: sticky;
-  bottom: calc(80px + env(safe-area-inset-bottom));
-  align-self: center;
-  margin-top: 10px;
+  /* Normal flow button — never overlaps rows */
+  display: block;
+  margin: 14px auto 6px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
 

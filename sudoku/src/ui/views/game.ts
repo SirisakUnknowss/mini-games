@@ -52,7 +52,7 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
 
   // DOM
   root.innerHTML = `
-    <section class="view">
+    <section class="view view--game">
       <div class="top-bar">
         <button class="icon-btn" id="back-btn" aria-label="Back">←</button>
         <div class="game-stats">
