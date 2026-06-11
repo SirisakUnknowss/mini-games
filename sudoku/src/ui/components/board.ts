@@ -8,6 +8,7 @@ export interface BoardRenderOptions {
   userBoard: Board;
   givenMask: boolean[][];
   hintMask: boolean[][];
+  noteMask: Set<number>[][];
   selected: { r: number; c: number } | null;
   settings: {
     highlightSame: boolean;
@@ -21,7 +22,7 @@ export function renderBoard(container: HTMLElement, opts: BoardRenderOptions): v
   container.innerHTML = '';
   container.className = 'board';
 
-  const { userBoard, givenMask, hintMask, selected, settings, onCellClick } = opts;
+  const { userBoard, givenMask, hintMask, noteMask, selected, settings, onCellClick } = opts;
   const selVal = selected ? userBoard[selected.r][selected.c] : 0;
 
   for (let r = 0; r < 9; r++) {
@@ -30,22 +31,38 @@ export function renderBoard(container: HTMLElement, opts: BoardRenderOptions): v
       cell.className = 'cell';
 
       const v = userBoard[r][c];
-      if (v !== 0) cell.textContent = String(v);
+      const notes = noteMask[r][c];
 
-      if (givenMask[r][c]) cell.classList.add('given');
-      else if (hintMask[r][c]) cell.classList.add('hint');
-      else if (v !== 0) cell.classList.add('user');
+      if (v !== 0) {
+        cell.textContent = String(v);
+        if (givenMask[r][c]) cell.classList.add('given');
+        else if (hintMask[r][c]) cell.classList.add('hint');
+        else cell.classList.add('user');
+      } else if (notes.size > 0) {
+        cell.classList.add('has-notes');
+        const grid = document.createElement('div');
+        grid.className = 'cell-notes';
+        for (let n = 1; n <= 9; n++) {
+          const span = document.createElement('span');
+          if (notes.has(n)) span.textContent = String(n);
+          grid.appendChild(span);
+        }
+        cell.appendChild(grid);
+      }
 
       if (selected) {
-        if (selected.r === r && selected.c === c) cell.classList.add('selected');
-        else if (
+        if (selected.r === r && selected.c === c) {
+          cell.classList.add('selected');
+        } else if (
           settings.highlightRelated && (
             selected.r === r ||
             selected.c === c ||
             (Math.floor(selected.r / 3) === Math.floor(r / 3) &&
              Math.floor(selected.c / 3) === Math.floor(c / 3))
           )
-        ) cell.classList.add('related');
+        ) {
+          cell.classList.add('related');
+        }
 
         if (
           settings.highlightSame &&
