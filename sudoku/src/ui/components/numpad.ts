@@ -1,12 +1,14 @@
 // =====================================================================
-// Numpad component — 3×3 grid, shows remaining count
+// Numpad component
 // =====================================================================
 import type { Board } from '@engine/types';
 
 export interface NumpadOptions {
   userBoard: Board;
   solution: Board;
+  hideDone: boolean;
   onNumber: (n: number) => void;
+  onErase: () => void;
 }
 
 function countCorrectPlaced(userBoard: Board, solution: Board, n: number): number {
@@ -24,27 +26,21 @@ export function renderNumpad(container: HTMLElement, opts: NumpadOptions): void 
   container.className = 'numpad';
 
   for (let n = 1; n <= 9; n++) {
-    const placed = countCorrectPlaced(opts.userBoard, opts.solution, n);
-    const remaining = 9 - placed;
-
     const btn = document.createElement('button');
+    btn.textContent = String(n);
     btn.dataset.num = String(n);
-    if (remaining === 0) btn.classList.add('done');
-
-    const numSpan = document.createElement('span');
-    numSpan.className = 'numpad-num';
-    numSpan.textContent = String(n);
-
-    const countSpan = document.createElement('span');
-    countSpan.className = 'numpad-count';
-    countSpan.textContent = remaining > 0 ? String(remaining) : '';
-
-    btn.appendChild(numSpan);
-    btn.appendChild(countSpan);
-
+    if (opts.hideDone && countCorrectPlaced(opts.userBoard, opts.solution, n) === 9) {
+      btn.classList.add('done');
+    }
     btn.addEventListener('click', () => {
       if (!btn.classList.contains('done')) opts.onNumber(n);
     });
     container.appendChild(btn);
   }
+
+  const erase = document.createElement('button');
+  erase.className = 'erase';
+  erase.textContent = '⌫';
+  erase.addEventListener('click', () => opts.onErase());
+  container.appendChild(erase);
 }
