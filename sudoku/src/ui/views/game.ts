@@ -61,11 +61,12 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
         </div>
         <button class="icon-btn" id="hint-btn" aria-label="Hint">💡<span id="hint-count" style="font-size:11px;margin-left:2px;">3</span></button>
       </div>
-      <div id="game-label" style="margin-bottom:12px;font-weight:bold;">
+      <div id="game-label">
         ${mode === 'daily' ? `Daily · ${difficulty}` : `Practice · ${difficulty}`}
       </div>
       <div id="board" class="board"></div>
       <div id="numpad" class="numpad"></div>
+      <a href="https://www.facebook.com/10Hands" target="_blank" rel="noopener noreferrer" class="game-footer">Developed by Unknowss</a>
     </section>
   `;
 

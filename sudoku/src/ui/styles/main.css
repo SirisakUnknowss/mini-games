@@ -459,13 +459,12 @@ h3 { font-size: 18px; }
 .view--home .card { margin-bottom: 0; }
 .view--home .quests-card { min-height: 70px; }
 
-/* Game view — no bottom nav so minimal bottom padding */
+/* Game view — board at top, footer pinned at bottom */
 .view--game {
-  padding-bottom: 16px;
-  /* Prevent any scroll — everything must fit in viewport */
+  padding-bottom: 0;
   overflow: hidden;
   height: 100dvh;
-  justify-content: center;
+  justify-content: flex-start;
 }
 /* Game label compact */
 .view--game #game-label {
@@ -473,6 +472,19 @@ h3 { font-size: 18px; }
   margin-bottom: 6px !important;
   opacity: 0.85;
 }
+.game-footer {
+  margin-top: auto;
+  padding: 10px 16px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.game-footer:hover { color: rgba(255,255,255,0.7); }
 
 /* ===== Modal ===== */
 .modal-bg {
