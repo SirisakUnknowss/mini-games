@@ -227,6 +227,7 @@ h3 { font-size: 18px; }
 /* ===== Game card top-bar ===== */
 .game-topbar {
   display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
   padding: 4px 0 12px;
   gap: 6px;
   overflow: visible;
