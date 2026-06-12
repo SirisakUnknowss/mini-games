@@ -89,19 +89,21 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
                 <span id="mode-pill-label">${diffLabel}</span>
                </button>`
           }
-          <div class="game-stats-row">
-            <div class="stat-block">
-              <span class="stat-label">MISTAKES</span>
-              <span class="stat-value"><span id="mistake-count">0</span>/3</span>
+          <div class="topbar-right">
+            <div class="game-stats-row">
+              <div class="stat-block">
+                <span class="stat-label">MISTAKES</span>
+                <span class="stat-value"><span id="mistake-count">0</span>/3</span>
+              </div>
+              <div class="stat-block">
+                <span class="stat-label">TIME</span>
+                <span class="stat-value" id="timer">00:00</span>
+              </div>
             </div>
-            <div class="stat-block">
-              <span class="stat-label">TIME</span>
-              <span class="stat-value" id="timer">00:00</span>
-            </div>
+            <button class="topbar-icon-btn" id="menu-btn" title="Menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </button>
           </div>
-          <button class="topbar-icon-btn" id="menu-btn" title="Menu">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-          </button>
         </div>
 
         <div class="board-wrap">
@@ -109,7 +111,7 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
           <div class="board-overlay" id="board-overlay">
             <div class="board-menu">
               <button class="board-menu-btn board-menu-btn--resume" id="overlay-resume">Resume</button>
-              <button class="board-menu-btn board-menu-btn--new" id="overlay-new">New Game</button>
+              ${mode !== 'daily' ? `<button class="board-menu-btn board-menu-btn--new" id="overlay-new">New Game</button>` : ''}
               <button class="board-menu-btn board-menu-btn--leave" id="overlay-leave">Leave Game</button>
             </div>
           </div>

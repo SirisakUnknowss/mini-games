@@ -231,6 +231,9 @@ h3 { font-size: 18px; }
   gap: 6px;
   overflow: visible;
 }
+.topbar-right {
+  display: flex; align-items: center; gap: 6px;
+}
 .mode-pill {
   display: flex; align-items: center; gap: 5px;
   background: #f0ecff;
