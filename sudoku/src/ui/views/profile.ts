@@ -6,6 +6,7 @@ import * as api from '@lib/api';
 import { escapeHtml, formatNumber } from '@lib/format';
 import { track } from '@lib/analytics';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 export interface ProfileProps {
   onBack: () => void;
@@ -69,15 +70,15 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
       <div class="profile-stats">
         <div class="stat-tile">
           <div class="stat-label">STREAK</div>
-          <div class="stat-value">🔥 ${state.currentStreak}</div>
+          <div class="stat-value">${ic.streak(14)} ${state.currentStreak}</div>
         </div>
         <div class="stat-tile">
           <div class="stat-label">LEVEL</div>
-          <div class="stat-value">⭐ ${state.level}</div>
+          <div class="stat-value">${ic.star(14)} ${state.level}</div>
         </div>
         <div class="stat-tile">
           <div class="stat-label">COINS</div>
-          <div class="stat-value">💰 ${formatNumber(state.coins)}</div>
+          <div class="stat-value">${ic.coin(14)} ${formatNumber(state.coins)}</div>
         </div>
       </div>
 

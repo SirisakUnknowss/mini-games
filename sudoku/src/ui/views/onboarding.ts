@@ -4,6 +4,7 @@
 import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { track } from '@lib/analytics';
+import { ic } from '@ui/icons';
 
 const ONBOARDED_KEY = 'sudoku_onboarded_v1';
 
@@ -66,7 +67,7 @@ export function showOnboarding(props: OnboardingProps): void {
 
     if (step === 0) {
       body = `
-        <div class="onb-emoji">👋</div>
+        <div class="onb-emoji" style="color:var(--brand-primary);">${ic.wave(48)}</div>
         <h2>Welcome to Sudoku Daily!</h2>
         <p class="onb-sub">Let's set up your account. What should we call you?</p>
         <label class="auth-field" style="margin-top:14px;">
@@ -77,7 +78,7 @@ export function showOnboarding(props: OnboardingProps): void {
       primaryLabel = 'Continue';
     } else if (step === 1) {
       body = `
-        <div class="onb-emoji">🧠</div>
+        <div class="onb-emoji" style="color:var(--brand-primary);">${ic.brain(48)}</div>
         <h2>How to play</h2>
         <ul class="onb-list">
           <li>Fill the grid so every <strong>row</strong>, <strong>column</strong>, and <strong>3×3 box</strong> contains digits 1–9.</li>
@@ -87,29 +88,29 @@ export function showOnboarding(props: OnboardingProps): void {
       `;
     } else if (step === 2) {
       body = `
-        <div class="onb-emoji">📅</div>
+        <div class="onb-emoji" style="color:var(--brand-primary);">${ic.daily(48)}</div>
         <h2>One puzzle per day</h2>
         <ul class="onb-list">
           <li>A new daily puzzle drops every midnight UTC.</li>
-          <li>Keep your <strong>🔥 streak</strong> alive — play every day!</li>
+          <li>Keep your <strong>${ic.streak(13)} streak</strong> alive — play every day!</li>
           <li>Climb the global <strong>leaderboard</strong> for bragging rights.</li>
         </ul>
         <p class="onb-sub" style="margin-top:12px;">Want a daily reminder?</p>
         <div class="onb-choices">
-          <button class="btn btn--secondary" data-notif="accept">🔔 Yes, remind me</button>
+          <button class="btn btn--secondary" data-notif="accept">${ic.bell(14)} Yes, remind me</button>
           <button class="btn btn--secondary" data-notif="skip">No thanks</button>
         </div>
       `;
       primaryLabel = 'Next';
     } else {
       body = `
-        <div class="onb-emoji">🚀</div>
+        <div class="onb-emoji" style="color:var(--brand-primary);">${ic.rocket(48)}</div>
         <h2>You're all set!</h2>
         <p class="onb-sub">Ready to start your first daily puzzle?</p>
         <ul class="onb-list" style="margin-top:14px;">
-          <li>💰 Earn coins for each puzzle</li>
-          <li>⭐ Level up by gaining XP</li>
-          <li>🏆 Unlock achievements</li>
+          <li>${ic.coin(13)} Earn coins for each puzzle</li>
+          <li>${ic.star(13)} Level up by gaining XP</li>
+          <li>${ic.trophy(13)} Unlock achievements</li>
         </ul>
       `;
       primaryLabel = "Let's play!";

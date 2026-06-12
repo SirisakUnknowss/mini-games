@@ -6,6 +6,7 @@ import { supabase } from '@lib/supabase';
 import * as api from '@lib/api';
 import { formatTime, todayUtc, escapeHtml } from '@lib/format';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 export interface LeaderboardProps {
   onBack: () => void;
@@ -132,7 +133,7 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
     if (errorMsg) {
       listEl.innerHTML = `
         <div class="lb-empty">
-          <p>⚠️ ${escapeHtml(errorMsg)}</p>
+          <p>${ic.warning(16)} ${escapeHtml(errorMsg)}</p>
           <button class="btn btn--small" id="lb-retry">Retry</button>
         </div>`;
       listEl.querySelector('#lb-retry')?.addEventListener('click', () => void load());
@@ -149,7 +150,7 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
     if (memberRows.length === 0) {
       listEl.innerHTML = `
         <div class="lb-empty">
-          <p>🫥 No scores yet for ${activeDate()}.</p>
+          <p>${ic.empty(20)} No scores yet for ${activeDate()}.</p>
           <p style="opacity:0.75;font-size:13px;">Be the first to finish today's puzzle!</p>
         </div>`;
       metaEl.textContent = '';
@@ -185,7 +186,7 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
     if (guestRows.length === 0) {
       listEl.innerHTML = `
         <div class="lb-empty">
-          <p>👻 No guest scores yet for today.</p>
+          <p>${ic.empty(20)} No guest scores yet for today.</p>
           <p style="opacity:0.75;font-size:13px;">Play the daily puzzle to appear here!</p>
         </div>`;
       metaEl.textContent = '';
@@ -199,10 +200,10 @@ export function mountLeaderboardView(root: HTMLElement, props: LeaderboardProps)
     `;
     listEl.innerHTML = guestRows.map((r) => {
       const isMe = r.session_id === mySessionId;
-      const medal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : '';
+      const badgeCls = r.rank === 1 ? 'lb-rank-1' : r.rank === 2 ? 'lb-rank-2' : r.rank === 3 ? 'lb-rank-3' : 'lb-rank-other';
       return `
         <div class="lb-row${isMe ? ' is-me' : ''}" data-sid="${escapeHtml(r.session_id)}">
-          <span class="lb-rank">${medal || '#' + r.rank}</span>
+          <span class="lb-rank"><span class="lb-rank-badge ${badgeCls}">${r.rank}</span></span>
           <span class="lb-name lb-guest-id">
             ${escapeHtml(r.guest_display_id)}${isMe ? ' <span class="lb-you">you</span>' : ''}
           </span>
