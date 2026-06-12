@@ -132,6 +132,8 @@ function showProfile() {
       if (confirm('Sign out?')) {
         void signOut().then(() => {
           useStore.setState({ user: null, profile: null, coins: 0, xp: 0, level: 1, currentStreak: 0 });
+          applyBackground('bg_default');
+          applyTheme('theme_classic');
           void boot();
         });
       }
