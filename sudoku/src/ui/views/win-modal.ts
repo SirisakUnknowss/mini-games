@@ -3,6 +3,7 @@
 // =====================================================================
 import type { GameResult } from './game';
 import { formatTime } from '@lib/format';
+import { ic } from '@ui/icons';
 
 export interface WinModalProps {
   result: GameResult;
@@ -26,30 +27,30 @@ export function showWinModal(props: WinModalProps): void {
   wrapper.className = 'modal-bg active';
   wrapper.innerHTML = `
     <div class="modal">
-      <h2>🎉 You won!</h2>
+      <h2>${ic.celebrate(22)} You won!</h2>
       <div class="big-number">${result.score.toLocaleString()}</div>
       <p class="small" style="opacity:0.8;">Points</p>
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0;">
-        <div style="background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;">
+        <div style="background:rgba(108,92,231,0.08);padding:8px;border-radius:12px;">
           <div style="font-size:11px;opacity:0.8;">Time</div>
-          <div style="font-size:18px;font-weight:bold;">${formatTime(result.timeSeconds)}</div>
+          <div style="font-size:18px;">${formatTime(result.timeSeconds)}</div>
         </div>
-        <div style="background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;">
+        <div style="background:rgba(108,92,231,0.08);padding:8px;border-radius:12px;">
           <div style="font-size:11px;opacity:0.8;">Mistakes</div>
-          <div style="font-size:18px;font-weight:bold;">${result.mistakes}</div>
+          <div style="font-size:18px;">${result.mistakes}</div>
         </div>
-        <div style="background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;">
+        <div style="background:rgba(108,92,231,0.08);padding:8px;border-radius:12px;">
           <div style="font-size:11px;opacity:0.8;">Hints</div>
-          <div style="font-size:18px;font-weight:bold;">${result.hintsUsed}</div>
+          <div style="font-size:18px;">${result.hintsUsed}</div>
         </div>
       </div>
 
-      ${rank ? `<p style="font-size:14px;margin-bottom:8px;">🏆 Rank #${rank} / ${totalPlayers}</p>` : ''}
-      ${isPersonalBest ? `<p style="color:var(--color-xp);font-weight:bold;">🏆 New Personal Best!</p>` : ''}
+      ${rank ? `<p style="font-size:14px;margin-bottom:8px;">${ic.trophy(14)} Rank #${rank} / ${totalPlayers}</p>` : ''}
+      ${isPersonalBest ? `<p style="color:var(--brand-primary);font-weight:600;">${ic.trophy(14)} New Personal Best!</p>` : ''}
 
       <p style="margin:12px 0;font-size:14px;">
-        💰 +${coinsEarned} coins · ⭐ +${xpEarned} XP
+        ${ic.coin(14)} +${coinsEarned} coins · ${ic.star(14)} +${xpEarned} XP
       </p>
 
       <div class="modal-buttons">

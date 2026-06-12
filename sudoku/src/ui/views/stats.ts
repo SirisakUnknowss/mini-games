@@ -7,6 +7,7 @@ import * as api from '@lib/api';
 import { formatTime, formatNumber, escapeHtml } from '@lib/format';
 import { drawLineChart, type LinePoint } from '@lib/chart';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 interface StatRow {
   total_games: number;
@@ -67,8 +68,8 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
   root.innerHTML = `
     <section class="view">
       <div class="top-bar">
-        <button class="icon-btn" id="stats-back" aria-label="Back">‹</button>
-        <h2 style="margin:0;">📊 Stats</h2>
+        <button class="icon-btn" id="stats-back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <h2 style="margin:0;font-size:16px;color:var(--app-text);">${ic.chart(16)} Stats</h2>
         <span style="width:38px;"></span>
       </div>
       <div id="stats-body" class="stats-body"><div class="shop-loading">Loading stats…</div></div>
@@ -96,9 +97,9 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         if (gAvgTime > 0 && avgTime > 0) {
           const pct = Math.round(((gAvgTime - avgTime) / gAvgTime) * 100);
           timeDelta = pct > 0
-            ? `⚡ ${pct}% faster than global average`
+            ? `${ic.zap(13)} ${pct}% faster than global average`
             : pct < 0
-              ? `🐢 ${-pct}% slower than global average`
+              ? `${ic.turtle(13)} ${-pct}% slower than global average`
               : `≈ average pace`;
         }
         const gAvgMistakes = Number(globalSummary.avg_mistakes ?? 0);
@@ -106,9 +107,9 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         if (gAvgMistakes > 0) {
           const pct = Math.round(((gAvgMistakes - myAvgMistakes) / gAvgMistakes) * 100);
           mistakesDelta = pct > 0
-            ? `🎯 ${pct}% fewer mistakes than average`
+            ? `${ic.target(13)} ${pct}% fewer mistakes than average`
             : pct < 0
-              ? `❌ ${-pct}% more mistakes than average`
+              ? `${ic.mistakes(13)} ${-pct}% more mistakes than average`
               : '≈ average accuracy';
         }
       }
@@ -123,8 +124,8 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         <div class="card">
           <h3>Streaks</h3>
           <div class="profile-stats" style="margin-top:8px;">
-            <div class="stat-tile"><div class="stat-label">Current</div><div class="stat-value">🔥 ${s.current_streak}</div></div>
-            <div class="stat-tile"><div class="stat-label">Longest</div><div class="stat-value">🏅 ${s.longest_streak}</div></div>
+            <div class="stat-tile"><div class="stat-label">Current</div><div class="stat-value">${ic.streak(15)} ${s.current_streak}</div></div>
+            <div class="stat-tile"><div class="stat-label">Longest</div><div class="stat-value">${ic.medal(15)} ${s.longest_streak}</div></div>
             <div class="stat-tile"><div class="stat-label">Mistakes/game</div><div class="stat-value">${mistakesPerGame}</div></div>
           </div>
         </div>
@@ -149,7 +150,7 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
             ? '<p style="opacity:0.7;font-size:13px;">Play some puzzles to see breakdown.</p>'
             : Object.entries(s.difficulty_breakdown).map(([k, v]) => `
                 <div class="quest-row">
-                  <div class="quest-icon">🎯</div>
+                  <div class="quest-icon">${ic.target(16)}</div>
                   <div class="quest-body">
                     <div class="quest-title">${escapeHtml(k)}</div>
                     <div class="quest-bar">
@@ -173,7 +174,7 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         requestAnimationFrame(() => drawLineChart(canvas, pts));
       }
     } catch (err) {
-      body.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml((err as Error).message)}</p></div>`;
+      body.innerHTML = `<div class="lb-empty"><p>${ic.warning(16)} ${escapeHtml((err as Error).message)}</p></div>`;
     }
   }
 

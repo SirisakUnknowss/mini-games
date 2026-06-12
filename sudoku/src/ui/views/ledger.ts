@@ -5,6 +5,7 @@ import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { escapeHtml, formatNumber } from '@lib/format';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 interface Tx {
   id: number;
@@ -32,7 +33,7 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
     <section class="view">
       <div class="top-bar">
         <button class="icon-btn" id="ledger-back" aria-label="Back">‹</button>
-        <h2 style="margin:0;">💰 Coin Ledger</h2>
+        <h2 style="margin:0;">${ic.coin(16)} Coin Ledger</h2>
         <span style="width:38px;"></span>
       </div>
       <div id="ledger-body" class="stats-body">
@@ -62,7 +63,7 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
 
       const txs = (data ?? []) as Tx[];
       if (!txs.length) {
-        body.innerHTML = `<div class="lb-empty"><p>🫥 No transactions yet.</p>
+        body.innerHTML = `<div class="lb-empty"><p>${ic.empty(20)} No transactions yet.</p>
           <p style="opacity:0.75;font-size:13px;">Play a daily puzzle to earn your first coins.</p></div>`;
         return;
       }
@@ -98,7 +99,7 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
         </div>
       `;
     } catch (err) {
-      body.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml((err as Error).message)}</p></div>`;
+      body.innerHTML = `<div class="lb-empty"><p>${ic.warning(16)} ${escapeHtml((err as Error).message)}</p></div>`;
     }
   }
 

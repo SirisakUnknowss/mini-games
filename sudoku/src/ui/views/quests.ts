@@ -6,6 +6,7 @@ import { useStore } from '@state/store';
 import { todayUtc, escapeHtml } from '@lib/format';
 import { track } from '@lib/analytics';
 import { sfxQuestClaim } from '@lib/sound';
+import { ic } from '@ui/icons';
 
 interface Quest {
   date: string;
@@ -19,12 +20,12 @@ interface Quest {
   claimed_at: string | null;
 }
 
-const QUEST_META: Record<string, { icon: string; title: string }> = {
-  daily_complete: { icon: '📅', title: 'Complete today\'s daily puzzle' },
-  no_mistakes: { icon: '🎯', title: 'Finish with 0 mistakes' },
-  no_hints: { icon: '🧠', title: 'Finish without using a hint' },
-  fast_finish: { icon: '⚡', title: 'Finish under target time' },
-  practice_streak: { icon: '🔁', title: 'Complete 3 practice puzzles' },
+const QUEST_META: Record<string, { icon: () => string; title: string }> = {
+  daily_complete: { icon: () => ic.daily(16), title: 'Complete today\'s daily puzzle' },
+  no_mistakes:    { icon: () => ic.target(16), title: 'Finish with 0 mistakes' },
+  no_hints:       { icon: () => ic.brain(16), title: 'Finish without using a hint' },
+  fast_finish:    { icon: () => ic.zap(16), title: 'Finish under target time' },
+  practice_streak:{ icon: () => ic.repeat(16), title: 'Complete 3 practice puzzles' },
 };
 
 function questTitle(q: Quest): string {
@@ -32,7 +33,7 @@ function questTitle(q: Quest): string {
 }
 
 function questIcon(q: Quest): string {
-  return QUEST_META[q.quest_id]?.icon || '⭐';
+  return QUEST_META[q.quest_id]?.icon() ?? ic.star(16);
 }
 
 export interface RenderQuestsOptions {
@@ -52,7 +53,7 @@ export async function renderDailyQuests(container: HTMLElement, opts: RenderQues
   try {
     quests = (await api.getDailyQuests(todayUtc())) as Quest[];
   } catch (err) {
-    container.innerHTML = `<p style="opacity:0.7;font-size:13px;">⚠️ Could not load quests.</p>`;
+    container.innerHTML = `<p style="opacity:0.7;font-size:13px;">${ic.warning(13)} Could not load quests.</p>`;
     console.warn('Quest load failed:', err);
     return;
   }
@@ -77,7 +78,7 @@ export async function renderDailyQuests(container: HTMLElement, opts: RenderQues
           </div>
           <div class="quest-meta">
             <span>${q.progress}/${q.target}</span>
-            <span>💰 ${q.reward_coin}${q.reward_xp ? ` · ⭐ ${q.reward_xp}` : ''}</span>
+            <span>${ic.coin(12)} ${q.reward_coin}${q.reward_xp ? ` · ${ic.star(12)} ${q.reward_xp}` : ''}</span>
           </div>
         </div>
         <div class="quest-action">
@@ -101,7 +102,7 @@ export async function renderDailyQuests(container: HTMLElement, opts: RenderQues
         if (error) throw error;
         track('quest_claimed', { quest_id: questId });
         sfxQuestClaim();
-        opts.onToast?.('Quest reward claimed! 💰');
+        opts.onToast?.('Quest reward claimed!');
         // Optimistically refresh
         await renderDailyQuests(container, opts);
       } catch (err) {

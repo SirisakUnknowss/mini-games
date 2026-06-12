@@ -8,6 +8,8 @@ export interface LevelUpProps {
   onContinue?: () => void;
 }
 
+import { ic } from '@ui/icons';
+
 export function showLevelUpModal(props: LevelUpProps): void {
   const existing = document.getElementById('lvl-modal-root');
   if (existing) existing.remove();
@@ -17,11 +19,11 @@ export function showLevelUpModal(props: LevelUpProps): void {
   wrapper.className = 'modal-bg active';
   wrapper.innerHTML = `
     <div class="modal lvl-modal">
-      <div class="lvl-stars">⭐</div>
+      <div class="lvl-stars" style="color:var(--brand-primary);">${ic.star(40)}</div>
       <h2>Level up!</h2>
       <div class="big-number">${props.newLevel}</div>
       <p style="opacity:0.85;">You've reached level ${props.newLevel}.</p>
-      ${props.rewardCoins ? `<p style="margin-top:8px;">💰 +${props.rewardCoins} bonus coins</p>` : ''}
+      ${props.rewardCoins ? `<p style="margin-top:8px;">${ic.coin(14)} +${props.rewardCoins} bonus coins</p>` : ''}
       <div class="modal-buttons">
         <button class="btn" id="lvl-continue">Awesome!</button>
       </div>

@@ -6,6 +6,7 @@ import { useStore } from '@state/store';
 import { formatTime, escapeHtml } from '@lib/format';
 import { track } from '@lib/analytics';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 export interface RecapProps {
   onBack: () => void;
@@ -70,8 +71,8 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
   root.innerHTML = `
     <section class="view">
       <div class="top-bar">
-        <button class="icon-btn" id="recap-back" aria-label="Back">‹</button>
-        <h2 style="margin:0;">📅 Weekly Recap</h2>
+        <button class="icon-btn" id="recap-back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <h2 style="margin:0;font-size:16px;color:var(--app-text);">${ic.daily(16)} Weekly Recap</h2>
         <span style="width:38px;"></span>
       </div>
       <div id="recap-body" class="stats-body"><div class="shop-loading">Loading recap…</div></div>
@@ -89,7 +90,7 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
 
       body.innerHTML = `
         <div class="recap-hero">
-          <div style="font-size:48px;">📅</div>
+          <div style="color:var(--brand-primary);">${ic.daily(48)}</div>
           <h2>Your week in numbers</h2>
         </div>
 
@@ -112,12 +113,12 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
           <h3>Looking good!</h3>
           <p style="opacity:0.85;font-size:14px;">
             ${r.daysPlayed >= 5
-              ? '🔥 Great consistency this week — keep the streak going!'
+              ? `${ic.streak(14)} Great consistency this week — keep the streak going!`
               : r.daysPlayed >= 2
                 ? 'Solid effort. Aim for 5+ days next week to maximize XP.'
                 : 'A slow start — try logging in for a daily puzzle each day.'}
           </p>
-          <button class="btn btn--full" id="recap-share" style="margin-top:12px;">📤 Share my week</button>
+          <button class="btn btn--full" id="recap-share" style="margin-top:12px;">${ic.share(15)} Share my week</button>
         </div>
       `;
 
@@ -135,7 +136,7 @@ export function mountRecapView(root: HTMLElement, props: RecapProps): { unmount:
         }
       });
     } catch (err) {
-      body.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml((err as Error).message)}</p></div>`;
+      body.innerHTML = `<div class="lb-empty"><p>${ic.warning(16)} ${escapeHtml((err as Error).message)}</p></div>`;
     }
   }
 

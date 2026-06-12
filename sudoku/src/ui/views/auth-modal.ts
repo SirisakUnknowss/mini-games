@@ -3,6 +3,7 @@
 // =====================================================================
 import { signIn, signUp, upgradeAnonymousToEmail, signInWithGoogle } from '@lib/auth';
 import { track, Events, identify } from '@lib/analytics';
+import { ic } from '@ui/icons';
 
 type Mode = 'signin' | 'signup' | 'upgrade';
 
@@ -30,9 +31,9 @@ export function showAuthModal(props: AuthModalProps): void {
   const render = () => {
     const isUpgrade = mode === 'upgrade';
     const isSignup = mode === 'signup';
-    const title = isUpgrade ? '☁️ Save your progress'
-                : isSignup  ? '✨ Create account'
-                            : '👋 Welcome back';
+    const title = isUpgrade ? `${ic.cloud(20)} Save your progress`
+                : isSignup  ? `${ic.sparkle(20)} Create account`
+                            : `${ic.wave(20)} Welcome back`;
     const subtitle = isUpgrade
       ? 'Link an email so you can play on any device.'
       : isSignup
