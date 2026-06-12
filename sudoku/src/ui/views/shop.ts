@@ -60,8 +60,6 @@ function avatarPreviewIcon(id: string): string {
 
 const CATEGORY_TABS: { key: Category; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'theme', label: 'Themes' },
-  { key: 'background', label: 'Backgrounds' },
   { key: 'avatar', label: 'Avatars' },
 ];
 

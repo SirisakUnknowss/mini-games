@@ -26,8 +26,8 @@
   --color-xp: #ffeb3b;
 
   /* Game board (default theme) */
-  --cell-bg: #ffffff;
-  --cell-bg-given: #f5f3ff;
+  --cell-bg: #f0eeff;
+  --cell-bg-given: #e6e0ff;
   --cell-bg-selected: #ede8ff;
   --cell-bg-related: #f5f3ff;
   --cell-bg-same: #ddd6fe;
