@@ -133,8 +133,8 @@ export function mountStatsView(root: HTMLElement, props: StatsProps): { unmount:
         ${timeDelta || mistakesDelta ? `
           <div class="card">
             <h3>vs Global average</h3>
-            ${timeDelta ? `<p style="font-size:14px;margin:4px 0;">${escapeHtml(timeDelta)}</p>` : ''}
-            ${mistakesDelta ? `<p style="font-size:14px;margin:4px 0;">${escapeHtml(mistakesDelta)}</p>` : ''}
+            ${timeDelta ? `<p style="font-size:14px;margin:4px 0;">${timeDelta}</p>` : ''}
+            ${mistakesDelta ? `<p style="font-size:14px;margin:4px 0;">${mistakesDelta}</p>` : ''}
             ${globalSummary ? `<p style="font-size:11px;opacity:0.7;margin-top:8px;">Based on ${formatNumber(globalSummary.total_games ?? 0)} games from ${formatNumber(globalSummary.total_players ?? 0)} players (last 30 days).</p>` : ''}
           </div>
         ` : ''}

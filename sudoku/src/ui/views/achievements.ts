@@ -6,6 +6,7 @@ import { supabase } from '@lib/supabase';
 import { useStore } from '@state/store';
 import { escapeHtml } from '@lib/format';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 
 interface AchievementDef {
   id: string;
@@ -33,16 +34,16 @@ const TIER_COLOR: Record<string, string> = {
   diamond: '#b9f2ff',
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  play_volume:  '🎮 Volume',
-  daily:        '📅 Daily',
-  skill:        '🎯 Skill',
-  leaderboard:  '🏆 Ranks',
-  progression:  '⭐ Levels',
-  special:      '✨ Special',
+const CATEGORY_LABEL: Record<string, () => string> = {
+  play_volume:  () => `${ic.gamepad(13)} Volume`,
+  daily:        () => `${ic.daily(13)} Daily`,
+  skill:        () => `${ic.target(13)} Skill`,
+  leaderboard:  () => `${ic.trophy(13)} Ranks`,
+  progression:  () => `${ic.star(13)} Levels`,
+  special:      () => `${ic.sparkle(13)} Special`,
 };
 function categoryLabel(c: string): string {
-  return CATEGORY_LABEL[c] || c.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+  return CATEGORY_LABEL[c]?.() ?? c.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 export interface AchievementsProps {
@@ -125,8 +126,8 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
   root.innerHTML = `
     <section class="view">
       <div class="top-bar">
-        <button class="icon-btn" id="ach-back" aria-label="Back">‹</button>
-        <h2 style="margin:0;">🏆 Achievements</h2>
+        <button class="icon-btn" id="ach-back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <h2 style="margin:0;font-size:16px;color:var(--app-text);">${ic.trophy(16)} Achievements</h2>
         <span class="stat-pill" id="ach-count">0/0</span>
       </div>
       <div class="shop-tabs" id="ach-tabs"></div>
@@ -146,7 +147,7 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
       return;
     }
     if (errorMsg) {
-      gridEl.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml(errorMsg)}</p></div>`;
+      gridEl.innerHTML = `<div class="lb-empty"><p>${ic.warning(16)} ${escapeHtml(errorMsg)}</p></div>`;
       return;
     }
 
@@ -172,7 +173,7 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
     countEl.textContent = `${unlocked.size}/${defs.length}`;
 
     if (!visible.length) {
-      gridEl.innerHTML = `<div class="lb-empty"><p>🫥 No achievements in this category.</p></div>`;
+      gridEl.innerHTML = `<div class="lb-empty"><p>${ic.empty(20)} No achievements in this category.</p></div>`;
       return;
     }
 
@@ -180,7 +181,7 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
       const isUnlocked = unlocked.has(d.id);
       const tier = d.tier ?? 'bronze';
       const color = TIER_COLOR[tier] ?? '#cd7f32';
-      const icon = d.icon || (isUnlocked ? '🏆' : '🔒');
+      const icon = d.icon || (isUnlocked ? ic.trophy(28) : ic.lock(28));
       const prog = !isUnlocked && computeProgress(d.id, progressInputs);
       return `
         <div class="ach-card${isUnlocked ? ' unlocked' : ' locked'}">
@@ -196,8 +197,8 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
           <div class="ach-tier" style="background:${color};color:#1a1a2e;">${escapeHtml(tier)}</div>
           ${d.reward_coin || d.reward_xp ? `
             <div class="ach-rewards">
-              ${d.reward_coin ? `<span>💰 ${d.reward_coin}</span>` : ''}
-              ${d.reward_xp ? `<span>⭐ ${d.reward_xp}</span>` : ''}
+              ${d.reward_coin ? `<span>${ic.coin(12)} ${d.reward_coin}</span>` : ''}
+              ${d.reward_xp ? `<span>${ic.star(12)} ${d.reward_xp}</span>` : ''}
             </div>
           ` : ''}
         </div>

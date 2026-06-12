@@ -11,6 +11,7 @@ import { countUp, floatReward } from '@lib/animate';
 import { PREMIUM_THEMES, isPremium } from '@lib/premium';
 import { showPaywall } from './paywall';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
+import { ic } from '@ui/icons';
 import { sfxThemeChange, sfxCoin } from '@lib/sound';
 
 export interface ShopProps {
@@ -79,7 +80,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
         <h2 style="margin:0;font-size:16px;color:var(--app-text);">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Shop
         </h2>
-        <span class="stat-pill" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;">💰 ${formatNumber(useStore.getState().coins)}</span>
+        <span class="stat-pill" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;">${ic.coin(12)} ${formatNumber(useStore.getState().coins)}</span>
       </div>
 
       <div class="shop-tabs">
@@ -101,9 +102,9 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
     if (!pill) return;
     const now = useStore.getState().coins;
     if (typeof prev === 'number') {
-      countUp(pill, prev, now, 600, (n) => `💰 ${formatNumber(Math.round(n))}`);
+      countUp(pill, prev, now, 600, (n) => `${ic.coin(12)} ${formatNumber(Math.round(n))}`);
     } else {
-      pill.textContent = `💰 ${formatNumber(now)}`;
+      pill.innerHTML = `${ic.coin(12)} ${formatNumber(now)}`;
     }
   }
 
@@ -129,14 +130,14 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       return;
     }
     if (errorMsg) {
-      gridEl.innerHTML = `<div class="lb-empty"><p>⚠️ ${escapeHtml(errorMsg)}</p>
+      gridEl.innerHTML = `<div class="lb-empty"><p>${ic.warning(16)} ${escapeHtml(errorMsg)}</p>
         <button class="btn btn--small" id="shop-retry">Retry</button></div>`;
       gridEl.querySelector('#shop-retry')?.addEventListener('click', () => void load());
       return;
     }
     const filtered = activeCat === 'all' ? items : items.filter((i) => i.category === activeCat);
     if (!filtered.length) {
-      gridEl.innerHTML = `<div class="lb-empty"><p>🫥 No items here.</p></div>`;
+      gridEl.innerHTML = `<div class="lb-empty"><p>${ic.empty(20)} No items here.</p></div>`;
       return;
     }
 
@@ -159,11 +160,9 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       } else if (isOwned) {
         action = `<button class="btn btn--small" data-equip="${escapeHtml(item.id)}">Equip</button>`;
       } else if (isPremiumGated) {
-        action = `<button class="btn btn--small" data-premium="${escapeHtml(item.id)}">✨ Premium</button>`;
+        action = `<button class="btn btn--small" data-premium="${escapeHtml(item.id)}">${ic.sparkle(13)} Premium</button>`;
       } else {
-        action = `<button class="btn btn--small" data-buy="${escapeHtml(item.id)}" ${canAfford ? '' : 'disabled'}>
-          💰 ${item.price_coin}
-        </button>`;
+        action = `<button class="btn btn--small" data-buy="${escapeHtml(item.id)}" ${canAfford ? '' : 'disabled'}>${ic.coin(12)} ${item.price_coin}</button>`;
       }
 
       let preview = '🎁';
@@ -174,7 +173,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       const previewable = item.category === 'theme';
       return `
         <div class="shop-card shop-rarity-${rarity}${previewable ? ' previewable' : ''}" data-preview="${previewable ? escapeHtml(item.id) : ''}">
-          ${isPremiumGated ? '<div class="shop-premium-badge" title="Premium-only">✨</div>' : ''}
+          ${isPremiumGated ? `<div class="shop-premium-badge" title="Premium-only">${ic.sparkle(12)}</div>` : ''}
           <div class="shop-preview">${preview}</div>
           <div class="shop-name">${escapeHtml(item.name)}</div>
           ${item.description ? `<div class="shop-desc">${escapeHtml(item.description)}</div>` : ''}
@@ -223,14 +222,14 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       useStore.setState({ coins: Math.max(0, prevCoins - item.price_coin) });
       useStore.getState().addToInventory(itemId);
       sfxCoin();
-      props.onToast(`✨ ${item.name} purchased!`);
-      floatReward(btn, `−${item.price_coin} 💰`);
+      props.onToast(`${item.name} purchased!`);
+      floatReward(btn, `−${item.price_coin}`);
       refreshCoinBadge(prevCoins);
       render();
     } catch (err) {
       console.warn('Purchase failed:', err);
       props.onToast('Purchase failed');
-      btn.disabled = false; btn.textContent = `💰 ${item.price_coin}`;
+      btn.disabled = false; btn.innerHTML = `${ic.coin(12)} ${item.price_coin}`;
     }
   }
 

@@ -21,6 +21,24 @@ export interface LedgerProps {
   nav: BottomNavCallbacks;
 }
 
+const REASON_LABEL: Record<string, string> = {
+  signup_bonus:        'Welcome bonus',
+  daily_complete:      'Daily puzzle',
+  practice_complete:   'Practice complete',
+  purchase_item:       'Item purchased',
+  hint_used:           'Hint used',
+  level_up_bonus:      'Level up reward',
+  streak_bonus:        'Streak bonus',
+  achievement_reward:  'Achievement reward',
+  xp_reward:           'XP reward',
+  refund:              'Refund',
+  admin_grant:         'Admin grant',
+};
+
+function reasonLabel(reason: string): string {
+  return REASON_LABEL[reason] ?? reason.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
 function formatTimestamp(iso: string): string {
   try {
     const d = new Date(iso);
@@ -32,7 +50,7 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
   root.innerHTML = `
     <section class="view">
       <div class="top-bar">
-        <button class="icon-btn" id="ledger-back" aria-label="Back">‹</button>
+        <button class="icon-btn" id="ledger-back" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <h2 style="margin:0;">${ic.coin(16)} Coin Ledger</h2>
         <span style="width:38px;"></span>
       </div>
@@ -87,7 +105,7 @@ export function mountLedgerView(root: HTMLElement, props: LedgerProps): { unmoun
               return `
                 <div class="ledger-row">
                   <div class="ledger-reason">
-                    <strong>${escapeHtml(t.reason)}</strong>
+                    <strong>${escapeHtml(reasonLabel(t.reason))}</strong>
                     <small>${formatTimestamp(t.created_at)}</small>
                   </div>
                   <div class="ledger-amount" style="color:${color};">${sign}${t.amount.toLocaleString()}</div>
