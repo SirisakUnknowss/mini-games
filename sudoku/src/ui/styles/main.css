@@ -183,13 +183,13 @@ h3 { font-size: 18px; }
   padding: 0 var(--space-4);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-error);
+  background: var(--brand-primary);
   color: white;
   font-size: 15px;
   font-weight: 400;
   transition: transform var(--duration-fast), background var(--duration-fast);
 }
-.btn:hover { background: #d33; }
+.btn:hover { background: #5b4ed0; }
 .btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -778,18 +778,19 @@ h3 { font-size: 18px; }
 }
 .modal-bg.active { display: flex; }
 .modal {
-  background: var(--brand-gradient);
+  background: white;
   border-radius: var(--radius-2xl);
   padding: 28px;
   text-align: center;
-  box-shadow: var(--shadow-modal);
+  box-shadow: 0 24px 64px rgba(108,92,231,0.18);
   max-width: 400px;
   width: 100%;
+  color: var(--app-text);
 }
-.modal h2 { margin-bottom: 10px; }
+.modal h2 { margin-bottom: 10px; color: var(--app-text); }
 .modal .big-number {
   font-size: 44px; font-weight: bold;
-  color: var(--color-xp);
+  color: var(--brand-primary);
   font-variant-numeric: tabular-nums;
   margin: 12px 0 8px;
 }
@@ -807,22 +808,22 @@ h3 { font-size: 18px; }
 .auth-sub {
   text-align: center;
   font-size: 14px;
-  opacity: 0.85;
+  color: var(--app-text-secondary);
   margin-bottom: 18px;
 }
 .modal-close {
   position: absolute; top: 12px; right: 14px;
   width: 32px; height: 32px;
-  border: none; background: rgba(255,255,255,0.15);
-  color: white; border-radius: 50%;
+  border: none; background: #f3f0ff;
+  color: var(--app-text-secondary); border-radius: 50%;
   font-size: 20px; line-height: 1;
   cursor: pointer;
 }
-.modal-close:hover { background: rgba(255,255,255,0.3); }
+.modal-close:hover { background: #ede9fe; }
 
 .auth-tabs {
-  display: flex; gap: 6px;
-  background: rgba(0,0,0,0.25);
+  display: flex; gap: 4px;
+  background: #f3f0ff;
   padding: 4px;
   border-radius: var(--radius-md);
   margin-bottom: 18px;
@@ -831,38 +832,40 @@ h3 { font-size: 18px; }
   flex: 1;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.6);
+  color: var(--app-text-secondary);
   padding: 10px;
   font-size: 14px; font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
 .auth-tab.active {
-  background: rgba(255,255,255,0.18);
-  color: white;
+  background: white;
+  color: var(--brand-primary);
+  box-shadow: 0 1px 4px rgba(108,92,231,0.12);
 }
 
 .auth-form { display: flex; flex-direction: column; gap: 12px; }
 .auth-field { display: flex; flex-direction: column; gap: 4px; }
 .auth-field > span {
   font-size: 12px; font-weight: 600;
-  opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--app-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;
 }
 .auth-field input {
   padding: 12px 14px;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 1.5px solid var(--app-border);
   border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.1);
-  color: white;
+  background: #faf9ff;
+  color: var(--app-text);
   font-size: 15px;
   outline: none;
+  transition: border-color 0.15s;
 }
-.auth-field input::placeholder { color: rgba(255,255,255,0.5); }
-.auth-field input:focus { border-color: rgba(255,255,255,0.6); }
+.auth-field input::placeholder { color: #c4bfda; }
+.auth-field input:focus { border-color: var(--brand-primary); }
 
 .auth-error {
   min-height: 18px;
-  color: #ffccbc;
+  color: var(--color-error);
   font-size: 13px;
   text-align: center;
   margin: 4px 0 0;
@@ -871,11 +874,11 @@ h3 { font-size: 18px; }
   margin-top: 14px;
   text-align: center;
   font-size: 13px;
-  opacity: 0.85;
+  color: var(--app-text-secondary);
 }
 .auth-link {
   background: none; border: none;
-  color: white; font-weight: 700;
+  color: var(--brand-primary); font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
   font-size: inherit;
@@ -888,16 +891,16 @@ h3 { font-size: 18px; }
   display: flex; align-items: center; justify-content: center; gap: 10px;
   background: white;
   color: #1f1f1f;
-  border: none;
+  border: 1.5px solid var(--app-border);
   border-radius: var(--radius-md);
   padding: 12px 16px;
   font-size: 15px; font-weight: 600;
   cursor: pointer;
   margin-bottom: 4px;
   transition: background 0.15s, box-shadow 0.15s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-.btn-google:hover  { background: #f5f5f5; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+.btn-google:hover  { background: #f5f5f5; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
 .btn-google:active { background: #ebebeb; }
 .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -905,14 +908,14 @@ h3 { font-size: 18px; }
 .auth-divider {
   display: flex; align-items: center; gap: 10px;
   margin: 14px 0 10px;
-  color: rgba(255,255,255,0.4);
+  color: var(--app-text-secondary);
   font-size: 12px;
 }
 .auth-divider::before, .auth-divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255,255,255,0.15);
+  background: var(--app-border);
 }
 
 /* ===== Leaderboard ===== */
@@ -1469,6 +1472,21 @@ h3 { font-size: 18px; }
 /* background-attachment: fixed keeps gradient pinned to viewport — prevents color split when scrolling long pages */
 body { background: var(--app-bg); background-attachment: fixed; transition: background 0.4s ease; position: relative; }
 body.bg-default       { background: var(--app-bg); background-attachment: fixed; }
+
+/* White semi-transparent card overlay when a custom background is active */
+body[class*="bg-"]:not(.bg-default) .view {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-xl);
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+body[class*="bg-"]:not(.bg-default) .bottom-nav {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 body.bg-blank-white   { background: #fafafa; color: #1a1a2e; }
 body.bg-solid-navy    { background: #0d1b2a; }
 body.bg-solid-forest  { background: #1b4332; }
