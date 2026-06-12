@@ -4,9 +4,18 @@
 
 :root {
   /* Brand */
-  --brand-primary: #667eea;
+  --brand-primary: #6c5ce7;
   --brand-secondary: #764ba2;
   --brand-gradient: linear-gradient(135deg, #667eea, #764ba2);
+
+  /* App-level light theme */
+  --app-bg: #f0eeff;
+  --app-text: #1e1b4b;
+  --app-text-secondary: #6b7280;
+  --app-card-bg: #ffffff;
+  --app-card-shadow: 0 2px 12px rgba(108,92,231,0.08);
+  --app-section-label: #9ca3af;
+  --app-border: #e8e3ff;
 
   /* Semantic */
   --color-success: #43a047;
@@ -18,17 +27,29 @@
 
   /* Game board (default theme) */
   --cell-bg: #ffffff;
-  --cell-bg-given: #f5f5f5;
-  --cell-bg-selected: #bbdefb;
-  --cell-bg-related: #e3f2fd;
-  --cell-bg-same: #c5cae9;
-  --cell-bg-conflict: #ffebee;
-  --cell-text: #1a1a2e;
-  --cell-text-user: #1976d2;
-  --cell-text-hint: #43a047;
-  --cell-text-conflict: #e53935;
-  --border-thick: #1a1a2e;
-  --border-thin: #dddddd;
+  --cell-bg-given: #f5f3ff;
+  --cell-bg-selected: #ede8ff;
+  --cell-bg-related: #f5f3ff;
+  --cell-bg-same: #ddd6fe;
+  --cell-bg-conflict: #fee2e2;
+  --cell-text: #1e1b4b;
+  --cell-text-user: #6c5ce7;
+  --cell-text-hint: #10b981;
+  --cell-text-conflict: #dc2626;
+  --border-thick: #c4b5fd;
+  --border-thin: #ede9fe;
+
+  /* Game view light theme */
+  --game-bg: linear-gradient(160deg, #f0eeff 0%, #e8e2ff 100%);
+  --game-card-bg: #ffffff;
+  --game-card-shadow: 0 8px 32px rgba(108, 92, 231, 0.12);
+  --game-topbar-text: #1e1b4b;
+  --game-muted: #9ca3af;
+  --action-bar-bg: #f8f7ff;
+  --action-btn-text: #4b5563;
+  --action-btn-hover: #ede9fe;
+  --numpad-btn-bg: #f8f7ff;
+  --numpad-btn-shadow: 0 2px 8px rgba(108, 92, 231, 0.08);
 
   /* Typography */
   --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sarabun", "Roboto", sans-serif;

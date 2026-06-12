@@ -34,7 +34,7 @@ interface ShopItem {
 }
 
 const RARITY_LABEL: Record<string, string> = {
-  common: '⚪', rare: '🔵', epic: '🟣', legendary: '🟡',
+  common: '◯ COMMON', rare: '◉ RARE', epic: '◈ EPIC', legendary: '★ LEGENDARY',
 };
 
 const AVATAR_EMOJI: Record<string, string> = {
@@ -59,9 +59,9 @@ function avatarPreviewIcon(id: string): string {
 
 const CATEGORY_TABS: { key: Category; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'theme', label: '🎨 Themes' },
-  { key: 'background', label: '🖼 Backgrounds' },
-  { key: 'avatar', label: '👤 Avatars' },
+  { key: 'theme', label: 'Themes' },
+  { key: 'background', label: 'Backgrounds' },
+  { key: 'avatar', label: 'Avatars' },
 ];
 
 export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: () => void } {
@@ -73,9 +73,13 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
   root.innerHTML = `
     <section class="view">
       <div class="top-bar">
-        <button class="icon-btn" id="shop-back" aria-label="Back">‹</button>
-        <h2 style="margin:0;">🛍️ Shop</h2>
-        <span class="stat-pill">💰 ${formatNumber(useStore.getState().coins)}</span>
+        <button class="icon-btn" id="shop-back" aria-label="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h2 style="margin:0;font-size:16px;color:var(--app-text);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Shop
+        </h2>
+        <span class="stat-pill" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;">💰 ${formatNumber(useStore.getState().coins)}</span>
       </div>
 
       <div class="shop-tabs">
