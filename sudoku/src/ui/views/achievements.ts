@@ -155,7 +155,7 @@ export function mountAchievementsView(root: HTMLElement, props: AchievementsProp
     tabsEl.innerHTML = `
       <button class="shop-tab${activeCategory === 'all' ? ' active' : ''}" data-cat="all">All</button>
       ${categories.map((c) => `
-        <button class="shop-tab${activeCategory === c ? ' active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(categoryLabel(c))}</button>
+        <button class="shop-tab${activeCategory === c ? ' active' : ''}" data-cat="${escapeHtml(c)}">${categoryLabel(c)}</button>
       `).join('')}
     `;
     tabsEl.querySelectorAll<HTMLButtonElement>('.shop-tab').forEach((btn) => {
