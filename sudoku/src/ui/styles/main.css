@@ -1329,6 +1329,15 @@ h3 { font-size: 18px; }
 .profile-row .row-icon { margin-right: 10px; color: var(--brand-primary); }
 .profile-row.danger strong { color: #ef4444; }
 
+.app-version {
+  text-align: center;
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  opacity: 0.5;
+  margin: 8px 0 4px;
+  letter-spacing: 0.04em;
+}
+
 .avatar-grid {
   margin-top: 16px;
   width: 100%; max-width: 520px;

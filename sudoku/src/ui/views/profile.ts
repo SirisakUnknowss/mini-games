@@ -7,6 +7,7 @@ import { escapeHtml, formatNumber } from '@lib/format';
 import { track } from '@lib/analytics';
 import { bottomNavHTML, wireBottomNav, type BottomNavCallbacks } from '../components/bottom-nav';
 import { ic } from '@ui/icons';
+import { APP_VERSION } from '@lib/version';
 
 export interface ProfileProps {
   onBack: () => void;
@@ -121,6 +122,8 @@ export function mountProfileView(root: HTMLElement, props: ProfileProps): { unmo
           </button>
         ` : ''}
       </div>
+
+      <div class="app-version">v${APP_VERSION}</div>
 
       <div id="avatar-grid" class="avatar-grid hidden">
         ${DEFAULT_AVATARS.map((e) => `
