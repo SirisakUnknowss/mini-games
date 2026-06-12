@@ -325,6 +325,21 @@ h3 { font-size: 18px; }
 .board-menu-btn--new    { background: #f0ecff; color: #6c5ce7; }
 .board-menu-btn--leave  { background: #fee2e2; color: #ef4444; }
 
+.board-gameover { background: rgba(255, 240, 240, 0.92); }
+.gameover-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ef4444;
+  text-align: center;
+  margin-bottom: 2px;
+}
+.gameover-sub {
+  font-size: 13px;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
 /* ===== Board ===== */
 .board {
   display: grid;

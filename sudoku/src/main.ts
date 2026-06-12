@@ -258,6 +258,7 @@ async function playPractice(level: Difficulty) {
     stage,
     onWin: (result) => handleWin(result),
     onExit: showHome,
+    onNewGame: () => void playPractice(level),
   });
   currentUnmount = view.unmount;
 }

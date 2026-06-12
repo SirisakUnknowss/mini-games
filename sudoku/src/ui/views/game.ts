@@ -18,6 +18,7 @@ export interface GameViewProps {
   stage?: number;
   onWin: (result: GameResult) => void;
   onExit: () => void;
+  onNewGame?: () => void;
 }
 
 export interface GameResult {
@@ -110,6 +111,14 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
               <button class="board-menu-btn board-menu-btn--resume" id="overlay-resume">Resume</button>
               <button class="board-menu-btn board-menu-btn--new" id="overlay-new">New Game</button>
               <button class="board-menu-btn board-menu-btn--leave" id="overlay-leave">Leave Game</button>
+            </div>
+          </div>
+          <div class="board-overlay board-gameover" id="gameover-overlay">
+            <div class="board-menu">
+              <div class="gameover-title">Game Over</div>
+              <div class="gameover-sub">3 mistakes — better luck next time!</div>
+              <button class="board-menu-btn board-menu-btn--new" id="gameover-new">New Game</button>
+              <button class="board-menu-btn board-menu-btn--leave" id="gameover-leave">Leave Game</button>
             </div>
           </div>
         </div>
@@ -225,6 +234,15 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
       mistakeEl.textContent = String(mistakes);
       mistakesDelta = 1;
       sfxError();
+      if (mistakes >= 3) {
+        history.push({ r, c, prevDigit, nextDigit: n, prevNotes, nextNotes: [], mistakesDelta });
+        future.length = 0;
+        syncUndoRedo();
+        moves.push({ r, c, n, t: Date.now() - startTime });
+        rerender();
+        triggerGameOver();
+        return;
+      }
     } else {
       sfxPlace();
       // Clear same number from related cells' notes
@@ -339,6 +357,13 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
     props.onWin({ mode, difficulty, timeSeconds, mistakes, hintsUsed, score, moves, startedAt, completedAt: new Date().toISOString() });
   }
 
+  function triggerGameOver() {
+    gameWon = true;
+    if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
+    const overlay = root.querySelector('#gameover-overlay') as HTMLElement;
+    overlay.classList.add('open');
+  }
+
   // Hamburger menu overlay
   const boardOverlay = root.querySelector('#board-overlay') as HTMLElement;
 
@@ -356,12 +381,16 @@ export function mountGameView(root: HTMLElement, props: GameViewProps): { unmoun
   root.querySelector('#overlay-resume')?.addEventListener('click', closeMenu);
   root.querySelector('#overlay-new')?.addEventListener('click', () => {
     if (timerHandle) clearInterval(timerHandle);
-    props.onExit();
+    if (props.onNewGame) props.onNewGame(); else props.onExit();
   });
   root.querySelector('#overlay-leave')?.addEventListener('click', () => {
     if (timerHandle) clearInterval(timerHandle);
     props.onExit();
   });
+  root.querySelector('#gameover-new')?.addEventListener('click', () => {
+    if (props.onNewGame) props.onNewGame(); else props.onExit();
+  });
+  root.querySelector('#gameover-leave')?.addEventListener('click', () => props.onExit());
 
   hintBtn.addEventListener('click', useHint);
   undoBtn.addEventListener('click', undoMove);
