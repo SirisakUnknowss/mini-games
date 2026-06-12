@@ -437,9 +437,9 @@ h3 { font-size: 18px; }
 .notes-badge.on { background: #6c5ce7; }
 .hint-count-badge {
   position: absolute; top: -6px; right: -8px;
-  background: #6c5ce7;
-  color: white;
-  font-size: 9px; font-weight: 800;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 9px; font-weight: 700;
   width: 16px; height: 16px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -1359,7 +1359,7 @@ h3 { font-size: 18px; }
   border-radius: var(--radius-lg);
   padding: 14px;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
   gap: 8px;
   box-shadow: var(--app-card-shadow);
 }

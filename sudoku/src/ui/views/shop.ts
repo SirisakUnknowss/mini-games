@@ -133,7 +133,9 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
       gridEl.querySelector('#shop-retry')?.addEventListener('click', () => void load());
       return;
     }
-    const filtered = activeCat === 'all' ? items : items.filter((i) => i.category === activeCat);
+    const filtered = activeCat === 'all'
+      ? items.filter((i) => i.category !== 'theme' && i.category !== 'background')
+      : items.filter((i) => i.category === activeCat);
     if (!filtered.length) {
       gridEl.innerHTML = `<div class="lb-empty"><p>${ic.empty(20)} No items here.</p></div>`;
       return;
@@ -175,7 +177,7 @@ export function mountShopView(root: HTMLElement, props: ShopProps): { unmount: (
           <div class="shop-preview">${preview}</div>
           <div class="shop-name">${escapeHtml(item.name)}</div>
           ${item.description ? `<div class="shop-desc">${escapeHtml(item.description)}</div>` : ''}
-          <div class="shop-rarity">${RARITY_LABEL[rarity] ?? '⚪'} ${escapeHtml(rarity)}</div>
+          <div class="shop-rarity">${RARITY_LABEL[rarity] ?? `⚪ ${escapeHtml(rarity)}`}</div>
           <div class="shop-action">${action}</div>
         </div>
       `;
