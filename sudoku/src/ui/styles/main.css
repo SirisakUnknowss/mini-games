@@ -228,9 +228,10 @@ h3 { font-size: 18px; }
 .game-topbar {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%;
-  padding: 4px 0 12px;
+  padding: 8px 12px 10px;
   gap: 6px;
   overflow: visible;
+  flex-shrink: 0;
 }
 .topbar-right {
   display: flex; align-items: center; gap: 6px;
@@ -292,7 +293,11 @@ h3 { font-size: 18px; }
 /* ===== Board wrap + overlay ===== */
 .board-wrap {
   position: relative;
-  width: min(100%, 440px);
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 .board-overlay {
   position: absolute;
@@ -349,6 +354,9 @@ h3 { font-size: 18px; }
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
   aspect-ratio: 1;
   background: var(--border-thick);
   border: 2.5px solid var(--border-thick);
@@ -397,9 +405,10 @@ h3 { font-size: 18px; }
 /* ===== Action bar ===== */
 .action-bar {
   display: flex; justify-content: space-between; align-items: center;
-  width: min(100%, 440px);
-  padding: 10px 4px 6px;
+  width: 100%;
+  padding: 8px 12px 4px;
   gap: 4px;
+  flex-shrink: 0;
 }
 .action-btn {
   flex: 1;
@@ -451,9 +460,10 @@ h3 { font-size: 18px; }
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: min(100%, 440px);
-  padding: 4px 0 8px;
+  width: 100%;
+  padding: 4px 10px 10px;
   gap: 0;
+  flex-shrink: 0;
 }
 .numpad button {
   flex: 1;
@@ -755,32 +765,31 @@ h3 { font-size: 18px; }
 
 /* Game view — ใช้ background ของ body (dark gradient) */
 .view--game {
-  padding-bottom: 24px;
-  overflow-y: auto;
-  min-height: 100dvh;
-  height: auto;
-  justify-content: flex-start;
-  background: transparent;
+  position: fixed;
+  inset: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--app-bg);
 }
 .game-card {
-  width: min(100%, 440px);
-  padding: 16px;
-  display: flex; flex-direction: column; align-items: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  display: flex; flex-direction: column; align-items: stretch;
   gap: 0;
-  margin-top: 8px;
+  margin-top: 0;
 }
 .game-footer {
-  padding: 12px 16px;
-  width: 100%;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(255,255,255,0.3);
-  text-decoration: none;
-  letter-spacing: 0.5px;
-  transition: color 0.2s;
-  flex-shrink: 0;
+  display: none;
 }
-.game-footer:hover { color: rgba(255,255,255,0.65); }
 
 /* ===== Modal ===== */
 .modal-bg {
