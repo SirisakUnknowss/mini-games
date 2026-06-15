@@ -123,18 +123,22 @@
     .tab-btn.active { color:white; background:var(--accent); }
 
     /* ── Members Panel ── */
-    .members-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:12px; flex-wrap:wrap; }
+    .members-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:12px; flex-wrap:wrap; }
     .members-search { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; color:var(--text); font-size:14px; width:260px; outline:none; }
     .members-search:focus { border-color:var(--accent); }
     .view-toggle { display:flex; gap:4px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:3px; }
     .view-btn { background:none; border:none; color:var(--muted); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px; transition:all .15s; }
     .view-btn.active { background:var(--accent); color:white; }
+    .members-filter-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; flex-wrap:wrap; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; }
+    .members-sort-select { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:5px 8px; font-size:12px; cursor:pointer; outline:none; }
+    .members-sort-select:focus { border-color:var(--accent); }
 
     /* Card grid */
     .member-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
     .member-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 16px; cursor:pointer; transition:border-color .15s,transform .15s; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
     .member-card:hover { border-color:var(--accent); transform:translateY(-2px); }
-    .member-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:white; flex-shrink:0; }
+    .member-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:white; flex-shrink:0; overflow:hidden; }
+    .member-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
     .member-card-name { font-weight:700; font-size:14px; line-height:1.2; }
     .member-card-username { color:var(--muted); font-size:12px; }
     .member-card-stats { display:flex; gap:10px; margin-top:4px; }
@@ -393,6 +397,27 @@
               <button class="view-btn active" id="view-btn-card" title="Card view">⊞</button>
               <button class="view-btn" id="view-btn-list" title="List view">☰</button>
             </div>
+          </div>
+        </div>
+        <div class="members-filter-bar">
+          <div class="filter-group">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" data-filter-status="all">All</button>
+            <button class="filter-btn" data-filter-status="active">Active 7d</button>
+            <button class="filter-btn" data-filter-status="inactive">Inactive</button>
+            <button class="filter-btn" data-filter-status="banned">Banned</button>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Sort:</span>
+            <select class="members-sort-select" id="members-sort">
+              <option value="last_active">Last Active</option>
+              <option value="level">Level</option>
+              <option value="coins">Coins</option>
+              <option value="games">Games</option>
+              <option value="name">Name</option>
+              <option value="joined">Joined</option>
+            </select>
+            <button class="filter-btn" id="members-sort-dir" title="Toggle direction">↓</button>
           </div>
         </div>
         <div id="members-card-grid" class="member-cards"></div>
@@ -898,10 +923,36 @@ async function loadLogsData() {
 let membersData = [];
 let membersView = 'card'; // 'card' | 'list'
 let membersSearch = '';
+let membersSort = 'last_active'; // last_active | level | coins | games | name | joined
+let membersSortDir = 'desc';    // asc | desc
+let membersFilterStatus = 'all'; // all | active | inactive | banned
 
 function memberInitials(name) {
   if (!name) return '?';
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function memberAvatarHTML(m, size = 52) {
+  const name = m.display_name || m.username || '?';
+  const initials = memberInitials(name);
+  const fz = Math.round(size * 0.38);
+  if (m.avatar_url) {
+    return `<div class="member-avatar" style="width:${size}px;height:${size}px;font-size:${fz}px;">` +
+      `<img src="${escapeHtml(m.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" ` +
+      `onerror="this.outerHTML='${initials}'"></div>`;
+  }
+  return `<div class="member-avatar" style="width:${size}px;height:${size}px;font-size:${fz}px;">${initials}</div>`;
+}
+
+function detailAvatarHTML(p) {
+  const name = p.display_name || p.username || '?';
+  const initials = memberInitials(name);
+  if (p.avatar_url) {
+    return `<div class="detail-avatar" style="padding:0;overflow:hidden;">` +
+      `<img src="${escapeHtml(p.avatar_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" ` +
+      `onerror="this.outerHTML='${initials}'"></div>`;
+  }
+  return `<div class="detail-avatar">${initials}</div>`;
 }
 
 function relativeTime(iso) {
@@ -924,13 +975,28 @@ function isRecentlyActive(iso) {
 
 function renderMembersPanel() {
   const query = membersSearch.trim().toLowerCase();
-  const filtered = membersData.filter(m =>
-    !query ||
-    (m.display_name || '').toLowerCase().includes(query) ||
-    (m.username || '').toLowerCase().includes(query)
-  );
+  let filtered = membersData.filter(m => {
+    if (query && !(m.display_name||'').toLowerCase().includes(query) && !(m.username||'').toLowerCase().includes(query)) return false;
+    if (membersFilterStatus === 'active'   && !isRecentlyActive(m.last_active)) return false;
+    if (membersFilterStatus === 'inactive' && (isRecentlyActive(m.last_active) || m.is_banned)) return false;
+    if (membersFilterStatus === 'banned'   && !m.is_banned) return false;
+    return true;
+  });
+  filtered.sort((a, b) => {
+    let av, bv;
+    switch (membersSort) {
+      case 'level':  av = a.level||1;      bv = b.level||1;      break;
+      case 'coins':  av = a.coins||0;      bv = b.coins||0;      break;
+      case 'games':  av = a.game_count||0; bv = b.game_count||0; break;
+      case 'name':   av = (a.display_name||a.username||'').toLowerCase(); bv = (b.display_name||b.username||'').toLowerCase(); break;
+      case 'joined': av = new Date(a.created_at||0).getTime(); bv = new Date(b.created_at||0).getTime(); break;
+      default:       av = new Date(a.last_active||0).getTime(); bv = new Date(b.last_active||0).getTime();
+    }
+    if (av < bv) return membersSortDir === 'asc' ? -1 : 1;
+    if (av > bv) return membersSortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
   document.getElementById('members-count').textContent = `${filtered.length} / ${membersData.length} สมาชิก`;
-
   if (membersView === 'card') {
     document.getElementById('members-card-grid').style.display = '';
     document.getElementById('members-table-wrap').style.display = 'none';
@@ -949,7 +1015,7 @@ function renderMemberCards(data) {
     const active = isRecentlyActive(m.last_active);
     return `
       <div class="member-card" onclick="openMemberDetail('${m.id}')">
-        <div class="member-avatar">${memberInitials(m.display_name || m.username)}</div>
+        ${memberAvatarHTML(m)}
         <div class="member-card-name">
           ${m.is_banned ? '<span class="badge-banned-sm">BAN</span> ' : ''}
           ${escapeHtml(m.display_name || m.username)}
@@ -985,7 +1051,7 @@ function renderMemberTable(data) {
       return `<tr style="cursor:pointer" onclick="openMemberDetail('${m.id}')">
         <td>
           <div style="display:flex;align-items:center;gap:10px;">
-            <div class="member-avatar" style="width:32px;height:32px;font-size:12px;">${memberInitials(m.display_name || m.username)}</div>
+            ${memberAvatarHTML(m, 32)}
             <div>
               <div style="font-weight:600;font-size:14px;">
                 ${m.is_banned ? '<span class="badge-banned-sm">BAN</span> ' : ''}
@@ -1043,7 +1109,7 @@ function renderMemberDetail(d) {
   document.getElementById('detail-content').innerHTML = `
     <!-- Header -->
     <div class="detail-header">
-      <div class="detail-avatar">${memberInitials(name)}</div>
+      ${detailAvatarHTML(p)}
       <div class="detail-info">
         <h2>${escapeHtml(name)} ${isBanned ? '<span class="badge-banned">⛔ Banned</span>' : ''}</h2>
         <div class="detail-sub">@${escapeHtml(p.username || '—')} · ${escapeHtml(p.email || '—')}</div>
@@ -1318,6 +1384,28 @@ async function boot() {
     // Members: search
     document.getElementById('members-search').oninput = (e) => {
       membersSearch = e.target.value;
+      renderMembersPanel();
+    };
+
+    // Members: filter by status
+    document.querySelectorAll('[data-filter-status]').forEach(btn => {
+      btn.onclick = () => {
+        membersFilterStatus = btn.dataset.filterStatus;
+        document.querySelectorAll('[data-filter-status]').forEach(b => b.classList.toggle('active', b.dataset.filterStatus === membersFilterStatus));
+        renderMembersPanel();
+      };
+    });
+
+    // Members: sort select
+    document.getElementById('members-sort').onchange = (e) => {
+      membersSort = e.target.value;
+      renderMembersPanel();
+    };
+
+    // Members: sort direction toggle
+    document.getElementById('members-sort-dir').onclick = () => {
+      membersSortDir = membersSortDir === 'desc' ? 'asc' : 'desc';
+      document.getElementById('members-sort-dir').textContent = membersSortDir === 'asc' ? '↑' : '↓';
       renderMembersPanel();
     };
 
