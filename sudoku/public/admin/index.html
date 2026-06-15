@@ -403,7 +403,7 @@
           <div class="filter-group">
             <span class="filter-label">Filter:</span>
             <button class="filter-btn active" data-filter-status="all">All</button>
-            <button class="filter-btn" data-filter-status="active">Active 7d</button>
+            <button class="filter-btn" data-filter-status="active">🟢 Online Now</button>
             <button class="filter-btn" data-filter-status="inactive">Inactive</button>
             <button class="filter-btn" data-filter-status="banned">Banned</button>
           </div>
@@ -977,8 +977,8 @@ function renderMembersPanel() {
   const query = membersSearch.trim().toLowerCase();
   let filtered = membersData.filter(m => {
     if (query && !(m.display_name||'').toLowerCase().includes(query) && !(m.username||'').toLowerCase().includes(query)) return false;
-    if (membersFilterStatus === 'active'   && !isRecentlyActive(m.last_active)) return false;
-    if (membersFilterStatus === 'inactive' && (isRecentlyActive(m.last_active) || m.is_banned)) return false;
+    if (membersFilterStatus === 'active'   && !m.is_online) return false;
+    if (membersFilterStatus === 'inactive' && (m.is_online || m.is_banned)) return false;
     if (membersFilterStatus === 'banned'   && !m.is_banned) return false;
     return true;
   });
@@ -1012,7 +1012,6 @@ function renderMemberCards(data) {
   const grid = document.getElementById('members-card-grid');
   if (!data.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ไม่พบสมาชิก</div>'; return; }
   grid.innerHTML = data.map(m => {
-    const active = isRecentlyActive(m.last_active);
     return `
       <div class="member-card" onclick="openMemberDetail('${m.id}')">
         ${memberAvatarHTML(m)}
@@ -1027,8 +1026,8 @@ function renderMemberCards(data) {
           <div class="member-card-stat"><strong>${m.game_count || 0}</strong> 🎮</div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px;">
-          <span class="member-status-dot ${active ? 'member-status-active' : 'member-status-inactive'}"></span>
-          ${active ? 'Active' : relativeTime(m.last_active)}
+          <span class="member-status-dot ${m.is_online ? 'member-status-active' : 'member-status-inactive'}"></span>
+          ${m.is_online ? 'Online' : relativeTime(m.last_active)}
         </div>
       </div>`;
   }).join('');
@@ -1047,7 +1046,6 @@ function renderMemberTable(data) {
       <th style="text-align:right">สมัครเมื่อ</th>
     </tr></thead>
     <tbody>${data.map(m => {
-      const active = isRecentlyActive(m.last_active);
       return `<tr style="cursor:pointer" onclick="openMemberDetail('${m.id}')">
         <td>
           <div style="display:flex;align-items:center;gap:10px;">
@@ -1065,8 +1063,8 @@ function renderMemberTable(data) {
         <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(m.coins)} 🪙</td>
         <td style="text-align:center;color:var(--muted)">${m.game_count || 0}</td>
         <td style="text-align:center">
-          <span class="member-status-dot ${active ? 'member-status-active' : 'member-status-inactive'}"></span>
-          <span style="font-size:12px;color:${active ? 'var(--green)' : 'var(--muted)'}">${active ? 'Active' : 'Inactive'}</span>
+          <span class="member-status-dot ${m.is_online ? 'member-status-active' : 'member-status-inactive'}"></span>
+          <span style="font-size:12px;color:${m.is_online ? 'var(--green)' : 'var(--muted)'}">${m.is_online ? 'Online' : 'Offline'}</span>
         </td>
         <td style="text-align:right;color:var(--muted);font-size:13px;">${new Date(m.created_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}</td>
       </tr>`;

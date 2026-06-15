@@ -558,16 +558,18 @@ async function boot() {
 
   // Track visit + start heartbeat loop (best-effort, non-blocking)
   void (async () => {
-    const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
+    const u = useStore.getState().user;
+    const isGuest = !u || !!u.is_anonymous;
     await trackVisit(isGuest);
-    await heartbeat(isGuest);
+    await heartbeat(isGuest, isGuest ? undefined : u?.id);
     await refreshVisitorStats();
   })();
 
   // Heartbeat every 30s — keeps "online now" count accurate
   const heartbeatInterval = setInterval(async () => {
-    const isGuest = !useStore.getState().user || !!useStore.getState().user?.is_anonymous;
-    await heartbeat(isGuest);
+    const u = useStore.getState().user;
+    const isGuest = !u || !!u.is_anonymous;
+    await heartbeat(isGuest, isGuest ? undefined : u?.id);
     await refreshVisitorStats();
   }, 30_000);
 

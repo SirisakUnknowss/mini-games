@@ -229,13 +229,13 @@ export async function trackVisit(isGuest: boolean): Promise<void> {
  * Heartbeat — call every 30s to stay "online".
  * Upserts into online_sessions; stale rows (>2min) = offline.
  */
-export async function heartbeat(isGuest: boolean): Promise<void> {
+export async function heartbeat(isGuest: boolean, userId?: string): Promise<void> {
   try {
     const session_id = getSessionId();
     await supabase
       .from('online_sessions')
       .upsert(
-        { session_id, last_seen: new Date().toISOString(), is_guest: isGuest },
+        { session_id, last_seen: new Date().toISOString(), is_guest: isGuest, user_id: userId ?? null },
         { onConflict: 'session_id' }
       );
   } catch { /* offline / demo mode */ }
