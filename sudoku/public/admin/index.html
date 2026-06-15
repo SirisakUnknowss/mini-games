@@ -122,6 +122,57 @@
     .tab-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
     .tab-btn.active { color:white; background:var(--accent); }
 
+    /* ── Members Panel ── */
+    .members-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:12px; flex-wrap:wrap; }
+    .members-search { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; color:var(--text); font-size:14px; width:260px; outline:none; }
+    .members-search:focus { border-color:var(--accent); }
+    .view-toggle { display:flex; gap:4px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:3px; }
+    .view-btn { background:none; border:none; color:var(--muted); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:14px; transition:all .15s; }
+    .view-btn.active { background:var(--accent); color:white; }
+
+    /* Card grid */
+    .member-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+    .member-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 16px; cursor:pointer; transition:border-color .15s,transform .15s; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+    .member-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .member-avatar { width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:white; flex-shrink:0; }
+    .member-card-name { font-weight:700; font-size:14px; line-height:1.2; }
+    .member-card-username { color:var(--muted); font-size:12px; }
+    .member-card-stats { display:flex; gap:10px; margin-top:4px; }
+    .member-card-stat { font-size:12px; color:var(--muted); }
+    .member-card-stat strong { color:var(--text); }
+    .member-status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+    .member-status-active  { background:var(--green); }
+    .member-status-inactive { background:var(--muted); }
+    .badge-banned-sm { background:rgba(248,113,113,.15); color:#f87171; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:700; }
+
+    /* Member list table */
+    .members-table-wrap { overflow-x:auto; }
+
+    /* Member detail panel */
+    #member-detail { display:none; }
+    .detail-back { background:rgba(255,255,255,.07); border:1px solid var(--border); color:var(--text); padding:7px 16px; border-radius:8px; cursor:pointer; font-size:13px; margin-bottom:20px; }
+    .detail-back:hover { background:rgba(255,255,255,.14); }
+    .detail-header { display:flex; align-items:center; gap:18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px 24px; margin-bottom:18px; }
+    .detail-avatar { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:white; flex-shrink:0; }
+    .detail-info h2 { font-size:20px; font-weight:800; margin-bottom:2px; }
+    .detail-info .detail-sub { color:var(--muted); font-size:13px; margin-bottom:6px; }
+    .detail-info .detail-tags { display:flex; gap:6px; flex-wrap:wrap; }
+    .detail-actions { margin-left:auto; display:flex; gap:8px; }
+    .btn-ban   { background:rgba(248,113,113,.15); border:1px solid rgba(248,113,113,.3); color:#f87171; padding:7px 14px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
+    .btn-unban { background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.3); color:#10b981; padding:7px 14px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
+    .btn-ban:hover   { background:rgba(248,113,113,.3); }
+    .btn-unban:hover { background:rgba(16,185,129,.3); }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .detail-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+    @media(max-width:768px){ .detail-grid,.detail-grid-3 { grid-template-columns:1fr; } .member-cards { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); } }
+    .kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:14px; }
+    @media(max-width:900px){ .kpi-row { grid-template-columns:repeat(3,1fr); } }
+    .kpi-mini { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 12px; text-align:center; }
+    .kpi-mini .kv { font-size:22px; font-weight:800; line-height:1; margin-bottom:4px; }
+    .kpi-mini .kl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .section-h { font-size:13px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .uuid-box { font-family:monospace; font-size:11px; color:#a3e635; background:#07070d; padding:4px 8px; border-radius:4px; word-break:break-all; }
+
     /* ── Log Monitor ── */
     .log-filter-bar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; background:var(--surface2); padding:12px 16px; border-radius:var(--radius); border:1px solid var(--border); }
     .filter-group { display:flex; align-items:center; gap:8px; }
@@ -198,6 +249,7 @@
     <!-- Tab Bar -->
     <div class="tab-container">
       <button class="tab-btn active" id="btn-tab-analytics">📊 Dashboard & Analytics</button>
+      <button class="tab-btn" id="btn-tab-members">👥 Members</button>
       <button class="tab-btn" id="btn-tab-logs">📋 Log Monitor & Audit</button>
     </div>
 
@@ -329,7 +381,31 @@
     
     </div> <!-- end of panel-analytics -->
 
-    <!-- Panel 2: Log Monitor -->
+    <!-- Panel 2: Members -->
+    <div id="panel-members" style="display:none">
+      <!-- List / Card view -->
+      <div id="members-list-view">
+        <div class="members-toolbar">
+          <input class="members-search" id="members-search" placeholder="ค้นหาชื่อ / username…" autocomplete="off">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="members-count" style="font-size:13px;color:var(--muted)"></span>
+            <div class="view-toggle">
+              <button class="view-btn active" id="view-btn-card" title="Card view">⊞</button>
+              <button class="view-btn" id="view-btn-list" title="List view">☰</button>
+            </div>
+          </div>
+        </div>
+        <div id="members-card-grid" class="member-cards"></div>
+        <div id="members-table-wrap" class="members-table-wrap" style="display:none"></div>
+      </div>
+      <!-- Detail view -->
+      <div id="member-detail">
+        <button class="detail-back" id="detail-back-btn">← กลับไปรายชื่อ</button>
+        <div id="detail-content"><div class="skeleton" style="height:120px;width:100%;border-radius:12px;margin-bottom:14px;"></div></div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Log Monitor -->
     <div id="panel-logs" style="display:none">
       <!-- Integrity Alerts -->
       <div id="audit-alerts-wrap"></div>
@@ -818,13 +894,332 @@ async function loadLogsData() {
   renderAuditAlerts(anomalies);
 }
 
+// ── Members ───────────────────────────────────────────────────────────
+let membersData = [];
+let membersView = 'card'; // 'card' | 'list'
+let membersSearch = '';
+
+function memberInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function relativeTime(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 2)   return 'เมื่อกี้';
+  if (m < 60)  return `${m} นาทีที่แล้ว`;
+  const h = Math.floor(m / 60);
+  if (h < 24)  return `${h} ชม.ที่แล้ว`;
+  const d = Math.floor(h / 24);
+  if (d < 30)  return `${d} วันที่แล้ว`;
+  return new Date(iso).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' });
+}
+
+function isRecentlyActive(iso) {
+  if (!iso) return false;
+  return (Date.now() - new Date(iso).getTime()) < 7 * 24 * 60 * 60 * 1000; // 7 days
+}
+
+function renderMembersPanel() {
+  const query = membersSearch.trim().toLowerCase();
+  const filtered = membersData.filter(m =>
+    !query ||
+    (m.display_name || '').toLowerCase().includes(query) ||
+    (m.username || '').toLowerCase().includes(query)
+  );
+  document.getElementById('members-count').textContent = `${filtered.length} / ${membersData.length} สมาชิก`;
+
+  if (membersView === 'card') {
+    document.getElementById('members-card-grid').style.display = '';
+    document.getElementById('members-table-wrap').style.display = 'none';
+    renderMemberCards(filtered);
+  } else {
+    document.getElementById('members-card-grid').style.display = 'none';
+    document.getElementById('members-table-wrap').style.display = '';
+    renderMemberTable(filtered);
+  }
+}
+
+function renderMemberCards(data) {
+  const grid = document.getElementById('members-card-grid');
+  if (!data.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ไม่พบสมาชิก</div>'; return; }
+  grid.innerHTML = data.map(m => {
+    const active = isRecentlyActive(m.last_active);
+    return `
+      <div class="member-card" onclick="openMemberDetail('${m.id}')">
+        <div class="member-avatar">${memberInitials(m.display_name || m.username)}</div>
+        <div class="member-card-name">
+          ${m.is_banned ? '<span class="badge-banned-sm">BAN</span> ' : ''}
+          ${escapeHtml(m.display_name || m.username)}
+        </div>
+        <div class="member-card-username">@${escapeHtml(m.username)}</div>
+        <div class="member-card-stats">
+          <div class="member-card-stat">Lv <strong>${m.level || 1}</strong></div>
+          <div class="member-card-stat"><strong>${fmt(m.coins)}</strong> 🪙</div>
+          <div class="member-card-stat"><strong>${m.game_count || 0}</strong> 🎮</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+          <span class="member-status-dot ${active ? 'member-status-active' : 'member-status-inactive'}"></span>
+          ${active ? 'Active' : relativeTime(m.last_active)}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderMemberTable(data) {
+  const wrap = document.getElementById('members-table-wrap');
+  if (!data.length) { wrap.innerHTML = '<div class="empty">ไม่พบสมาชิก</div>'; return; }
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>ชื่อ / Username</th>
+      <th style="text-align:center">Level</th>
+      <th style="text-align:right">Coins</th>
+      <th style="text-align:center">Games</th>
+      <th style="text-align:center">Status</th>
+      <th style="text-align:right">สมัครเมื่อ</th>
+    </tr></thead>
+    <tbody>${data.map(m => {
+      const active = isRecentlyActive(m.last_active);
+      return `<tr style="cursor:pointer" onclick="openMemberDetail('${m.id}')">
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="member-avatar" style="width:32px;height:32px;font-size:12px;">${memberInitials(m.display_name || m.username)}</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;">
+                ${m.is_banned ? '<span class="badge-banned-sm">BAN</span> ' : ''}
+                ${escapeHtml(m.display_name || m.username)}
+              </div>
+              <div style="color:var(--muted);font-size:12px;">@${escapeHtml(m.username)}</div>
+            </div>
+          </div>
+        </td>
+        <td style="text-align:center;font-weight:700;color:var(--accent)">${m.level || 1}</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(m.coins)} 🪙</td>
+        <td style="text-align:center;color:var(--muted)">${m.game_count || 0}</td>
+        <td style="text-align:center">
+          <span class="member-status-dot ${active ? 'member-status-active' : 'member-status-inactive'}"></span>
+          <span style="font-size:12px;color:${active ? 'var(--green)' : 'var(--muted)'}">${active ? 'Active' : 'Inactive'}</span>
+        </td>
+        <td style="text-align:right;color:var(--muted);font-size:13px;">${new Date(m.created_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+async function openMemberDetail(userId) {
+  document.getElementById('members-list-view').style.display = 'none';
+  document.getElementById('member-detail').style.display = 'block';
+  document.getElementById('detail-content').innerHTML = `
+    <div class="skeleton" style="height:120px;width:100%;border-radius:12px;margin-bottom:14px;"></div>
+    <div class="kpi-row">${Array(5).fill('<div class="kpi-mini"><div class="skeleton" style="height:30px;width:60%;margin:0 auto 6px;border-radius:4px;"></div><div class="skeleton" style="height:12px;width:50%;margin:0 auto;border-radius:3px;"></div></div>').join('')}</div>
+    <div class="skeleton" style="height:200px;width:100%;border-radius:12px;"></div>`;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+
+  const d = await callRpcParam('get_admin_member_detail', { p_user_id: userId }, session.access_token);
+  if (!d || d.error) {
+    document.getElementById('detail-content').innerHTML = '<div class="empty">ไม่สามารถโหลดข้อมูลได้</div>';
+    return;
+  }
+  renderMemberDetail(d);
+}
+
+function renderMemberDetail(d) {
+  const p   = d.profile     || {};
+  const prog = d.progression || {};
+  const w   = d.wallet      || {};
+  const gs  = d.game_stats  || {};
+  const games    = d.recent_games  || [];
+  const inv      = d.inventory    || [];
+  const ach      = d.achievements || [];
+  const coinLog  = d.coin_log     || [];
+
+  const isBanned = !!p.banned_at;
+  const name = p.display_name || p.username || 'Member';
+
+  document.getElementById('detail-content').innerHTML = `
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-avatar">${memberInitials(name)}</div>
+      <div class="detail-info">
+        <h2>${escapeHtml(name)} ${isBanned ? '<span class="badge-banned">⛔ Banned</span>' : ''}</h2>
+        <div class="detail-sub">@${escapeHtml(p.username || '—')} · ${escapeHtml(p.email || '—')}</div>
+        <div class="detail-sub">สมัครเมื่อ ${p.created_at ? new Date(p.created_at).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}) : '—'} · Login ล่าสุด ${p.last_sign_in_at ? relativeTime(p.last_sign_in_at) : '—'}</div>
+        <div class="detail-tags" style="margin-top:6px">
+          <span class="uuid-box">${p.id}</span>
+        </div>
+        ${isBanned ? `<div style="color:#f87171;font-size:12px;margin-top:6px;">⛔ Banned: ${escapeHtml(p.ban_reason || 'ไม่ระบุเหตุผล')} (${p.banned_at ? new Date(p.banned_at).toLocaleString('th-TH') : ''})</div>` : ''}
+      </div>
+      <div class="detail-actions">
+        ${isBanned
+          ? `<button class="btn-unban" onclick="adminUnban('${p.id}')">✅ Unban</button>`
+          : `<button class="btn-ban"   onclick="adminBan('${p.id}')">⛔ Ban</button>`
+        }
+      </div>
+    </div>
+
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-mini"><div class="kv" style="color:var(--accent)">Lv ${prog.level || 1}</div><div class="kl">Level</div></div>
+      <div class="kpi-mini"><div class="kv" style="color:var(--yellow)">${fmt(w.coins)}</div><div class="kl">🪙 Coins</div></div>
+      <div class="kpi-mini"><div class="kv" style="color:var(--green)">${prog.current_streak || 0}</div><div class="kl">🔥 Streak</div></div>
+      <div class="kpi-mini"><div class="kv">${gs.total_games || 0}</div><div class="kl">🎮 Games</div></div>
+      <div class="kpi-mini"><div class="kv" style="color:#a78bfa">${ach.length}</div><div class="kl">🏆 Achievements</div></div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Progression -->
+      <div class="table-card">
+        <div class="section-h">📈 Progression</div>
+        <table><tbody>
+          <tr><td style="color:var(--muted)">XP</td><td style="text-align:right;font-weight:600">${fmt(prog.xp || 0)}</td></tr>
+          <tr><td style="color:var(--muted)">Prestige</td><td style="text-align:right">${prog.prestige || 0}</td></tr>
+          <tr><td style="color:var(--muted)">Longest Streak</td><td style="text-align:right">${prog.longest_streak || 0} วัน</td></tr>
+          <tr><td style="color:var(--muted)">Daily ล่าสุด</td><td style="text-align:right">${prog.last_daily_played || '—'}</td></tr>
+          <tr><td style="color:var(--muted)">Streak Freezes</td><td style="text-align:right">${prog.streak_freezes ?? 0}</td></tr>
+          <tr><td style="color:var(--muted)">Coins Earned</td><td style="text-align:right;color:var(--green)">${fmt(w.total_earned)}</td></tr>
+          <tr><td style="color:var(--muted)">Coins Spent</td><td style="text-align:right;color:var(--red)">${fmt(w.total_spent)}</td></tr>
+        </tbody></table>
+      </div>
+
+      <!-- Game stats -->
+      <div class="table-card">
+        <div class="section-h">🎮 Game Stats</div>
+        <table><tbody>
+          <tr><td style="color:var(--muted)">Total Games</td><td style="text-align:right;font-weight:600">${gs.total_games || 0}</td></tr>
+          <tr><td style="color:var(--muted)">Daily</td><td style="text-align:right">${gs.daily_games || 0}</td></tr>
+          <tr><td style="color:var(--muted)">Practice</td><td style="text-align:right">${gs.practice_games || 0}</td></tr>
+          <tr><td style="color:var(--muted)">Best Time</td><td style="text-align:right;color:var(--green)">${gs.best_time ? fmtTime(gs.best_time) : '—'}</td></tr>
+          <tr><td style="color:var(--muted)">Avg Time</td><td style="text-align:right">${gs.avg_time ? fmtTime(gs.avg_time) : '—'}</td></tr>
+          <tr><td style="color:var(--muted)">Avg Mistakes</td><td style="text-align:right">${gs.avg_mistakes ?? '—'}</td></tr>
+          <tr><td style="color:var(--muted)">Perfect Games</td><td style="text-align:right;color:var(--yellow)">${gs.perfect_games || 0}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- Recent games -->
+    <div class="table-card" style="margin-bottom:14px">
+      <div class="section-h">🕹️ Recent Games (${games.length})</div>
+      ${games.length ? `<div class="list-scroll" style="max-height:280px"><table><thead><tr>
+        <th>Mode</th><th>Level</th>
+        <th style="text-align:right">Score</th>
+        <th style="text-align:right">Time</th>
+        <th style="text-align:right">❌</th>
+        <th style="text-align:right">เมื่อ</th>
+      </tr></thead><tbody>${games.map(g => `
+        <tr>
+          <td><span class="cat-badge">${g.mode}</span></td>
+          <td><span class="diff-badge diff-${g.level}">${g.level}</span></td>
+          <td style="text-align:right;font-variant-numeric:tabular-nums">${fmt(g.score)}</td>
+          <td style="text-align:right">${fmtTime(g.time_seconds)}</td>
+          <td style="text-align:right;color:${g.mistakes===0?'var(--green)':g.mistakes>=3?'var(--red)':'var(--yellow)'}">${g.mistakes}</td>
+          <td style="text-align:right;color:var(--muted);font-size:12px">${relativeTime(g.completed_at)}</td>
+        </tr>`).join('')}</tbody></table></div>`
+        : '<div class="empty">ยังไม่มีประวัติเกม</div>'}
+    </div>
+
+    <div class="detail-grid">
+      <!-- Inventory -->
+      <div class="table-card">
+        <div class="section-h">🎒 Inventory (${inv.length} items)</div>
+        ${inv.length ? `<div class="list-scroll" style="max-height:220px"><table><thead><tr>
+          <th>Item</th><th>Category</th><th style="text-align:right">เมื่อ</th>
+        </tr></thead><tbody>${inv.map(i => `
+          <tr>
+            <td><strong class="rarity-${i.rarity}">${escapeHtml(i.name || i.item_id)}</strong></td>
+            <td><span class="cat-badge">${escapeHtml(i.category || '—')}</span></td>
+            <td style="text-align:right;color:var(--muted);font-size:12px">${relativeTime(i.acquired_at)}</td>
+          </tr>`).join('')}</tbody></table></div>`
+        : '<div class="empty">ไม่มีไอเท็ม</div>'}
+      </div>
+
+      <!-- Coin ledger -->
+      <div class="table-card">
+        <div class="section-h">🪙 Coin Log (ล่าสุด ${coinLog.length})</div>
+        ${coinLog.length ? `<div class="list-scroll" style="max-height:220px"><table><thead><tr>
+          <th>เหตุผล</th>
+          <th style="text-align:right">จำนวน</th>
+          <th style="text-align:right">ยอด</th>
+          <th style="text-align:right">เมื่อ</th>
+        </tr></thead><tbody>${coinLog.map(c => `
+          <tr>
+            <td style="font-size:13px">${escapeHtml(c.reason)}</td>
+            <td style="text-align:right;color:${c.amount>=0?'var(--green)':'var(--red)'}; font-weight:600">${c.amount>=0?'+':''}${c.amount}</td>
+            <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px">${fmt(c.balance_after)}</td>
+            <td style="text-align:right;color:var(--muted);font-size:12px">${relativeTime(c.created_at)}</td>
+          </tr>`).join('')}</tbody></table></div>`
+        : '<div class="empty">ไม่มีประวัติ</div>'}
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    ${ach.length ? `<div class="table-card">
+      <div class="section-h">🏆 Achievements (${ach.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+        ${ach.map(a => `<span style="background:rgba(167,139,250,.15);color:#a78bfa;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">${escapeHtml(a.name || a.achievement_id)}</span>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+}
+
+async function callRpcParam(name, params, accessToken) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_ANON,
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(params),
+    });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+async function adminBan(userId) {
+  const reason = prompt('ระบุเหตุผลที่ ban (หรือปล่อยว่าง):');
+  if (reason === null) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const ok = await callRpcParam('admin_ban_user', { p_user_id: userId, p_reason: reason || null }, session.access_token);
+  if (ok !== null) { alert('Ban สำเร็จ'); openMemberDetail(userId); }
+  else alert('เกิดข้อผิดพลาด');
+}
+
+async function adminUnban(userId) {
+  if (!confirm('ยืนยัน Unban ผู้ใช้นี้?')) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const ok = await callRpcParam('admin_unban_user', { p_user_id: userId }, session.access_token);
+  if (ok !== null) { alert('Unban สำเร็จ'); openMemberDetail(userId); }
+  else alert('เกิดข้อผิดพลาด');
+}
+
+async function loadMembersData() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+
+  document.getElementById('members-card-grid').innerHTML =
+    Array(6).fill(`<div class="member-card" style="cursor:default"><div class="skeleton" style="width:52px;height:52px;border-radius:50%;margin:0 auto 10px;"></div><div class="skeleton" style="height:14px;width:80%;margin:0 auto 6px;"></div><div class="skeleton" style="height:12px;width:60%;margin:0 auto;"></div></div>`).join('');
+
+  const data = await callRpc('get_admin_member_list', session.access_token);
+  membersData = data || [];
+  renderMembersPanel();
+}
+
 function switchTab(tab) {
   currentTab = tab;
   document.getElementById('btn-tab-analytics').classList.toggle('active', tab === 'analytics');
-  document.getElementById('btn-tab-logs').classList.toggle('active', tab === 'logs');
+  document.getElementById('btn-tab-members').classList.toggle('active',  tab === 'members');
+  document.getElementById('btn-tab-logs').classList.toggle('active',     tab === 'logs');
   document.getElementById('panel-analytics').style.display = tab === 'analytics' ? 'block' : 'none';
-  document.getElementById('panel-logs').style.display = tab === 'logs' ? 'block' : 'none';
-  
+  document.getElementById('panel-members').style.display   = tab === 'members'   ? 'block' : 'none';
+  document.getElementById('panel-logs').style.display      = tab === 'logs'      ? 'block' : 'none';
+
   loadData();
 }
 
@@ -835,6 +1230,13 @@ async function loadData() {
 
   if (currentTab === 'logs') {
     await loadLogsData();
+    const now = new Date();
+    setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
+    return;
+  }
+
+  if (currentTab === 'members') {
+    await loadMembersData();
     const now = new Date();
     setEl('last-update-txt', `อัปเดต ${now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`);
     return;
@@ -894,9 +1296,36 @@ async function boot() {
     }
     setEl('user-name', meta.full_name || meta.name || session.user.email);
 
-    // Wire Log Monitor tabs & buttons
+    // Wire tabs
     document.getElementById('btn-tab-analytics').onclick = () => switchTab('analytics');
-    document.getElementById('btn-tab-logs').onclick = () => switchTab('logs');
+    document.getElementById('btn-tab-members').onclick   = () => switchTab('members');
+    document.getElementById('btn-tab-logs').onclick      = () => switchTab('logs');
+
+    // Members: view toggle
+    document.getElementById('view-btn-card').onclick = () => {
+      membersView = 'card';
+      document.getElementById('view-btn-card').classList.add('active');
+      document.getElementById('view-btn-list').classList.remove('active');
+      renderMembersPanel();
+    };
+    document.getElementById('view-btn-list').onclick = () => {
+      membersView = 'list';
+      document.getElementById('view-btn-list').classList.add('active');
+      document.getElementById('view-btn-card').classList.remove('active');
+      renderMembersPanel();
+    };
+
+    // Members: search
+    document.getElementById('members-search').oninput = (e) => {
+      membersSearch = e.target.value;
+      renderMembersPanel();
+    };
+
+    // Members: back button
+    document.getElementById('detail-back-btn').onclick = () => {
+      document.getElementById('member-detail').style.display = 'none';
+      document.getElementById('members-list-view').style.display = '';
+    };
 
     document.querySelectorAll('[data-filter-level]').forEach(btn => {
       btn.onclick = () => {
