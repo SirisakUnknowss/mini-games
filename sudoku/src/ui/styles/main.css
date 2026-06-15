@@ -380,7 +380,7 @@ h3 { font-size: 18px; }
 .cell.user  { color: var(--cell-text-user); font-weight: 400; }
 .cell.hint  { color: var(--cell-text-hint); font-weight: 400; }
 .cell.conflict { color: var(--cell-text-conflict) !important; background: var(--cell-bg-conflict) !important; }
-.cell.selected { background: var(--cell-bg-selected) !important; box-shadow: inset 0 0 0 2px #6c5ce7; }
+.cell.selected { background: var(--cell-bg-selected) !important; box-shadow: inset 0 0 0 3px #6c5ce7; }
 .cell.related  { background: var(--cell-bg-related); }
 .cell.same-num { background: var(--cell-bg-same); }
 .cell:nth-child(3n):not(:nth-child(9n)) { border-right: 2px solid var(--border-thick); }

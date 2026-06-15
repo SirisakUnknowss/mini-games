@@ -28,9 +28,9 @@
   /* Game board (default theme) */
   --cell-bg: #f0eeff;
   --cell-bg-given: #e6e0ff;
-  --cell-bg-selected: #ede8ff;
-  --cell-bg-related: #f5f3ff;
-  --cell-bg-same: #ddd6fe;
+  --cell-bg-selected: #d8cffc;
+  --cell-bg-related: #eae4ff;
+  --cell-bg-same: #c4b5fd;
   --cell-bg-conflict: #fee2e2;
   --cell-text: #1e1b4b;
   --cell-text-user: #6c5ce7;
